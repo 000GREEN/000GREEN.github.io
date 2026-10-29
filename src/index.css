@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #151D13;
+  --tile: #CBD0B8;
+  --fg: #E3DCC3;
+  --cream: #D3C9AC;
+  --muted: #98A18A;
+  --line: #2A3626;
+  --moss: #7E9A64;
+  --accent: #E3DCC3;
+  --accent-fg: #0E140D;
+  --bad: #E88C84;
+  --good: #9BD08A;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-mark: 'Cinzel', serif;
+  --font-body: 'Manrope', -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mark {
+  font-family: var(--font-mark);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+@keyframes sound-bar-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+@keyframes sound-bar-2 {
+  0%, 100% { height: 13px; }
+  50% { height: 5px; }
+}
+
+@keyframes sound-bar-3 {
+  0%, 100% { height: 7px; }
+  50% { height: 14px; }
+}
+
+.animate-sound-bar-1 {
+  animation: sound-bar-1 0.75s ease-in-out infinite;
+}
+
+.animate-sound-bar-2 {
+  animation: sound-bar-2 0.6s ease-in-out infinite;
+}
+
+.animate-sound-bar-3 {
+  animation: sound-bar-3 0.85s ease-in-out infinite;
+}
+
+/* Sparkle particles FX */
+#fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.fxs {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 3px rgba(126, 154, 100, 0.65));
+}
+
+.fxs svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 000GREEN Official Crest Jump Animation */
+@keyframes logo-jump {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-8px) scale(1.12);
+  }
+  65% {
+    transform: translateY(1.5px) scale(0.97);
+  }
+  85% {
+    transform: translateY(-2px) scale(1.02);
+  }
+}
+
+.animate-logo-jump {
+  animation: logo-jump 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+/* 000GREEN Letter-by-Letter Wave Hop Animation (Original behavior restored) */
+@keyframes letter-hop {
+  0%, 100% {
+    transform: translateY(0);
+    color: inherit;
+  }
+  38% {
+    transform: translateY(-0.35em);
+    color: #9BD08A;
+    text-shadow: 0 0 10px rgba(155, 208, 138, 0.8);
+  }
+  70% {
+    transform: translateY(0.06em);
+  }
+}
+
+.letter-hop {
+  display: inline-block;
+  vertical-align: baseline;
+  animation: letter-hop 0.52s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  will-change: transform, color, text-shadow;
+}
+
+/* Landscape / Sideways Mobile Optimizations - keeps badge and letter wave clean and compact */
+@media (orientation: landscape) and (max-height: 500px) {
+  @keyframes logo-jump {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    30% {
+      transform: translateY(-5px) scale(1.08);
+    }
+    65% {
+      transform: translateY(1px) scale(0.98);
+    }
+  }
+
+  @keyframes letter-hop {
+    0%, 100% {
+      transform: translateY(0);
+      color: inherit;
+    }
+    38% {
+      transform: translateY(-0.25em);
+      color: #9BD08A;
+      text-shadow: 0 0 8px rgba(155, 208, 138, 0.8);
+    }
+  }
+}
+
+
+
+

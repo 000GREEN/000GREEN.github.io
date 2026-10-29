@@ -1,0 +1,8 @@
+{
+  "name": "Remix 000GREEN ",
+  "description": "Tienda interactiva 000GREEN con selector de looks, catálogo y video reactivo con giro de cabeza controlado por el movimiento del ratón.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
