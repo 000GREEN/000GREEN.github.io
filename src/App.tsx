@@ -121,17 +121,10 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('rel');
   const [maxPrice, setMaxPrice] = useState<number>(600000);
-  const [favorites, setFavorites] = useState<string[]>(['w4']);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number; qty: number }[]>([
-    {
-      id: 'w4',
-      name: '000 Bio Green / Obsidian Matrix',
-      price: 275000,
-      qty: 1,
-    },
-  ]);
+  const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
 
   // Background Cyber Audio Soundtrack State (YouTube URL: NFa7KlLyzGY starting at 503s with fallback)
@@ -706,7 +699,7 @@ Total: ${fmt(total)}
               </span>
 
               {/* Hopping Letters Wordmark (Restored original wave animation, stabilized for landscape) */}
-              <span className="font-['Times_New_Roman',serif] font-bold text-xl sm:text-2xl tracking-[0.16em] text-[#E3DCC3] group-hover:text-white transition-colors shrink-0 whitespace-nowrap inline-flex items-center select-none">
+              <span translate="no" className="notranslate font-['Times_New_Roman',serif] font-bold text-xl sm:text-2xl tracking-[0.16em] text-[#E3DCC3] group-hover:text-white transition-colors shrink-0 whitespace-nowrap inline-flex items-center select-none">
                 {'000GREEN'.split('').map((letter, i) => (
                   <span
                     key={i}
@@ -1074,7 +1067,7 @@ Total: ${fmt(total)}
       <div className="h-[105px] sm:h-[66px]" />
 
       {/* ROTATING TEXT TICKER (SOLO TEXTO, SIN FONDO VERDE NI LÍNEAS) */}
-      <div className="py-3 sm:py-4 overflow-hidden select-none" aria-hidden="true">
+      <div className="py-3 sm:py-4 overflow-hidden select-none notranslate" translate="no" aria-hidden="true">
         <div className="animate-marquee font-mark text-xs sm:text-sm tracking-[0.25em] uppercase text-[#E3DCC3] font-semibold flex items-center gap-8">
           <span>000GREEN</span>
           <span>·</span>
@@ -1437,7 +1430,7 @@ Total: ${fmt(total)}
                   className="w-full h-full object-cover scale-105"
                 />
               </span>
-              <span className="font-mark font-bold text-2xl tracking-[0.16em] text-white">
+              <span translate="no" className="notranslate font-mark font-bold text-2xl tracking-[0.16em] text-white">
                 000GREEN
               </span>
             </button>
@@ -1518,7 +1511,7 @@ Total: ${fmt(total)}
 
         {/* BOTTOM SOCIAL & INSTAGRAM DIRECT BAR */}
         <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-[11px] font-mono text-[#D8EADB]">
+          <div translate="no" className="notranslate text-[11px] font-mono text-[#D8EADB]">
             © 2026 000GREEN · Todos los derechos reservados.
           </div>
 
