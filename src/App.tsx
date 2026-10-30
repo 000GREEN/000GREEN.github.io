@@ -17,7 +17,7 @@ export interface ProductItem {
   keywords: string[];
 }
 
-export const BRAND_LOGO_SRC = '/assets/aistudio/862063659_1697145255304697_6128105736949461467_n_f3ff5d9d.jpg';
+export const BRAND_LOGO_SRC = '/brand-logo.svg';
 
 export const EXACT_PRODUCTS: ProductItem[] = [
   {
