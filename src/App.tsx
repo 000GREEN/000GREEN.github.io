@@ -11,10 +11,10 @@ export interface ProductItem {
   kind: string;
   name: string;
   price: number;
-  tag?: string;
   desc: string;
   image: string;
   colors: [string, string][]; // [ColorName, HexCode]
+  keywords: string[];
 }
 
 export const BRAND_LOGO_SRC = '/assets/aistudio/862063659_1697145255304697_6128105736949461467_n_f3ff5d9d.jpg';
@@ -25,12 +25,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Chrono Blade / Orange Pulse',
     price: 275000,
-    tag: 'Edición Especial',
     image: '/assets/aistudio/reloj_1_naranja_5a75334e.png',
     desc: 'Caja asimétrica ergonómica en titanio cepillado, pantalla LED matricial de alto contraste y acentos en naranja vibrante.',
     colors: [
       ['Naranja Neón', '#FF6B00'],
       ['Gris Titanio', '#8B939C'],
+    ],
+    keywords: [
+      'naranja', 'orange', 'pulse', 'crono', 'chrono', 'blade', 'titanio', 'titanium',
+      'gris', 'neon', 'neón', 'fluo', 'deportivo', 'digital', 'led', 'asimetrico', 'asimétrico',
+      'correa naranja', 'reloj naranja', 'relojes'
     ],
   },
   {
@@ -38,12 +42,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Stealth Titanium / Matte Grey',
     price: 275000,
-    tag: 'Más Vendido',
     image: '/assets/aistudio/reloj_2_gris_b61eba16.png',
     desc: 'Estructura monolítica en acabado gris titanio mate, pantalla invertida táctica y brazalete segmentado ergonómico.',
     colors: [
       ['Titanio Mate', '#7A808C'],
       ['Grafito Oscuro', '#3F444E'],
+    ],
+    keywords: [
+      'gris', 'grey', 'gray', 'stealth', 'titanio', 'titanium', 'mate', 'matte',
+      'grafito', 'tactico', 'táctico', 'militar', 'oscuro', 'metal', 'acero',
+      'minimalista', 'plata', 'silver', 'reloj gris', 'reloj titanio', 'relojes'
     ],
   },
   {
@@ -51,12 +59,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Cyber Chrome / Mirror Steel',
     price: 275000,
-    tag: 'Edición Premium',
     image: '/assets/aistudio/reloj_3_cromado_6fc08572.png',
     desc: 'Acabado espejo cromado de alto impacto en acero líquido aeroespacial, bisel curvado fluido y display digital retroiluminado.',
     colors: [
       ['Cromado Espejo', '#E2E6EC'],
       ['Acero Pulido', '#B8BFC9'],
+    ],
+    keywords: [
+      'cromo', 'chrome', 'cromado', 'espejo', 'mirror', 'acero', 'steel',
+      'plateado', 'plata', 'silver', 'brillante', 'liquido', 'líquido', 'futurista',
+      'cyber', 'metal', 'reloj cromado', 'reloj plateado', 'relojes'
     ],
   },
   {
@@ -64,12 +76,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Bio Green / Obsidian Matrix',
     price: 275000,
-    tag: 'Edición Especial',
     image: '/assets/aistudio/reloj_4_negro_verde_6c42b715.png',
     desc: 'Edición en negro obsidiana con inserciones de alto contraste en verde neón eléctrico y caja ultraliviana.',
     colors: [
       ['Verde 000GREEN', '#76FF03'],
       ['Negro Obsidiana', '#121417'],
+    ],
+    keywords: [
+      'verde', 'green', 'bio', 'matrix', 'obsidiana', 'obsidian', 'neon', 'neón',
+      'electrico', 'eléctrico', '000green', 'negro', 'black', 'verde fluor',
+      'cyber green', 'reloj verde', 'relojes'
     ],
   },
   {
@@ -77,12 +93,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Crimson Core / Dark Red',
     price: 275000,
-    tag: 'Nuevo Ingreso',
     image: '/assets/aistudio/reloj_5_negro_rojo_3e1329aa.png',
     desc: 'Cuerpo aerodinámico en polímero reforzado y acero con ranuras en rojo carmesí brillante y pantalla LCD ultra nítida.',
     colors: [
       ['Rojo Carmesí', '#E50914'],
       ['Negro Carbón', '#15171A'],
+    ],
+    keywords: [
+      'rojo', 'red', 'crimson', 'carmesi', 'carmesí', 'core', 'dark',
+      'negro', 'black', 'carbon', 'carbón', 'fuego', 'bicolor', 'reloj rojo',
+      'reloj negro y rojo', 'relojes'
     ],
   },
   {
@@ -90,12 +110,16 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     kind: 'Reloj Digital Cyber',
     name: '000 Shadow Blade / Total Black',
     price: 275000,
-    tag: 'Edición Limitada',
     image: '/assets/aistudio/reloj_6_negro_total_6b621875.png',
     desc: 'Estructura asimétrica monocromática en negro total mate con pantalla digital LED segmentada blanca de alta visibilidad y correa ergonómica integrada.',
     colors: [
       ['Negro Total', '#0B0C0E'],
       ['Grafito Táctico', '#2B2F38'],
+    ],
+    keywords: [
+      'negro', 'black', 'total black', 'all black', 'shadow', 'blade',
+      'oscuro', 'mate', 'matte', 'monocromatico', 'monocromático', 'tactico',
+      'táctico', 'led blanco', 'reloj negro', 'relojes'
     ],
   },
 ];
@@ -120,7 +144,6 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<string>('todo');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('rel');
-  const [maxPrice, setMaxPrice] = useState<number>(600000);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
@@ -507,6 +530,19 @@ export default function App() {
 
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const getProductSearchableText = (p: ProductItem) => {
+    return normalize(
+      [
+        p.name,
+        p.desc,
+        p.kind,
+        p.colors.map((c) => c[0]).join(' '),
+        p.keywords.join(' '),
+        'reloj relojes digital cyber tiempo hora acero titanio pantalla led'
+      ].join(' ')
+    );
+  };
+
   const scrollToProductMatch = (query: string, immediate = false) => {
     if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
 
@@ -519,19 +555,10 @@ export default function App() {
       }
 
       // 1. Try to find the matching product directly
+      const tokens = q.split(/\s+/).filter(Boolean);
       const matched = EXACT_PRODUCTS.find((p) => {
-        const pName = normalize(p.name);
-        const pDesc = normalize(p.desc);
-        const pKind = normalize(p.kind);
-        const pTag = normalize(p.tag || '');
-        const pColors = p.colors.map((c) => normalize(c[0])).join(' ');
-        return (
-          pName.includes(q) ||
-          pDesc.includes(q) ||
-          pKind.includes(q) ||
-          pTag.includes(q) ||
-          pColors.includes(q)
-        );
+        const text = getProductSearchableText(p);
+        return tokens.every((t) => text.includes(t));
       });
 
       if (matched) {
@@ -558,27 +585,12 @@ export default function App() {
 
   // Filter & sorting for products
   const filteredProducts = EXACT_PRODUCTS.filter((p) => {
-    // Real-time live search across name, description, category, colors, and prices
+    // Real-time live multi-keyword search across all fields and rich keywords
     if (searchQuery.trim()) {
-      const q = normalize(searchQuery.trim());
-      const pName = normalize(p.name);
-      const pDesc = normalize(p.desc);
-      const pKind = normalize(p.kind);
-      const pTag = normalize(p.tag || '');
-      const pColors = p.colors.map((c) => normalize(c[0])).join(' ');
-      const pPrice = String(p.price);
-
-      const matches =
-        pName.includes(q) ||
-        pDesc.includes(q) ||
-        pKind.includes(q) ||
-        pTag.includes(q) ||
-        pColors.includes(q) ||
-        pPrice.includes(q);
-
+      const tokens = normalize(searchQuery.trim()).split(/\s+/).filter(Boolean);
+      const searchable = getProductSearchableText(p);
+      const matches = tokens.every((token) => searchable.includes(token));
       if (!matches) return false;
-      if (p.price > maxPrice) return false;
-      return true;
     }
 
     // Filter by favorites if activeFilter is 'favoritos'
@@ -588,7 +600,6 @@ export default function App() {
       return false;
     }
 
-    if (p.price > maxPrice) return false;
     return true;
   }).sort((a, b) => {
     if (sortBy === 'asc') return a.price - b.price;
@@ -1108,9 +1119,9 @@ Total: ${fmt(total)}
       </div>
 
       {/* CATALOG PREVIEW SECTION */}
-      <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+      <section id="catalogo" className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16 relative z-10">
         {/* Catalog Header Recuadro de Fondo */}
-        <div className="bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-6 sm:p-8 mb-8 shadow-[0_12px_35px_rgba(0,0,0,0.5)] backdrop-blur-md flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-6 sm:p-8 mb-8 shadow-[0_12px_35px_rgba(0,0,0,0.7)] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <div className="inline-block bg-[#274D24] border border-[#5E9455] px-3.5 py-1 rounded-full text-xs uppercase tracking-[0.2em] font-bold text-[#D3C9AC] mb-3 shadow-sm">
               Catálogo Oficial · Productos de Calidad
@@ -1128,7 +1139,7 @@ Total: ${fmt(total)}
         </div>
 
         {/* Filter Bar (Quality optical products, matching catalog box color and styling) */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-4 sm:p-5 mb-10 shadow-[0_12px_35px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-4 sm:p-5 mb-10 shadow-[0_12px_35px_rgba(0,0,0,0.7)]">
           {/* Watch Names Pills (No 000GREEN Signature) */}
           <div className="flex flex-wrap gap-2">
             <button
@@ -1192,17 +1203,17 @@ Total: ${fmt(total)}
             ))}
           </div>
 
-          {/* Sort & Max Price Controls */}
+          {/* Sort Controls (Price slider removed as requested) */}
           <div className="flex items-center gap-4 text-xs text-white">
             <label className="flex items-center gap-2">
-              <span className="font-medium text-[#DDECD7]">Ordenar:</span>
+              <span className="font-medium text-[#DDECD7]">Ordenar por:</span>
               <select
                 value={sortBy}
                 onChange={(e) => {
                   triggerLogoReaction();
                   setSortBy(e.target.value);
                 }}
-                className="bg-[#274D24] border border-[#5E9455] rounded-lg px-2.5 py-1 text-white font-medium focus:outline-none focus:border-[#9BD08A] cursor-pointer"
+                className="bg-[#274D24] border border-[#5E9455] rounded-lg px-3 py-1.5 text-white font-medium focus:outline-none focus:border-[#9BD08A] cursor-pointer"
               >
                 <option value="rel">Destacados</option>
                 <option value="asc">Precio: menor a mayor</option>
@@ -1210,28 +1221,15 @@ Total: ${fmt(total)}
                 <option value="az">Nombre A–Z</option>
               </select>
             </label>
-
-            <label className="hidden sm:flex items-center gap-2">
-              <span className="font-medium text-[#DDECD7]">Hasta {fmt(maxPrice)}:</span>
-              <input
-                type="range"
-                min="100000"
-                max="600000"
-                step="10000"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="accent-[#9BD08A] w-24 cursor-pointer"
-              />
-            </label>
           </div>
         </div>
 
         {/* Active Search Results Banner */}
         {searchQuery.trim() && (
-          <div className="mb-6 bg-[#274D24] border-2 border-[#5E9455] rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white shadow-md">
+          <div className="mb-6 bg-[#183216] border-2 border-[#5E9455] rounded-xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white shadow-md">
             <div className="flex items-center gap-2">
               <span className="text-[#D3C9AC] font-bold">Búsqueda activa:</span>
-              <span className="bg-[#183216] border border-[#44763C] px-2.5 py-0.5 rounded-md font-mono text-[#F0E9D5] font-bold">
+              <span className="bg-[#0B150A] border border-[#44763C] px-2.5 py-0.5 rounded-md font-mono text-[#F0E9D5] font-bold">
                 "{searchQuery}"
               </span>
               <span className="text-[#A4C992]">
@@ -1251,33 +1249,75 @@ Total: ${fmt(total)}
           </div>
         )}
 
-        {/* Empty Search / Filter State */}
+        {/* Empty State (Solid luxury background, no background video bleed-through) */}
         {filteredProducts.length === 0 && (
-          <div className="bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-10 text-center space-y-4 my-8 shadow-xl">
-            <div className="w-16 h-16 rounded-full bg-[#274D24] border border-[#5E9455] flex items-center justify-center mx-auto text-2xl">
-              🔍
-            </div>
-            <h3 className="text-xl font-bold text-white">
-              {activeFilter === 'favoritos'
-                ? 'No tienes productos en favoritos'
-                : 'No se encontraron relojes'}
-            </h3>
-            <p className="text-xs text-[#E3F2DF] max-w-md mx-auto leading-relaxed">
-              {activeFilter === 'favoritos'
-                ? 'Toca el corazón en cualquier reloj para agregarlo a tus favoritos.'
-                : `No encontramos resultados para "${searchQuery}". Intentá buscando por palabras como "Orange", "Titanium", "Chrome", "Green", "Crimson", "Black" o explorá todo el catálogo.`}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                triggerLogoReaction();
-                setSearchQuery('');
-                setActiveFilter('todo');
-              }}
-              className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-2.5 rounded-full text-xs hover:bg-white transition-colors cursor-pointer shadow-md"
-            >
-              Ver todos los relojes
-            </button>
+          <div className="relative z-20 bg-[#0B140A] border-2 border-[#376632] rounded-2xl p-8 sm:p-12 text-center space-y-5 my-8 shadow-[0_25px_60px_rgba(0,0,0,0.95)] max-w-2xl mx-auto">
+            {activeFilter === 'favoritos' ? (
+              <>
+                <div className="w-16 h-16 rounded-full bg-[#182C15] border border-[#E88C84]/60 flex items-center justify-center mx-auto text-2xl shadow-inner">
+                  ❤️
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white font-display">
+                  Tu lista de favoritos está vacía
+                </h3>
+                <p className="text-xs sm:text-sm text-[#D7E8D3] max-w-md mx-auto leading-relaxed">
+                  Podés guardar tus modelos preferidos tocando el ícono de corazón en cualquier reloj del catálogo para tenerlos siempre a mano y coordinar tu compra.
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerLogoReaction();
+                      setActiveFilter('todo');
+                    }}
+                    className="bg-[#D3C9AC] text-[#0E140D] font-bold px-7 py-3 rounded-full text-xs sm:text-sm hover:bg-white transition-all cursor-pointer shadow-lg hover:scale-105"
+                  >
+                    Ver todos los relojes
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-16 h-16 rounded-full bg-[#182C15] border border-[#5E9455] flex items-center justify-center mx-auto text-2xl shadow-inner">
+                  🔍
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-white font-display">
+                  No se encontraron resultados
+                </h3>
+                <p className="text-xs sm:text-sm text-[#D7E8D3] max-w-md mx-auto leading-relaxed">
+                  No encontramos coincidencias exactas para <span className="font-semibold text-white font-mono">"{searchQuery}"</span>. Probá buscando por alguna de estas opciones:
+                </p>
+                {/* Search suggestion pills */}
+                <div className="flex flex-wrap justify-center gap-2 pt-1">
+                  {['Verde', 'Titanio', 'Cromado', 'Total Black', 'Naranja', 'Rojo'].map((kw) => (
+                    <button
+                      key={kw}
+                      type="button"
+                      onClick={() => {
+                        triggerLogoReaction();
+                        setSearchQuery(kw);
+                      }}
+                      className="bg-[#183216] hover:bg-[#254A22] text-[#D3C9AC] hover:text-white border border-[#44763C] text-xs px-3 py-1 rounded-full font-medium transition-all cursor-pointer"
+                    >
+                      {kw}
+                    </button>
+                  ))}
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerLogoReaction();
+                      setSearchQuery('');
+                      setActiveFilter('todo');
+                    }}
+                    className="bg-[#D3C9AC] text-[#0E140D] font-bold px-7 py-3 rounded-full text-xs sm:text-sm hover:bg-white transition-all cursor-pointer shadow-lg hover:scale-105"
+                  >
+                    Restablecer catálogo
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -1293,24 +1333,20 @@ Total: ${fmt(total)}
               <div
                 key={p.id}
                 id={`producto-${p.id}`}
-                className={`bg-[#183216]/95 border-2 ${
+                className={`bg-[#183216] border-2 ${
                   isMatch
                     ? 'border-[#9BD08A] ring-2 ring-[#9BD08A] shadow-[0_0_35px_rgba(155,208,138,0.45)]'
                     : 'border-[#548A4C]'
-                } rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-[0_12px_35px_rgba(0,0,0,0.5)] backdrop-blur-md scroll-mt-28 transition-all duration-300`}
+                } rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-[0_12px_35px_rgba(0,0,0,0.6)] scroll-mt-28 transition-all duration-300`}
               >
                 <div>
-                  {/* Top Header of the Watch Box: Tag & Favorite */}
-                  <div className="flex justify-between items-center mb-3.5">
-                    <span className="bg-[#274D24] text-[#D3C9AC] border border-[#5E9455] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
-                      {p.tag || p.kind}
-                    </span>
-
+                  {/* Top Header of the Watch Box: Only Favorite button (Edición Limitada removed as requested) */}
+                  <div className="flex justify-end items-center mb-2.5">
                     <button
                       type="button"
                       onClick={() => toggleFavorite(p.id)}
                       className="w-8 h-8 rounded-full border border-[#5E9455] bg-[#274D24] flex items-center justify-center hover:border-white transition-colors cursor-pointer"
-                      title="Agregar a favoritos"
+                      title={favorites.includes(p.id) ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                     >
                       <svg
                         className={`w-4 h-4 ${
@@ -1439,33 +1475,18 @@ Total: ${fmt(total)}
                 Relojes digitales cyber de alta gama y piezas de diseño con carácter. Estructura ergonómica en titanio, acero cromado y pantallas LED matriciales.
               </p>
             </div>
-            <a
-              href="https://www.instagram.com/000green_/?hl=es-la"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={triggerLogoReaction}
-              className="inline-flex items-center gap-2 text-xs text-[#E3F2DF] hover:text-white bg-[#274D24] hover:bg-[#346230] border border-[#5E9455] hover:border-[#9BD08A] px-3.5 py-2 rounded-xl transition-all shadow-sm group w-full justify-between cursor-pointer"
-            >
-              <span className="flex items-center gap-2 font-semibold">
-                <svg className="w-4 h-4 fill-current text-[#E88C84] group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-                <span>Instagram: @000green_</span>
-              </span>
-              <span className="text-[#9BD08A] text-xs">Visitar ↗</span>
-            </a>
           </div>
 
           {/* Navigation Links Card */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs flex-1">
-            <div className="bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3">
+            <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3">
               <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Navegación</div>
               <ul className="space-y-2 text-[#E3F2DF] font-medium">
                 <li><a href="#catalogo" onClick={triggerLogoReaction} className="hover:text-white transition-colors block py-0.5">Catálogo Oficial</a></li>
                 <li><button type="button" onClick={() => { triggerLogoReaction(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors block py-0.5 text-left cursor-pointer">Volver al inicio</button></li>
               </ul>
             </div>
-            <div className="bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3">
+            <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3">
               <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Soporte</div>
               <ul className="space-y-2 text-[#E3F2DF] font-medium">
                 <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Envíos y Entregas</span></li>
@@ -1473,38 +1494,34 @@ Total: ${fmt(total)}
                 <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Cuidado del reloj</span></li>
               </ul>
             </div>
-            <div className="bg-[#183216]/95 border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3 col-span-2 sm:col-span-1">
-              <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Contacto</div>
-              <p className="text-[#E3F2DF] leading-relaxed font-medium">
-                Asunción, Paraguay.<br />
-                WhatsApp:{' '}
-                <a
-                  href="https://wa.me/595976287422"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-[#9BD08A] font-bold underline transition-colors"
-                >
-                  595 976 287 422
-                </a>
-                <br />
-                Instagram:{' '}
-                <a
-                  href="https://www.instagram.com/000green_/?hl=es-la"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-[#9BD08A] font-bold underline transition-colors"
-                >
-                  @000green_
-                </a>
-                <br />
-                Gmail:{' '}
-                <a
-                  href="mailto:000greeeen@gmail.com"
-                  className="text-white hover:text-[#9BD08A] font-bold underline transition-colors"
-                >
-                  000greeeen@gmail.com
-                </a>
-              </p>
+            <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3 col-span-2 sm:col-span-1">
+              <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Contacto Oficial</div>
+              <div className="text-[#E3F2DF] space-y-2 font-medium">
+                <div>
+                  <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">Ubicación</span>
+                  <span>Asunción, Paraguay</span>
+                </div>
+                <div>
+                  <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">WhatsApp Oficial</span>
+                  <a
+                    href="https://wa.me/595976287422"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-[#9BD08A] font-bold underline transition-colors"
+                  >
+                    +595 976 287 422
+                  </a>
+                </div>
+                <div>
+                  <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">Correo Electrónico</span>
+                  <a
+                    href="mailto:000green@gmail.com"
+                    className="text-white hover:text-[#9BD08A] font-bold underline transition-colors block"
+                  >
+                    000green@gmail.com
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
