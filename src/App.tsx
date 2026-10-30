@@ -17,7 +17,7 @@ export interface ProductItem {
   keywords: string[];
 }
 
-export const BRAND_LOGO_SRC = '/brand-logo.svg';
+export const BRAND_LOGO_SRC = '/official_logo.png';
 
 export const EXACT_PRODUCTS: ProductItem[] = [
   {
@@ -705,7 +705,7 @@ Total: ${fmt(total)}
                 <img
                   src={BRAND_LOGO_SRC}
                   alt="000GREEN Logo Oficial"
-                  className="w-full h-full object-cover scale-105"
+                  className="w-full h-full object-contain"
                 />
               </span>
 
@@ -1463,7 +1463,7 @@ Total: ${fmt(total)}
                 <img
                   src={BRAND_LOGO_SRC}
                   alt="000GREEN Logo"
-                  className="w-full h-full object-cover scale-105"
+                  className="w-full h-full object-contain"
                 />
               </span>
               <span translate="no" className="notranslate font-mark font-bold text-2xl tracking-[0.16em] text-white">
