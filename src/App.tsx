@@ -668,16 +668,18 @@ Total: ${fmt(total)}
         <source src="/assets/aistudio/cyber_music.ogg" type="audio/ogg" />
       </audio>
 
-      {/* BACKGROUND MASCOT (PERFECTLY CENTERED, NO BOX, NO SHADOWS, ENLARGED & CLOSE-UP) */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none flex items-center justify-center">
+      {/* BACKGROUND MASCOT (SEAMLESS CONTINUOUS BOOMERANG LOOP WITH SOFT EDGE DISSOLVE) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none flex items-center justify-center [mask-image:linear-gradient(to_bottom,black_0%,black_82%,transparent_98%)]">
         <video
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          src="/assets/aistudio/video_clean.mp4"
-          className="h-[84vh] sm:h-[90vh] md:h-[95vh] max-h-[960px] w-auto max-w-none object-contain object-center select-none pointer-events-none"
+          disablePictureInPicture
+          disableRemotePlayback
+          src="/assets/aistudio/video_clean.mp4?v=2"
+          className="h-[84vh] sm:h-[90vh] md:h-[95vh] max-h-[960px] w-auto max-w-none object-contain object-center select-none pointer-events-none transition-opacity duration-700"
         />
       </div>
 
