@@ -205,13 +205,9 @@ body {
   animation: cursor-ripple 0.42s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
 }
 
-/* 000GREEN Bespoke Green Cyber Pointer on Desktop */
+/* 000GREEN Bespoke Green Luxury Dot Cursor on Desktop */
 @media (hover: hover) and (pointer: fine) {
-  html {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2L18 10.5L11 13.2L7.5 20L3 2Z' fill='%2322C55E' stroke='%230A180C' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, auto;
-  }
-
-  body, a, button, input, select, textarea, [role="button"], .cursor-pointer {
+  body, a, button, input, select, textarea, [role="button"], .cursor-pointer, * {
     cursor: none !important;
   }
 }
