@@ -208,7 +208,7 @@ body {
 /* 000GREEN Bespoke Green Cyber Pointer on Desktop */
 @media (hover: hover) and (pointer: fine) {
   html {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='%2376FF03'/%3E%3Ccircle cx='12' cy='12' r='8.5' fill='none' stroke='%239BD08A' stroke-width='1.5' stroke-dasharray='3 3'/%3E%3C/svg%3E") 12 12, auto;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M3 2L18 10.5L11 13.2L7.5 20L3 2Z' fill='%2322C55E' stroke='%230A180C' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 3 2, auto;
   }
 
   body, a, button, input, select, textarea, [role="button"], .cursor-pointer {
