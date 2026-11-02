@@ -201,14 +201,14 @@ body {
   }
 }
 
-/* 000GREEN Bespoke Single Cyber Needle Cursor (100% Zero delay, single element, native OS hardware speed) */
+/* 000GREEN Official Moss Cursor (Extracted, recolored to match 000GREEN palette, 0ms hardware speed) */
 @media (hover: hover) and (pointer: fine) {
   html, body {
-    cursor: url('/cursor-default.svg') 2 2, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M2 2 L22 11.5 L13.5 14.5 L10.5 23 Z' fill='%2322C55E' stroke='%23051007' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M4.5 4.5 L17 11 L12 13 L9.5 18 Z' fill='%234ADE80'/%3E%3Cpath d='M10 8 L10 4 L10 8 L6 8 L10 8 Z' stroke='%23E3DCC3' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") 2 2, default !important;
+    cursor: url('/cursor-000green-default.png') 1 2, url('/cursor-000green-default.svg') 1 2, default !important;
   }
 
   a, button, input, select, textarea, [role="button"], .cursor-pointer, [data-cursor-interactive], label {
-    cursor: url('/cursor-pointer.svg') 2 2, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M2 2 L23 12 L14 15 L11 24 Z' fill='%2376FF03' stroke='%23051007' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M5 5 L17.5 11.5 L12.5 13.5 L10 19 Z' fill='%23FFFFFF' opacity='0.85'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23E3DCC3'/%3E%3C/svg%3E") 2 2, pointer !important;
+    cursor: url('/cursor-000green-pointer.png') 10 0, url('/cursor-000green-pointer.svg') 10 0, pointer !important;
   }
 }
 
