@@ -4,7 +4,6 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { CyberCursor } from './components/CyberCursor';
 
 // 000GREEN Official Products
 export interface ProductItem {
@@ -648,9 +647,6 @@ Total: ${fmt(total)}
 
   return (
     <div className="min-h-screen bg-black text-[#E3DCC3] font-body selection:bg-[#7E9A64] selection:text-black relative overflow-x-hidden">
-      {/* BESPOKE 000GREEN CYBER EMERALD CURSOR SYSTEM */}
-      <CyberCursor />
-
       {/* SPARKLE PARTICLES CONTAINER */}
       <div id="fx" aria-hidden="true" />
 
