@@ -187,6 +187,35 @@ body {
   }
 }
 
+/* Click Sonic Ripple Animation for Custom Cyber Cursor */
+@keyframes cursor-ripple {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.95;
+    border-color: #76FF03;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+    border-color: #9BD08A;
+  }
+}
+
+.animate-cursor-ripple {
+  animation: cursor-ripple 0.42s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+/* 000GREEN Bespoke Green Cyber Pointer on Desktop */
+@media (hover: hover) and (pointer: fine) {
+  html {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3.5' fill='%2376FF03'/%3E%3Ccircle cx='12' cy='12' r='8.5' fill='none' stroke='%239BD08A' stroke-width='1.5' stroke-dasharray='3 3'/%3E%3C/svg%3E") 12 12, auto;
+  }
+
+  body, a, button, input, select, textarea, [role="button"], .cursor-pointer {
+    cursor: none !important;
+  }
+}
+
 
 
 
