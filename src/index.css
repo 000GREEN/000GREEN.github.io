@@ -201,14 +201,14 @@ body {
   }
 }
 
-/* 000GREEN Official Moss Cursor (Extracted, recolored to match 000GREEN palette, 0ms hardware speed) */
+/* 000GREEN Official Moss Cursor (Refined palette, comfortable 26px size, 0ms hardware speed) */
 @media (hover: hover) and (pointer: fine) {
   html, body {
     cursor: url('/cursor-000green-default.png') 1 2, url('/cursor-000green-default.svg') 1 2, default !important;
   }
 
   a, button, input, select, textarea, [role="button"], .cursor-pointer, [data-cursor-interactive], label {
-    cursor: url('/cursor-000green-pointer.png') 10 0, url('/cursor-000green-pointer.svg') 10 0, pointer !important;
+    cursor: url('/cursor-000green-pointer.png') 8 0, url('/cursor-000green-pointer.svg') 8 0, pointer !important;
   }
 }
 
