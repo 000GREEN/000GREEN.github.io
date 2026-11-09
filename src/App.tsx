@@ -150,8 +150,9 @@ export default function App() {
   const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
 
-  // Background Cyber Audio Soundtrack State (Official 000GREEN exclusive music)
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
+  const ytPlayerRef = useRef<any>(null);
+  const isYtReadyRef = useRef<boolean>(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
   const [musicVolume, setMusicVolume] = useState<number>(0.85);
   const hasUserTriggeredMusic = useRef<boolean>(false);
@@ -236,40 +237,93 @@ export default function App() {
     };
   }, []);
 
-  // 000GREEN Official Exclusive Soundtrack Engine (cyber_music.mp3 / cyber_music.ogg)
+  // Official 000GREEN Exclusive YouTube Soundtrack Engine (NFa7KlLyzGY @ 503s)
   useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = musicVolume;
+    let isMounted = true;
 
-    // Attempt direct autoplay immediately upon entering the store
-    const startAudio = () => {
-      if (!audioRef.current) return;
-      audioRef.current.volume = musicVolume;
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsMusicPlaying(true);
-            hasUserTriggeredMusic.current = true;
-          })
-          .catch(() => {
-            // Browser autoplay policy requires initial user gesture
-            setIsMusicPlaying(false);
-          });
-      }
+    const playYouTubeAudio = () => {
+      if (!ytPlayerRef.current || !isYtReadyRef.current) return;
+      try {
+        ytPlayerRef.current.seekTo(503, true);
+        ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
+        ytPlayerRef.current.playVideo();
+      } catch {}
     };
 
-    startAudio();
+    const initYT = () => {
+      if (!(window as any).YT || !(window as any).YT.Player) return;
 
-    // Trigger seamless playback on the first user interaction anywhere (tap, click, key, or scroll)
+      try {
+        ytPlayerRef.current = new (window as any).YT.Player('yt-music-iframe-holder', {
+          height: '200',
+          width: '200',
+          videoId: 'NFa7KlLyzGY',
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            iv_load_policy: 3,
+            modestbranding: 1,
+            playsinline: 1,
+            rel: 0,
+            start: 503,
+            loop: 1,
+            playlist: 'NFa7KlLyzGY',
+          },
+          events: {
+            onReady: (event: any) => {
+              if (!isMounted) return;
+              isYtReadyRef.current = true;
+              try {
+                event.target.setVolume(Math.round(musicVolume * 100));
+                event.target.seekTo(503, true);
+                event.target.playVideo();
+              } catch {}
+
+              if (hasUserTriggeredMusic.current) {
+                try {
+                  event.target.playVideo();
+                  setIsMusicPlaying(true);
+                } catch {}
+              }
+            },
+            onStateChange: (event: any) => {
+              if (!isMounted) return;
+              // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
+              if (event.data === 1) {
+                setIsMusicPlaying(true);
+                hasUserTriggeredMusic.current = true;
+              } else if (event.data === 2) {
+                setIsMusicPlaying(false);
+              } else if (event.data === 0) {
+                // Loop back to 503s seamlessly
+                try {
+                  event.target.seekTo(503, true);
+                  event.target.playVideo();
+                } catch {}
+              }
+            },
+          },
+        });
+      } catch {}
+    };
+
+    if (!(window as any).YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+      (window as any).onYouTubeIframeAPIReady = initYT;
+    } else if ((window as any).YT && (window as any).YT.Player) {
+      initYT();
+    }
+
+    // Trigger playback on first user interaction anywhere (tap, click, key, or scroll)
     const handleFirstInteraction = () => {
-      if (!hasUserTriggeredMusic.current && audioRef.current) {
+      if (!hasUserTriggeredMusic.current) {
         hasUserTriggeredMusic.current = true;
-        audioRef.current.volume = musicVolume;
-        audioRef.current
-          .play()
-          .then(() => setIsMusicPlaying(true))
-          .catch(() => {});
+        playYouTubeAudio();
       }
     };
 
@@ -279,10 +333,16 @@ export default function App() {
     window.addEventListener('scroll', handleFirstInteraction, { once: true });
 
     return () => {
+      isMounted = false;
       window.removeEventListener('pointerdown', handleFirstInteraction);
       window.removeEventListener('touchstart', handleFirstInteraction);
       window.removeEventListener('keydown', handleFirstInteraction);
       window.removeEventListener('scroll', handleFirstInteraction);
+      try {
+        if (ytPlayerRef.current?.destroy) {
+          ytPlayerRef.current.destroy();
+        }
+      } catch {}
     };
   }, [musicVolume]);
 
@@ -290,24 +350,30 @@ export default function App() {
     triggerLogoReaction();
     hasUserTriggeredMusic.current = true;
 
-    if (!audioRef.current) return;
-    if (isMusicPlaying) {
-      audioRef.current.pause();
-      setIsMusicPlaying(false);
-    } else {
-      audioRef.current.volume = musicVolume;
-      audioRef.current
-        .play()
-        .then(() => setIsMusicPlaying(true))
-        .catch(() => {});
-    }
+    if (!ytPlayerRef.current || !isYtReadyRef.current) return;
+    try {
+      if (isMusicPlaying) {
+        ytPlayerRef.current.pauseVideo();
+        setIsMusicPlaying(false);
+      } else {
+        ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
+        ytPlayerRef.current.playVideo();
+        setIsMusicPlaying(true);
+      }
+    } catch {}
   };
 
   const handleVolumeChange = (vol: number) => {
     setMusicVolume(vol);
-    if (audioRef.current) {
-      audioRef.current.volume = vol;
-    }
+    if (!ytPlayerRef.current || !isYtReadyRef.current) return;
+    try {
+      ytPlayerRef.current.setVolume(Math.round(vol * 100));
+      if (vol === 0) {
+        ytPlayerRef.current.mute();
+      } else {
+        ytPlayerRef.current.unMute();
+      }
+    } catch {}
   };
 
   const fmt = (n: number) => `₲ ${Math.round(n).toLocaleString('es-PY')}`;
@@ -551,15 +617,13 @@ Total: ${fmt(total)}
       {/* SPARKLE PARTICLES CONTAINER */}
       <div id="fx" aria-hidden="true" />
 
-      {/* 000GREEN EXCLUSIVE OFFICIAL SOUNDTRACK */}
-      <audio
-        ref={audioRef}
-        loop
-        preload="auto"
+      {/* 000GREEN OFFICIAL YOUTUBE SOUNDTRACK ENGINE (NFa7KlLyzGY @ 503s - EXCLUSIVE) */}
+      <div
+        className="fixed -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none overflow-hidden select-none"
+        aria-hidden="true"
       >
-        <source src="/assets/aistudio/cyber_music.mp3" type="audio/mpeg" />
-        <source src="/assets/aistudio/cyber_music.ogg" type="audio/ogg" />
-      </audio>
+        <div id="yt-music-iframe-holder" />
+      </div>
 
       {/* BACKGROUND MASCOT (SEAMLESS CONTINUOUS BOOMERANG LOOP WITH SOFT EDGE DISSOLVE) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none flex items-center justify-center [mask-image:linear-gradient(to_bottom,black_0%,black_82%,transparent_98%)]">
