@@ -150,11 +150,8 @@ export default function App() {
   const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
 
-  // Background Cyber Audio Soundtrack State (YouTube URL: NFa7KlLyzGY starting at 503s with fallback)
+  // Background Cyber Audio Soundtrack State (Official 000GREEN exclusive music)
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const ytPlayerRef = useRef<any>(null);
-  const isYtReadyRef = useRef<boolean>(false);
-  const [usingYouTube, setUsingYouTube] = useState<boolean>(true);
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
   const [musicVolume, setMusicVolume] = useState<number>(0.85);
   const hasUserTriggeredMusic = useRef<boolean>(false);
@@ -239,110 +236,60 @@ export default function App() {
     };
   }, []);
 
-  // Initialize YouTube IFrame Player
+  // 000GREEN Official Exclusive Soundtrack Engine (cyber_music.mp3 / cyber_music.ogg)
   useEffect(() => {
-    let isMounted = true;
+    if (!audioRef.current) return;
+    audioRef.current.volume = musicVolume;
 
-    const initYT = () => {
-      if (!(window as any).YT || !(window as any).YT.Player) return;
-
-      try {
-        ytPlayerRef.current = new (window as any).YT.Player('yt-music-iframe-holder', {
-          height: '200',
-          width: '200',
-          videoId: 'NFa7KlLyzGY',
-          playerVars: {
-            autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            iv_load_policy: 3,
-            modestbranding: 1,
-            playsinline: 1,
-            rel: 0,
-            start: 503,
-            loop: 1,
-            playlist: 'NFa7KlLyzGY',
-          },
-          events: {
-            onReady: (event: any) => {
-              if (!isMounted) return;
-              isYtReadyRef.current = true;
-              event.target.setVolume(Math.round(musicVolume * 100));
-              event.target.seekTo(503, true);
-
-              // If user already clicked to start, trigger play immediately
-              if (hasUserTriggeredMusic.current) {
-                event.target.playVideo();
-                setIsMusicPlaying(true);
-              }
-            },
-            onStateChange: (event: any) => {
-              if (!isMounted) return;
-              // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
-              if (event.data === 1) {
-                setIsMusicPlaying(true);
-              } else if (event.data === 2) {
-                setIsMusicPlaying(false);
-              } else if (event.data === 0) {
-                // Loop back to 503s
-                event.target.seekTo(503, true);
-                event.target.playVideo();
-              }
-            },
-            onError: () => {
-              if (!isMounted) return;
-              // On error, fallback smoothly to HTML5 audio
-              setUsingYouTube(false);
-            },
-          },
-        });
-      } catch {
-        setUsingYouTube(false);
+    // Attempt direct autoplay immediately upon entering the store
+    const startAudio = () => {
+      if (!audioRef.current) return;
+      audioRef.current.volume = musicVolume;
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsMusicPlaying(true);
+            hasUserTriggeredMusic.current = true;
+          })
+          .catch(() => {
+            // Browser autoplay policy requires initial user gesture
+            setIsMusicPlaying(false);
+          });
       }
     };
 
-    if (!(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-      (window as any).onYouTubeIframeAPIReady = initYT;
-    } else if ((window as any).YT && (window as any).YT.Player) {
-      initYT();
-    }
+    startAudio();
+
+    // Trigger seamless playback on the first user interaction anywhere (tap, click, key, or scroll)
+    const handleFirstInteraction = () => {
+      if (!hasUserTriggeredMusic.current && audioRef.current) {
+        hasUserTriggeredMusic.current = true;
+        audioRef.current.volume = musicVolume;
+        audioRef.current
+          .play()
+          .then(() => setIsMusicPlaying(true))
+          .catch(() => {});
+      }
+    };
+
+    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
+    window.addEventListener('touchstart', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    window.addEventListener('scroll', handleFirstInteraction, { once: true });
 
     return () => {
-      isMounted = false;
-      try {
-        if (ytPlayerRef.current?.destroy) {
-          ytPlayerRef.current.destroy();
-        }
-      } catch {}
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('touchstart', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+      window.removeEventListener('scroll', handleFirstInteraction);
     };
-  }, []);
+  }, [musicVolume]);
 
   const toggleMusic = () => {
     triggerLogoReaction();
     hasUserTriggeredMusic.current = true;
 
-    if (usingYouTube && ytPlayerRef.current && isYtReadyRef.current) {
-      try {
-        if (isMusicPlaying) {
-          ytPlayerRef.current.pauseVideo();
-          setIsMusicPlaying(false);
-        } else {
-          ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
-          ytPlayerRef.current.playVideo();
-          setIsMusicPlaying(true);
-        }
-        return;
-      } catch {
-        // Fallback to audioRef if YT throws
-      }
-    }
-
-    // HTML5 Audio fallback
     if (!audioRef.current) return;
     if (isMusicPlaying) {
       audioRef.current.pause();
@@ -358,56 +305,10 @@ export default function App() {
 
   const handleVolumeChange = (vol: number) => {
     setMusicVolume(vol);
-
-    if (usingYouTube && ytPlayerRef.current && isYtReadyRef.current) {
-      try {
-        ytPlayerRef.current.setVolume(Math.round(vol * 100));
-        if (vol === 0) {
-          ytPlayerRef.current.mute();
-        } else {
-          ytPlayerRef.current.unMute();
-        }
-      } catch {}
-    }
-
     if (audioRef.current) {
       audioRef.current.volume = vol;
     }
   };
-
-  // Attempt gentle autoplay on user's first tap/click anywhere on the page
-  useEffect(() => {
-    const handleFirstInteraction = () => {
-      if (!hasUserTriggeredMusic.current) {
-        hasUserTriggeredMusic.current = true;
-
-        if (usingYouTube && ytPlayerRef.current && isYtReadyRef.current) {
-          try {
-            ytPlayerRef.current.seekTo(503, true);
-            ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
-            ytPlayerRef.current.playVideo();
-            setIsMusicPlaying(true);
-            return;
-          } catch {}
-        }
-
-        if (audioRef.current) {
-          audioRef.current.volume = musicVolume;
-          audioRef.current
-            .play()
-            .then(() => {
-              setIsMusicPlaying(true);
-            })
-            .catch(() => {});
-        }
-      }
-    };
-
-    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
-    return () => {
-      window.removeEventListener('pointerdown', handleFirstInteraction);
-    };
-  }, [musicVolume, usingYouTube]);
 
   const fmt = (n: number) => `₲ ${Math.round(n).toLocaleString('es-PY')}`;
 
@@ -650,15 +551,7 @@ Total: ${fmt(total)}
       {/* SPARKLE PARTICLES CONTAINER */}
       <div id="fx" aria-hidden="true" />
 
-      {/* YOUTUBE AUDIO BACKGROUND ENGINE (NFa7KlLyzGY @ 503s) */}
-      <div
-        className="fixed -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none overflow-hidden select-none"
-        aria-hidden="true"
-      >
-        <div id="yt-music-iframe-holder" />
-      </div>
-
-      {/* BACKGROUND SOUNDTRACK FALLBACK (HTML5 AUDIO) */}
+      {/* 000GREEN EXCLUSIVE OFFICIAL SOUNDTRACK */}
       <audio
         ref={audioRef}
         loop
@@ -975,7 +868,7 @@ Total: ${fmt(total)}
                   ? 'bg-[#183216] border-[#9BD08A] text-[#9BD08A] shadow-[0_0_12px_rgba(155,208,138,0.35)]'
                   : 'bg-[#274D24] border-[#5E9455] hover:border-[#D3C9AC] text-white'
               }`}
-              title={isMusicPlaying ? 'Pausar música (YouTube 503s)' : 'Reproducir música (YouTube 503s)'}
+              title={isMusicPlaying ? 'Pausar música oficial 000GREEN' : 'Reproducir música oficial 000GREEN'}
             >
               {isMusicPlaying ? (
                 <span className="flex items-end gap-[2px] h-3.5 w-3.5 justify-center">
