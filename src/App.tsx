@@ -4,12 +4,12 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import baggyMossCargoImg from './assets/images/baggy_moss_cargo_1795107530043.jpg';
-import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_1795107530423.jpg';
-import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_1795107530623.jpg';
-import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_1795107529917.jpg';
-import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_1795107530719.jpg';
-import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_1795107530121.jpg';
+import baggyMossCargoImg from './assets/images/baggy_moss_cargo_v2_1795108115684.jpg';
+import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_v3_1795108133375.jpg';
+import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_v2_1795108116852.jpg';
+import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_v2_1795108116703.jpg';
+import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_v2_1795108116230.jpg';
+import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_v2_1795108116399.jpg';
 
 // 000GREEN Official Baggy Pants Collection
 export interface ProductItem {
@@ -166,6 +166,8 @@ export default function App() {
   const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
   const [copiedOrder, setCopiedOrder] = useState(false);
+  const [customerNote, setCustomerNote] = useState('');
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
   const ytPlayerRef = useRef<any>(null);
@@ -594,15 +596,19 @@ export default function App() {
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
+  const INSTAGRAM_DM_URL = 'https://ig.me/m/000green_';
+
   const getOrderSummaryText = () => {
     if (cartItems.length === 0) {
-      return 'Hola 000GREEN! Me gustaría consultar sobre su colección de pantalones baggy.';
+      return 'Hola @000green_! Me gustaría consultar sobre la colección de pantalones baggy.';
     }
     const itemsList = cartItems
-      .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} - ${fmt(item.price * item.qty)}`)
+      .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} — ${fmt(item.price * item.qty)}`)
       .join('\n');
 
-    return `Hola 000GREEN! Quiero hacer el siguiente pedido de pantalones baggy:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}\n\n¿Cómo coordinamos el pago y la entrega?`;
+    const noteLine = customerNote.trim() ? `\nDatos / Ciudad: ${customerNote.trim()}\n` : '\n';
+
+    return `Hola @000green_! Quiero finalizar mi compra:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}${noteLine}\n¿Me confirman disponibilidad para coordinar el envío?`;
   };
 
   const getEmailOrderUrl = () => {
@@ -610,12 +616,43 @@ export default function App() {
     return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
+  const copyOrderToClipboard = async () => {
+    const text = getOrderSummaryText();
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        setCopiedOrder(true);
+        return true;
+      }
+    } catch {}
+
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      if (ok) {
+        setCopiedOrder(true);
+        return true;
+      }
+    } catch {}
+    return false;
+  };
+
   const handleCopyOrder = () => {
     triggerLogoReaction();
-    navigator.clipboard?.writeText(getOrderSummaryText()).then(() => {
-      setCopiedOrder(true);
-      setTimeout(() => setCopiedOrder(false), 2400);
-    }).catch(() => {});
+    void copyOrderToClipboard();
+  };
+
+  const handleInstagramCheckout = () => {
+    triggerLogoReaction();
+    void copyOrderToClipboard();
+    setOrderComplete(true);
   };
 
   return (
@@ -1334,14 +1371,22 @@ export default function App() {
                   {/* Official Baggy Pants Studio Photo Tile */}
                   <div
                     onClick={() => triggerLogoReaction()}
-                    className="aspect-[4/5] rounded-xl bg-[#B8DDB4] border border-[#52864A] mb-4 flex items-center justify-center relative overflow-hidden shadow-inner cursor-pointer"
+                    className="aspect-[4/5] rounded-xl bg-gradient-to-b from-[#132911] via-[#1C3D19] to-[#0B180A] border-2 border-[#68A85E]/75 mb-4 flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_28px_rgba(0,0,0,0.65)] cursor-pointer group"
                   >
-                    <img
-                      src={p.image}
-                      alt={p.name}
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-[1.03]"
-                    />
+                    {failedImages[p.id] ? (
+                      <div className="flex flex-col items-center justify-center p-6 text-center gap-2 text-[#D3C9AC]">
+                        <span className="text-xs font-mono uppercase tracking-widest text-[#9BD08A]">000GREEN</span>
+                        <span className="text-sm font-bold text-white">{p.name}</span>
+                      </div>
+                    ) : (
+                      <img
+                        src={p.image}
+                        alt={p.name}
+                        referrerPolicy="no-referrer"
+                        onError={() => setFailedImages((prev) => ({ ...prev, [p.id]: true }))}
+                        className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+                      />
+                    )}
                   </div>
 
                   {/* Recuadro de Información: Nombre, Precio, Descripción y Talles */}
@@ -1572,61 +1617,83 @@ export default function App() {
               </div>
 
               {orderComplete ? (
-                <div className="py-10 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#9BD08A]/20 text-[#9BD08A] flex items-center justify-center mx-auto text-2xl">
+                <div className="py-6 text-center space-y-4">
+                  <div className="w-14 h-14 rounded-full bg-[#274D24] border-2 border-[#9BD08A] text-[#9BD08A] flex items-center justify-center mx-auto text-2xl shadow-md">
                     ✓
                   </div>
-                  <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                    ¡Pedido preparado!
-                  </h3>
-                  <p className="text-xs text-[#98A18A] leading-relaxed">
-                    Tu selección por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span> está lista. Podés enviarnos tu pedido directamente por correo o Instagram para coordinar el envío.
-                  </p>
-                  <div className="bg-[#1C271A] border border-[#374C32] rounded-xl p-3 text-left text-xs space-y-1.5">
-                    {cartItems.map((item, i) => (
-                      <div key={i} className="flex justify-between gap-2 text-[#E3DCC3]">
-                        <span className="truncate">{item.name} · Talle {item.size} (x{item.qty})</span>
-                        <span className="font-mono shrink-0 text-[#D3C9AC]">{fmt(item.price * item.qty)}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-1.5">
+                    <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
+                      ¡Pedido listo para Instagram!
+                    </h3>
+                    <p className="text-xs text-[#C8DFC0] leading-relaxed">
+                      {copiedOrder
+                        ? 'El mensaje de tu compra se copió automáticamente. Solo pegalo y envialo en el chat de @000green_.'
+                        : 'Copiá el mensaje de abajo y envialo directamente al chat de @000green_ en Instagram.'}
+                    </p>
                   </div>
-                  <div className="flex flex-col gap-2.5 pt-2">
+
+                  {/* Ready-to-send Instagram Message Preview */}
+                  <div className="bg-[#0E180D] border border-[#4D8046] rounded-xl p-3.5 text-left space-y-2">
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-[#9BD08A]">
+                      <span>Mensaje para @000green_</span>
+                      {copiedOrder && <span className="font-bold">✓ Copiado</span>}
+                    </div>
+                    <pre className="whitespace-pre-wrap font-sans text-xs text-[#E3DCC3] leading-relaxed select-all">
+                      {getOrderSummaryText()}
+                    </pre>
+                  </div>
+
+                  <div className="flex flex-col gap-2.5 pt-1">
                     <a
-                      href={getEmailOrderUrl()}
-                      onClick={triggerLogoReaction}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold px-5 py-3 rounded-full text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
-                    >
-                      <span>Enviar pedido por Correo</span>
-                    </a>
-                    <a
-                      href="https://www.instagram.com/000green_/?hl=es-la"
+                      href={INSTAGRAM_DM_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={triggerLogoReaction}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-bold px-5 py-2.5 rounded-full text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                      onClick={handleInstagramCheckout}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold px-5 py-3.5 rounded-full text-xs uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
                     >
-                      <span>Coordinar por Instagram (@000green_)</span>
+                      <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                      <span>Abrir chat de Instagram (@000green_) ↗</span>
                     </a>
                     <button
                       type="button"
                       onClick={handleCopyOrder}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-bold px-5 py-2.5 rounded-full text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      <span>{copiedOrder ? '✓ Mensaje copiado (listo para pegar)' : 'Copiar mensaje del pedido'}</span>
+                    </button>
+                    <a
+                      href={getEmailOrderUrl()}
+                      onClick={triggerLogoReaction}
                       className="w-full inline-flex items-center justify-center gap-2 bg-[#1C271A] hover:bg-[#243422] border border-[#374C32] text-[#D3C9AC] font-semibold px-5 py-2.5 rounded-full text-xs transition-colors cursor-pointer"
                     >
-                      <span>{copiedOrder ? '✓ Resumen copiado al portapapeles' : 'Copiar resumen del pedido'}</span>
-                    </button>
+                      <span>Enviar por Correo (000green@gmail.com)</span>
+                    </a>
                   </div>
-                  <div>
+                  <div className="flex items-center justify-center gap-4 pt-1">
                     <button
                       type="button"
                       onClick={() => {
                         triggerLogoReaction();
                         setOrderComplete(false);
+                      }}
+                      className="text-xs text-[#98A18A] hover:text-white underline cursor-pointer"
+                    >
+                      Volver al carrito
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        triggerLogoReaction();
+                        setOrderComplete(false);
+                        setCopiedOrder(false);
                         setCartItems([]);
                         setCartOpen(false);
                       }}
-                      className="text-xs text-[#9BD08A] hover:text-white underline font-semibold mt-2 cursor-pointer"
+                      className="text-xs text-[#9BD08A] hover:text-white underline font-semibold cursor-pointer"
                     >
-                      Finalizar y seguir explorando
+                      Finalizar y vaciar carrito
                     </button>
                   </div>
                 </div>
@@ -1700,7 +1767,7 @@ export default function App() {
 
             {/* Cart Footer */}
             {!orderComplete && cartItems.length > 0 && (
-              <div className="pt-6 border-t border-[#2A3626] space-y-4">
+              <div className="pt-5 border-t border-[#2A3626] space-y-3.5">
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between font-bold text-base text-[#E3DCC3] pt-2 border-t border-[#2A3626]">
                     <span>Total estimado</span>
@@ -1708,18 +1775,43 @@ export default function App() {
                   </div>
                 </div>
 
+                <div>
+                  <input
+                    type="text"
+                    value={customerNote}
+                    onChange={(e) => setCustomerNote(e.target.value)}
+                    placeholder="Tu nombre o ciudad para el envío (opcional)"
+                    className="w-full bg-[#1C271A] border border-[#374C32] focus:border-[#9BD08A] rounded-xl px-3.5 py-2 text-xs text-[#E3DCC3] placeholder-[#7F8B78] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <a
+                  href={INSTAGRAM_DM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleInstagramCheckout}
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
+                >
+                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                  <span>Finalizar compra por Instagram ↗</span>
+                </a>
+
                 <button
                   type="button"
                   onClick={() => {
                     triggerLogoReaction();
+                    void copyOrderToClipboard();
                     setOrderComplete(true);
                   }}
-                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-semibold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer"
                 >
-                  <span>Finalizar pedido</span>
+                  <span>Ver mensaje / Otras opciones (Correo)</span>
                 </button>
+
                 <p className="text-[11px] text-center text-[#9BD08A] font-medium">
-                  Coordiná tu compra por correo o Instagram (@000green_)
+                  Se copia tu pedido y se abre el chat directo con @000green_
                 </p>
               </div>
             )}
@@ -1789,7 +1881,7 @@ export default function App() {
                       key={p.id}
                       className="py-3 px-3.5 bg-[#1C271A] rounded-xl border border-[#374C32] flex items-center justify-between gap-3 shadow-sm"
                     >
-                      <div className="w-14 h-14 bg-[#B8DDB4] rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                      <div className="w-14 h-14 bg-[#122610] border border-[#4D8046] rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                         <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                       </div>
 
