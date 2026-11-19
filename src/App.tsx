@@ -247,6 +247,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
   } | null>(null);
   const lastDragMovedRef = useRef<boolean>(false);
   const justLockedFreeMoveRef = useRef<boolean>(false);
+  const wheelAccumRef = useRef<{ acc: number; lastTs: number }>({ acc: 0, lastTs: 0 });
   const freeMoveOriginRef = useRef<{ x: number; y: number; startVal: number } | null>(null);
   const valueRef = useRef<number>(value);
 
@@ -280,7 +281,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
     [commitSize]
   );
 
-  // Smooth non-passive mouse-wheel rolling directly on the ruedita
+  // Smooth non-passive mouse-wheel rolling with accumulated threshold so micro-scrolls don't jump sizes
   useEffect(() => {
     const el = wheelRef.current;
     if (!el) return;
@@ -288,8 +289,20 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       e.preventDefault();
       const dir = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : -e.deltaX;
       if (dir === 0) return;
-      const delta = dir > 0 ? 1 : -1;
-      commitSize(valueRef.current + delta);
+
+      const now = performance.now();
+      if (now - wheelAccumRef.current.lastTs > 260) {
+        wheelAccumRef.current.acc = 0;
+      }
+      wheelAccumRef.current.lastTs = now;
+      wheelAccumRef.current.acc += dir;
+
+      const threshold = 48;
+      if (Math.abs(wheelAccumRef.current.acc) >= threshold) {
+        const delta = wheelAccumRef.current.acc > 0 ? 1 : -1;
+        wheelAccumRef.current.acc = 0;
+        commitSize(valueRef.current + delta);
+      }
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
@@ -339,12 +352,12 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       // Right -> smaller (-), Left -> larger (+)
       const dx = origin.x - touch.clientX;
       const dy = origin.y - touch.clientY;
-      if (Math.hypot(dx, dy) > 4 && !origin.moved) {
+      if (Math.hypot(dx, dy) > 6 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 10);
+      const steps = Math.trunc(primaryDelta / 22);
       commitSize(origin.startVal + steps);
     };
 
@@ -402,12 +415,12 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dx = origin.x - e.clientX;
       const dy = origin.y - e.clientY;
       const distance = Math.hypot(dx, dy);
-      if (distance > 3 && !origin.moved) {
+      if (distance > 6 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 10);
+      const steps = Math.trunc(primaryDelta / 22);
       commitSize(origin.startVal + steps);
     };
 
@@ -442,7 +455,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dx = origin.x - e.clientX;
       const dy = origin.y - e.clientY;
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 10);
+      const steps = Math.trunc(primaryDelta / 24);
       commitSize(origin.startVal + steps);
     };
 
@@ -1153,20 +1166,21 @@ export default function App() {
 
   const getOrderSummaryText = () => {
     if (cartItems.length === 0) {
-      return 'Hola @000green_! Me gustaría consultar sobre la colección de pantalones baggy.';
+      return 'Hola 000GREEN! Me gustaría consultar sobre la colección de pantalones baggy.';
     }
     const itemsList = cartItems
       .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} - ${fmt(item.price * item.qty)}`)
       .join('\n');
 
-    return `Hola @000green_! Quiero finalizar mi compra:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}\n\n¿Me confirman para coordinar la entrega?`;
+    return `Hola 000GREEN! Quiero finalizar mi compra:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}\n\n¿Me confirman para coordinar la entrega?`;
   };
 
-  const getInstagramOrderUrl = () => {
-    return `https://ig.me/m/000green_?text=${encodeURIComponent(getOrderSummaryText())}`;
+  const getGmailOrderUrl = () => {
+    const subject = `Pedido 000GREEN - ${fmt(total)}`;
+    return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
-  const handleInstagramCheckout = () => {
+  const handleGmailCheckout = () => {
     triggerLogoReaction();
     const text = getOrderSummaryText();
     try {
@@ -1616,7 +1630,7 @@ export default function App() {
           <span>·</span>
           <span>Stock Limitado</span>
           <span>·</span>
-          <span>Compra Directa por Instagram</span>
+          <span>Compra Directa por Gmail</span>
           <span>·</span>
           <span>000GREEN</span>
           <span>·</span>
@@ -1632,7 +1646,7 @@ export default function App() {
           <span>·</span>
           <span>Stock Limitado</span>
           <span>·</span>
-          <span>Compra Directa por Instagram</span>
+          <span>Compra Directa por Gmail</span>
         </div>
       </div>
 
@@ -2148,10 +2162,10 @@ export default function App() {
                     ✓
                   </div>
                   <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                    ¡Pedido enviado a Instagram!
+                    ¡Pedido listo en tu correo!
                   </h3>
                   <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
-                    Se abrió el chat de <strong className="text-[#E3DCC3]">@000green_</strong> con el detalle de tu compra por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Solo envialo y te respondemos al instante.
+                    Se abrió tu correo hacia <strong className="text-[#E3DCC3]">000green@gmail.com</strong> con el detalle de tu compra por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Solo envialo y te respondemos a la brevedad.
                   </p>
                   <button
                     type="button"
@@ -2245,16 +2259,14 @@ export default function App() {
                 </div>
 
                 <a
-                  href={getInstagramOrderUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={handleInstagramCheckout}
+                  href={getGmailOrderUrl()}
+                  onClick={handleGmailCheckout}
                   className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
                 >
                   <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
                   </svg>
-                  <span>Finalizar compra por Instagram</span>
+                  <span>Finalizar compra por Gmail</span>
                 </a>
               </div>
             )}
