@@ -142,19 +142,28 @@ interface SizeWheelProps {
 
 function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWheelProps) {
   const wheelRef = useRef<HTMLDivElement | null>(null);
-  const dragStartXRef = useRef<number | null>(null);
-  const dragStartValRef = useRef<number>(value);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [isFreeMove, setIsFreeMove] = useState(false);
+  const [isEditingText, setIsEditingText] = useState(false);
   const [draftValue, setDraftValue] = useState<string>(String(value));
 
+  const dragOriginRef = useRef<{ x: number; y: number; startVal: number; moved: boolean } | null>(null);
+  const lastDragMovedRef = useRef<boolean>(false);
+  const freeMoveOriginRef = useRef<{ x: number; y: number; startVal: number } | null>(null);
+  const valueRef = useRef<number>(value);
+
   useEffect(() => {
+    valueRef.current = value;
     setDraftValue(String(value));
   }, [value]);
 
   const clamp = (n: number) => Math.max(min, Math.min(max, n));
 
   const stepSize = (delta: number) => {
-    const next = clamp(value + delta);
-    if (next !== value) {
+    const next = clamp(valueRef.current + delta);
+    if (next !== valueRef.current) {
       onInteract?.();
       onChange(next);
     }
@@ -170,11 +179,94 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       if (dir === 0) return;
       const delta = dir > 0 ? 1 : -1;
       onInteract?.();
-      onChange(clamp(value + delta));
+      onChange(clamp(valueRef.current + delta));
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [value, min, max, onChange, onInteract]);
+  }, [min, max, onChange, onInteract]);
+
+  // Global pointer tracking while grabbing ("agarrarlo") so dragging works smoothly even outside the box
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleWindowMove = (e: PointerEvent) => {
+      const origin = dragOriginRef.current;
+      if (!origin) return;
+      const dx = e.clientX - origin.x;
+      const dy = origin.y - e.clientY; // dragging up also increases size
+      const distance = Math.hypot(dx, dy);
+      if (distance > 3 && !origin.moved) {
+        origin.moved = true;
+        inputRef.current?.blur();
+      }
+      const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
+      const steps = Math.trunc(primaryDelta / 12);
+      const next = clamp(origin.startVal + steps);
+      if (next !== valueRef.current) {
+        onInteract?.();
+        onChange(next);
+      }
+    };
+
+    const handleWindowUp = () => {
+      lastDragMovedRef.current = dragOriginRef.current?.moved ?? false;
+      dragOriginRef.current = null;
+      setIsDragging(false);
+    };
+
+    window.addEventListener('pointermove', handleWindowMove);
+    window.addEventListener('pointerup', handleWindowUp);
+    window.addEventListener('pointercancel', handleWindowUp);
+    return () => {
+      window.removeEventListener('pointermove', handleWindowMove);
+      window.removeEventListener('pointerup', handleWindowUp);
+      window.removeEventListener('pointercancel', handleWindowUp);
+    };
+  }, [isDragging, min, max, onChange, onInteract]);
+
+  // Double-click / double-tap free-move mode: move mouse to glide size 26..56, single click to lock
+  useEffect(() => {
+    if (!isFreeMove) return;
+
+    const handleFreeMove = (e: MouseEvent) => {
+      const origin = freeMoveOriginRef.current;
+      if (!origin) {
+        freeMoveOriginRef.current = { x: e.clientX, y: e.clientY, startVal: valueRef.current };
+        return;
+      }
+      const dx = e.clientX - origin.x;
+      const dy = origin.y - e.clientY;
+      const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
+      const steps = Math.trunc(primaryDelta / 12);
+      const next = clamp(origin.startVal + steps);
+      if (next !== valueRef.current) {
+        onInteract?.();
+        onChange(next);
+      }
+    };
+
+    const handleLockOnOutsideClick = (e: MouseEvent) => {
+      if (wheelRef.current && wheelRef.current.contains(e.target as Node)) return;
+      setIsFreeMove(false);
+      freeMoveOriginRef.current = null;
+    };
+
+    const handleKeyLock = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        setIsFreeMove(false);
+        freeMoveOriginRef.current = null;
+      }
+    };
+
+    window.addEventListener('mousemove', handleFreeMove);
+    window.addEventListener('mousedown', handleLockOnOutsideClick);
+    window.addEventListener('keydown', handleKeyLock);
+    return () => {
+      window.removeEventListener('mousemove', handleFreeMove);
+      window.removeEventListener('mousedown', handleLockOnOutsideClick);
+      window.removeEventListener('keydown', handleKeyLock);
+    };
+  }, [isFreeMove, min, max, onChange, onInteract]);
 
   const prevNum = value > min ? value - 1 : null;
   const nextNum = value < max ? value + 1 : null;
@@ -183,7 +275,10 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
     <div className="flex items-center gap-1.5 select-none">
       <button
         type="button"
-        onClick={() => stepSize(-1)}
+        onClick={() => {
+          setIsFreeMove(false);
+          stepSize(-1);
+        }}
         disabled={value <= min}
         aria-label="Disminuir talle"
         className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
@@ -194,32 +289,51 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       <div
         ref={wheelRef}
         onPointerDown={(e) => {
-          if ((e.target as HTMLElement).tagName === 'INPUT') return;
-          dragStartXRef.current = e.clientX;
-          dragStartValRef.current = value;
-          (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-        }}
-        onPointerMove={(e) => {
-          if (dragStartXRef.current === null) return;
-          const dx = e.clientX - dragStartXRef.current;
-          const steps = Math.trunc(-dx / 18);
-          const next = clamp(dragStartValRef.current + steps);
-          if (next !== value) {
-            onInteract?.();
-            onChange(next);
+          if (isFreeMove) {
+            // Single click while in double-click free-move mode locks the chosen size
+            e.preventDefault();
+            setIsFreeMove(false);
+            freeMoveOriginRef.current = null;
+            return;
           }
+          // Allow grabbing the wheel from anywhere (including center number)
+          if (isEditingText && e.target === inputRef.current) return;
+          e.preventDefault();
+          lastDragMovedRef.current = false;
+          dragOriginRef.current = {
+            x: e.clientX,
+            y: e.clientY,
+            startVal: valueRef.current,
+            moved: false,
+          };
+          setIsDragging(true);
         }}
-        onPointerUp={() => {
-          dragStartXRef.current = null;
+        onDoubleClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onInteract?.();
+          setIsDragging(false);
+          setIsEditingText(false);
+          inputRef.current?.blur();
+          freeMoveOriginRef.current = {
+            x: e.clientX,
+            y: e.clientY,
+            startVal: valueRef.current,
+          };
+          setIsFreeMove((prev) => !prev);
         }}
-        onPointerCancel={() => {
-          dragStartXRef.current = null;
-        }}
-        title="Girá la ruedita o escribí tu número de talle"
-        className="relative flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border border-[#5E9455] shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] cursor-ew-resize"
+        style={{ touchAction: 'none' }}
+        title="Agarrá y arrastrá la ruedita, o tocá 2 veces encima para moverla libremente (26–56)"
+        className={`relative flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all ${
+          isFreeMove
+            ? 'border-[#9BD08A] ring-2 ring-[#9BD08A]/70 cursor-ew-resize shadow-[0_0_14px_rgba(155,208,138,0.45)]'
+            : isDragging
+            ? 'border-[#D3C9AC] ring-1 ring-[#D3C9AC]/60 cursor-grabbing scale-[1.03]'
+            : 'border-[#5E9455] hover:border-[#9BD08A] cursor-grab'
+        }`}
       >
         {/* Subtle wheel drum notch ticks */}
-        <span className="pointer-events-none absolute inset-x-3 top-0 h-[2px] flex justify-between opacity-40" aria-hidden="true">
+        <span className="pointer-events-none absolute inset-x-3 top-0 h-[2px] flex justify-between opacity-45" aria-hidden="true">
           <span className="w-[1px] h-full bg-[#9BD08A]" />
           <span className="w-[1px] h-full bg-[#9BD08A]" />
           <span className="w-[1px] h-full bg-[#9BD08A]" />
@@ -229,19 +343,32 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
 
         <button
           type="button"
-          onClick={() => prevNum !== null && stepSize(-1)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isFreeMove && !lastDragMovedRef.current && prevNum !== null) stepSize(-1);
+          }}
           disabled={prevNum === null}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-65 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20"
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20"
           tabIndex={-1}
         >
           {prevNum ?? '·'}
         </button>
 
         <input
+          ref={inputRef}
           type="number"
           min={min}
           max={max}
           value={draftValue}
+          onFocus={() => setIsEditingText(true)}
+          onClick={(e) => {
+            if (!isFreeMove && !lastDragMovedRef.current) {
+              setIsEditingText(true);
+              inputRef.current?.focus();
+            } else {
+              e.preventDefault();
+            }
+          }}
           onChange={(e) => {
             const raw = e.target.value;
             setDraftValue(raw);
@@ -252,20 +379,26 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
             }
           }}
           onBlur={() => {
+            setIsEditingText(false);
             const parsed = parseInt(draftValue, 10);
             const finalVal = Number.isNaN(parsed) ? value : clamp(parsed);
             setDraftValue(String(finalVal));
             if (finalVal !== value) onChange(finalVal);
           }}
           aria-label="Número de talle"
-          className="no-spinner w-9 text-center bg-[#D3C9AC] text-[#0E140D] font-mono font-bold text-xs py-0.5 rounded-md shadow-[0_0_10px_rgba(211,201,172,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9BD08A]"
+          className={`no-spinner w-9 text-center font-mono font-bold text-xs py-0.5 rounded-md shadow-[0_0_10px_rgba(211,201,172,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9BD08A] cursor-inherit ${
+            isFreeMove ? 'bg-[#9BD08A] text-[#0E140D]' : 'bg-[#D3C9AC] text-[#0E140D]'
+          }`}
         />
 
         <button
           type="button"
-          onClick={() => nextNum !== null && stepSize(1)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isFreeMove && nextNum !== null) stepSize(1);
+          }}
           disabled={nextNum === null}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-65 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20"
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20"
           tabIndex={-1}
         >
           {nextNum ?? '·'}
@@ -274,7 +407,10 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
 
       <button
         type="button"
-        onClick={() => stepSize(1)}
+        onClick={() => {
+          setIsFreeMove(false);
+          stepSize(1);
+        }}
         disabled={value >= max}
         aria-label="Aumentar talle"
         className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
