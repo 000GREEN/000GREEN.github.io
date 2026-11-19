@@ -1612,7 +1612,7 @@ export default function App() {
             </button>
             <div className="bg-[#1E3F1C] border border-[#4D8046] rounded-xl p-3 shadow-inner">
               <p className="text-xs text-[#E3F2DF] leading-relaxed font-medium">
-                Pantalones baggy de alta gama y streetwear con carácter. Corte wide-leg estructurado en denim selvedge de 14oz, sarga de algodón y ripstop técnico.
+                Marca urbana independiente con identidad propia. Piezas exclusivas de edición limitada pensadas para destacar con comodidad, actitud y calidad en cada detalle.
               </p>
             </div>
           </div>
