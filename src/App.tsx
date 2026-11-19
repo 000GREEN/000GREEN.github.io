@@ -736,6 +736,9 @@ export default function App() {
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
+  const [purchaseThankYou, setPurchaseThankYou] = useState<boolean>(false);
+  const [thankYouTotal, setThankYouTotal] = useState<number>(0);
+  const pendingGmailReturnRef = useRef<{ totalSnapshot: number; leftPage: boolean; launchedAt: number } | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
@@ -1183,11 +1186,54 @@ export default function App() {
 
   const handleGmailLaunch = () => {
     triggerLogoReaction();
+    pendingGmailReturnRef.current = {
+      totalSnapshot: total,
+      leftPage: false,
+      launchedAt: Date.now(),
+    };
     const text = getOrderSummaryText();
     try {
       void navigator.clipboard?.writeText(text);
     } catch {}
   };
+
+  useEffect(() => {
+    const markLeft = () => {
+      if (pendingGmailReturnRef.current) {
+        pendingGmailReturnRef.current.leftPage = true;
+      }
+    };
+
+    const handleReturnFromGmail = () => {
+      const pending = pendingGmailReturnRef.current;
+      if (!pending || document.hidden) return;
+      const elapsed = Date.now() - pending.launchedAt;
+      if (pending.leftPage || elapsed > 1200) {
+        pendingGmailReturnRef.current = null;
+        setThankYouTotal(pending.totalSnapshot);
+        setPurchaseThankYou(true);
+        setCartItems([]);
+        setCartOpen(true);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        markLeft();
+      } else {
+        handleReturnFromGmail();
+      }
+    };
+
+    window.addEventListener('blur', markLeft);
+    window.addEventListener('focus', handleReturnFromGmail);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('blur', markLeft);
+      window.removeEventListener('focus', handleReturnFromGmail);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-[#E3DCC3] font-body selection:bg-[#7E9A64] selection:text-black relative overflow-x-hidden">
@@ -2000,6 +2046,8 @@ export default function App() {
                           },
                         ];
                       });
+                      pendingGmailReturnRef.current = null;
+                      setPurchaseThankYou(false);
                       setCartOpen(true);
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-xl transition-colors cursor-pointer shadow-md"
@@ -2137,7 +2185,10 @@ export default function App() {
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm transition-all"
-          onClick={() => setCartOpen(false)}
+          onClick={() => {
+            setCartOpen(false);
+            if (purchaseThankYou) setPurchaseThankYou(false);
+          }}
         >
           <div
             className="w-full max-w-md bg-[#151D13] border-l border-[#2A3626] h-full flex flex-col justify-between p-6 sm:p-8 text-[#E3DCC3] shadow-2xl overflow-y-auto"
@@ -2145,84 +2196,122 @@ export default function App() {
           >
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-[#2A3626]">
-                <h2 className="font-display font-bold text-2xl text-[#E3DCC3]">Finalizar compra</h2>
+                <h2 className="font-display font-bold text-2xl text-[#E3DCC3]">
+                  {purchaseThankYou ? 'Pedido enviado' : 'Finalizar compra'}
+                </h2>
                 <button
                   type="button"
-                  onClick={() => setCartOpen(false)}
+                  onClick={() => {
+                    setCartOpen(false);
+                    if (purchaseThankYou) setPurchaseThankYou(false);
+                  }}
                   className="w-8 h-8 rounded-full border border-[#2A3626] flex items-center justify-center text-sm hover:border-white transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="py-4 space-y-4">
-                {cartItems.length === 0 ? (
-                  <div className="py-12 text-center text-xs text-[#98A18A]">
-                    El carrito está vacío.
+              {purchaseThankYou ? (
+                <div className="py-14 text-center space-y-5">
+                  <div className="w-16 h-16 rounded-full bg-[#274D24] border-2 border-[#9BD08A] text-[#9BD08A] flex items-center justify-center mx-auto text-2xl shadow-lg">
+                    ✓
                   </div>
-                ) : (
-                  cartItems.map((item, idx) => (
-                    <div
-                      key={`${item.id}-${item.size}-${idx}`}
-                      className="py-3 border-b border-[#2A3626] flex items-center justify-between gap-3"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold truncate text-[#E3DCC3]">{item.name}</div>
-                        <div className="text-xs text-[#98A18A] font-mono">
-                          Talle {item.size} · {fmt(item.price)} c/u
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center border border-[#2A3626] rounded-full px-2 py-0.5 text-xs font-mono">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              triggerLogoReaction();
-                              setCartItems((prev) =>
-                                prev
-                                  .map((p, i) => (i === idx ? { ...p, qty: p.qty - 1 } : p))
-                                  .filter((p) => p.qty > 0)
-                              );
-                            }}
-                            className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
-                          >
-                            -
-                          </button>
-                          <span className="px-2">{item.qty}</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              triggerLogoReaction();
-                              setCartItems((prev) =>
-                                prev.map((p, i) => (i === idx ? { ...p, qty: p.qty + 1 } : p))
-                              );
-                            }}
-                            className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            triggerLogoReaction();
-                            setCartItems((prev) => prev.filter((_, i) => i !== idx));
-                          }}
-                          className="text-[11px] text-[#E88C84] hover:underline cursor-pointer"
-                        >
-                          Quitar
-                        </button>
-                      </div>
+                  <div className="space-y-2">
+                    <h3 className="font-display font-bold text-2xl sm:text-3xl text-[#E3DCC3]">
+                      Gracias por su compra
+                    </h3>
+                    <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
+                      Tu correo hacia <strong className="text-[#E3DCC3]">000green@gmail.com</strong>
+                      {thankYouTotal > 0 ? (
+                        <>
+                          {' '}por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(thankYouTotal)}</span>
+                        </>
+                      ) : null}{' '}
+                      ya está en proceso. Te respondemos a la brevedad para confirmar stock, pago y entrega.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerLogoReaction();
+                      setPurchaseThankYou(false);
+                      setCartOpen(false);
+                    }}
+                    className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-3 rounded-full text-xs uppercase tracking-wider hover:bg-white transition-colors cursor-pointer shadow-md"
+                  >
+                    Seguir comprando
+                  </button>
+                </div>
+              ) : (
+                <div className="py-4 space-y-4">
+                  {cartItems.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-[#98A18A]">
+                      El carrito está vacío.
                     </div>
-                  ))
-                )}
-              </div>
+                  ) : (
+                    cartItems.map((item, idx) => (
+                      <div
+                        key={`${item.id}-${item.size}-${idx}`}
+                        className="py-3 border-b border-[#2A3626] flex items-center justify-between gap-3"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold truncate text-[#E3DCC3]">{item.name}</div>
+                          <div className="text-xs text-[#98A18A] font-mono">
+                            Talle {item.size} · {fmt(item.price)} c/u
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center border border-[#2A3626] rounded-full px-2 py-0.5 text-xs font-mono">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerLogoReaction();
+                                setCartItems((prev) =>
+                                  prev
+                                    .map((p, i) => (i === idx ? { ...p, qty: p.qty - 1 } : p))
+                                    .filter((p) => p.qty > 0)
+                                );
+                              }}
+                              className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
+                            >
+                              -
+                            </button>
+                            <span className="px-2">{item.qty}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                triggerLogoReaction();
+                                setCartItems((prev) =>
+                                  prev.map((p, i) => (i === idx ? { ...p, qty: p.qty + 1 } : p))
+                                );
+                              }}
+                              className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerLogoReaction();
+                              setCartItems((prev) => prev.filter((_, i) => i !== idx));
+                            }}
+                            className="text-[11px] text-[#E88C84] hover:underline cursor-pointer"
+                          >
+                            Quitar
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Cart Footer */}
-            {cartItems.length > 0 && (
+            {!purchaseThankYou && cartItems.length > 0 && (
               <div className="pt-6 border-t border-[#2A3626] space-y-4">
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between font-bold text-base text-[#E3DCC3] pt-2 border-t border-[#2A3626]">
@@ -2345,6 +2434,8 @@ export default function App() {
                               }
                               return [...prev, { id: p.id, name: p.name, size: chosenSize, price: p.price, qty: 1 }];
                             });
+                            pendingGmailReturnRef.current = null;
+                            setPurchaseThankYou(false);
                             setFavoritesOpen(false);
                             setCartOpen(true);
                           }}
@@ -2390,6 +2481,8 @@ export default function App() {
                       });
                       return next;
                     });
+                    pendingGmailReturnRef.current = null;
+                    setPurchaseThankYou(false);
                     setFavoritesOpen(false);
                     setCartOpen(true);
                   }}
