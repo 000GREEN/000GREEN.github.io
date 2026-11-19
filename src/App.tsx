@@ -4,8 +4,14 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import baggyMossCargoImg from './assets/images/baggy_moss_cargo_1795107530043.jpg';
+import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_1795107530423.jpg';
+import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_1795107530623.jpg';
+import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_1795107529917.jpg';
+import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_1795107530719.jpg';
+import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_1795107530121.jpg';
 
-// 000GREEN Official Products
+// 000GREEN Official Baggy Pants Collection
 export interface ProductItem {
   id: string;
   kind: string;
@@ -13,6 +19,7 @@ export interface ProductItem {
   price: number;
   desc: string;
   image: string;
+  sizes: string[];
   colors: [string, string][]; // [ColorName, HexCode]
   keywords: string[];
 }
@@ -21,105 +28,106 @@ export const BRAND_LOGO_SRC = '/official_logo.png';
 
 export const EXACT_PRODUCTS: ProductItem[] = [
   {
-    id: 'w1',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Chrono Blade / Orange Pulse',
-    price: 275000,
-    image: '/assets/aistudio/reloj_1_naranja_5a75334e.png',
-    desc: 'Caja asimétrica ergonómica en titanio cepillado, pantalla LED matricial de alto contraste y acentos en naranja vibrante.',
+    id: 'b1',
+    kind: 'Pantalón Baggy Cargo',
+    name: '000 Moss Cargo / Olive Wide',
+    price: 320000,
+    image: baggyMossCargoImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Pantalón baggy cargo de sarga pesada en verde musgo oliva, bolsillos fuelle de gran volumen, pinzas articuladas en rodilla y ajuste en botamanga.',
     colors: [
-      ['Naranja Neón', '#FF6B00'],
-      ['Gris Titanio', '#8B939C'],
+      ['Verde Musgo', '#556B3D'],
+      ['Oliva Táctico', '#3D4D2B'],
     ],
     keywords: [
-      'naranja', 'orange', 'pulse', 'crono', 'chrono', 'blade', 'titanio', 'titanium',
-      'gris', 'neon', 'neón', 'fluo', 'deportivo', 'digital', 'led', 'asimetrico', 'asimétrico',
-      'correa naranja', 'reloj naranja', 'relojes'
+      'verde', 'green', 'musgo', 'moss', 'oliva', 'olive', 'cargo', 'bolsillos',
+      'ancho', 'wide', 'baggy', 'bagy', 'baguies', 'baggies', 'pantalon', 'pantalones',
+      'militar', 'tactico', 'sarga', '000green'
     ],
   },
   {
-    id: 'w2',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Stealth Titanium / Matte Grey',
-    price: 275000,
-    image: '/assets/aistudio/reloj_2_gris_b61eba16.png',
-    desc: 'Estructura monolítica en acabado gris titanio mate, pantalla invertida táctica y brazalete segmentado ergonómico.',
+    id: 'b2',
+    kind: 'Jean Baggy Selvedge 14oz',
+    name: '000 Obsidian Wash / Raw Baggy',
+    price: 345000,
+    image: baggyObsidianDenimImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Jean baggy corte ultra wide-leg en denim japonés selvedge de 14oz lavado en negro obsidiana, caída estructurada y doble costura reforzada.',
     colors: [
-      ['Titanio Mate', '#7A808C'],
-      ['Grafito Oscuro', '#3F444E'],
+      ['Negro Obsidiana', '#1C1E22'],
+      ['Carbón Lavado', '#3E4249'],
     ],
     keywords: [
-      'gris', 'grey', 'gray', 'stealth', 'titanio', 'titanium', 'mate', 'matte',
-      'grafito', 'tactico', 'táctico', 'militar', 'oscuro', 'metal', 'acero',
-      'minimalista', 'plata', 'silver', 'reloj gris', 'reloj titanio', 'relojes'
+      'negro', 'black', 'obsidiana', 'obsidian', 'jean', 'jeans', 'denim', 'selvedge',
+      'lavado', 'washed', 'carbon', 'baggy', 'baguies', 'baggies', 'wide leg', 'pantalon', 'pantalones'
     ],
   },
   {
-    id: 'w3',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Cyber Chrome / Mirror Steel',
-    price: 275000,
-    image: '/assets/aistudio/reloj_3_cromado_6fc08572.png',
-    desc: 'Acabado espejo cromado de alto impacto en acero líquido aeroespacial, bisel curvado fluido y display digital retroiluminado.',
+    id: 'b3',
+    kind: 'Pantalón Baggy Parachute',
+    name: '000 Stealth Parachute / Slate Ripstop',
+    price: 295000,
+    image: baggyStealthParachuteImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Baggy parachute confeccionado en ripstop técnico liviano color gris pizarra mate, cintura elástica con cordón y topes regulables en tobillos.',
     colors: [
-      ['Cromado Espejo', '#E2E6EC'],
-      ['Acero Pulido', '#B8BFC9'],
+      ['Gris Pizarra', '#5C6468'],
+      ['Acero Mate', '#3E4548'],
     ],
     keywords: [
-      'cromo', 'chrome', 'cromado', 'espejo', 'mirror', 'acero', 'steel',
-      'plateado', 'plata', 'silver', 'brillante', 'liquido', 'líquido', 'futurista',
-      'cyber', 'metal', 'reloj cromado', 'reloj plateado', 'relojes'
+      'gris', 'grey', 'gray', 'slate', 'pizarra', 'parachute', 'paracaidas', 'nylon',
+      'ripstop', 'tecnico', 'táctico', 'liviano', 'oversized', 'baggy', 'baguies', 'pantalon', 'pantalones'
     ],
   },
   {
-    id: 'w4',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Bio Green / Obsidian Matrix',
-    price: 275000,
-    image: '/assets/aistudio/reloj_4_negro_verde_6c42b715.png',
-    desc: 'Edición en negro obsidiana con inserciones de alto contraste en verde neón eléctrico y caja ultraliviana.',
+    id: 'b4',
+    kind: 'Pantalón Baggy Carpenter',
+    name: '000 Bio Stitch / Carpenter Black',
+    price: 335000,
+    image: baggyBioStitchImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Pantalón baggy carpenter en lona duck negra de alto gramaje con costuras triples en contraste verde salvia 000GREEN y panel doble en rodillas.',
     colors: [
-      ['Verde 000GREEN', '#76FF03'],
-      ['Negro Obsidiana', '#121417'],
+      ['Negro Duck', '#141516'],
+      ['Costura 000GREEN', '#7E9A64'],
     ],
     keywords: [
-      'verde', 'green', 'bio', 'matrix', 'obsidiana', 'obsidian', 'neon', 'neón',
-      'electrico', 'eléctrico', '000green', 'negro', 'black', 'verde fluor',
-      'cyber green', 'reloj verde', 'relojes'
+      'negro', 'black', 'verde', 'green', 'carpenter', 'carpintero', 'costura', 'stitch',
+      'lona', 'canvas', 'bio', '000green', 'skater', 'skate', 'baggy', 'baguies', 'pantalon', 'pantalones'
     ],
   },
   {
-    id: 'w5',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Crimson Core / Dark Red',
-    price: 275000,
-    image: '/assets/aistudio/reloj_5_negro_rojo_3e1329aa.png',
-    desc: 'Cuerpo aerodinámico en polímero reforzado y acero con ranuras en rojo carmesí brillante y pantalla LCD ultra nítida.',
+    id: 'b5',
+    kind: 'Pantalón Baggy Pinzado',
+    name: '000 Bone Canvas / Double Pleat',
+    price: 315000,
+    image: baggyBonePleatedImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Baggy arquitectónico de doble pinza frontal en gabardina cruda tono hueso, caída amplia fluida y cintura sastrera de calce relajado.',
     colors: [
-      ['Rojo Carmesí', '#E50914'],
-      ['Negro Carbón', '#15171A'],
+      ['Hueso Crudo', '#E5DEC9'],
+      ['Arena Natural', '#C9BFA5'],
     ],
     keywords: [
-      'rojo', 'red', 'crimson', 'carmesi', 'carmesí', 'core', 'dark',
-      'negro', 'black', 'carbon', 'carbón', 'fuego', 'bicolor', 'reloj rojo',
-      'reloj negro y rojo', 'relojes'
+      'beige', 'hueso', 'bone', 'crema', 'crudo', 'ecru', 'blanco', 'arena', 'pinzado',
+      'pinzas', 'pleated', 'gabardina', 'canvas', 'sastrero', 'baggy', 'baguies', 'pantalon', 'pantalones'
     ],
   },
   {
-    id: 'w6',
-    kind: 'Reloj Digital Cyber',
-    name: '000 Shadow Blade / Total Black',
-    price: 275000,
-    image: '/assets/aistudio/reloj_6_negro_total_6b621875.png',
-    desc: 'Estructura asimétrica monocromática en negro total mate con pantalla digital LED segmentada blanca de alta visibilidad y correa ergonómica integrada.',
+    id: 'b6',
+    kind: 'Jean Baggy Skater',
+    name: '000 Vintage Indigo / Acid Baggy',
+    price: 330000,
+    image: baggyVintageIndigoImg,
+    sizes: ['S', 'M', 'L', 'XL'],
+    desc: 'Jean super baggy estilo skate 90s en denim índigo con lavado ácido vintage, botamanga extra ancha y remaches metálicos de alta resistencia.',
     colors: [
-      ['Negro Total', '#0B0C0E'],
-      ['Grafito Táctico', '#2B2F38'],
+      ['Índigo Ácido', '#4D647D'],
+      ['Azul Vintage', '#2D3C4E'],
     ],
     keywords: [
-      'negro', 'black', 'total black', 'all black', 'shadow', 'blade',
-      'oscuro', 'mate', 'matte', 'monocromatico', 'monocromático', 'tactico',
-      'táctico', 'led blanco', 'reloj negro', 'relojes'
+      'azul', 'blue', 'indigo', 'índigo', 'acid', 'acido', 'vintage', 'jean', 'jeans',
+      'denim', 'skater', 'skate', '90s', 'baggy', 'baguies', 'baggies', 'pantalon', 'pantalones'
     ],
   },
 ];
@@ -144,11 +152,20 @@ export default function App() {
   const [activeFilter, setActiveFilter] = useState<string>('todo');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('rel');
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({
+    b1: 'M',
+    b2: 'M',
+    b3: 'M',
+    b4: 'M',
+    b5: 'M',
+    b6: 'M',
+  });
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<{ id: string; name: string; price: number; qty: number }[]>([]);
+  const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
+  const [copiedOrder, setCopiedOrder] = useState(false);
 
   // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
   const ytPlayerRef = useRef<any>(null);
@@ -505,7 +522,7 @@ export default function App() {
         p.kind,
         p.colors.map((c) => c[0]).join(' '),
         p.keywords.join(' '),
-        'reloj relojes digital cyber tiempo hora acero titanio pantalla led'
+        'pantalon pantalones baggy baguies baggies wide leg cargo denim streetwear ropa'
       ].join(' ')
     );
   };
@@ -577,39 +594,28 @@ export default function App() {
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-  const getWhatsAppOrderUrl = () => {
+  const getOrderSummaryText = () => {
     if (cartItems.length === 0) {
-      return `https://wa.me/595976287422?text=${encodeURIComponent(
-        'Hola 000GREEN! Me gustaría consultar sobre su catálogo de relojes.'
-      )}`;
+      return 'Hola 000GREEN! Me gustaría consultar sobre su colección de pantalones baggy.';
     }
-
-    if (cartItems.length === 1) {
-      const item = cartItems[0];
-      const qtyStr = item.qty > 1 ? ` (${item.qty} unidades)` : '';
-      const msg = `Hola 000GREEN! Quiero comprar este reloj:
-
-• ${item.name}${qtyStr} - ${fmt(item.price * item.qty)}
-
-Total: ${fmt(total)}
-
-¿Cómo coordinamos el pago y la entrega?`;
-      return `https://wa.me/595976287422?text=${encodeURIComponent(msg)}`;
-    }
-
     const itemsList = cartItems
-      .map((item) => `• ${item.name} (${item.qty} un.) - ${fmt(item.price * item.qty)}`)
+      .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} - ${fmt(item.price * item.qty)}`)
       .join('\n');
 
-    const msg = `Hola 000GREEN! Quiero comprar estos relojes:
+    return `Hola 000GREEN! Quiero hacer el siguiente pedido de pantalones baggy:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}\n\n¿Cómo coordinamos el pago y la entrega?`;
+  };
 
-${itemsList}
+  const getEmailOrderUrl = () => {
+    const subject = 'Nuevo Pedido 000GREEN · Pantalones Baggy';
+    return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
+  };
 
-Total: ${fmt(total)}
-
-¿Cómo coordinamos el pago y la entrega?`;
-
-    return `https://wa.me/595976287422?text=${encodeURIComponent(msg)}`;
+  const handleCopyOrder = () => {
+    triggerLogoReaction();
+    navigator.clipboard?.writeText(getOrderSummaryText()).then(() => {
+      setCopiedOrder(true);
+      setTimeout(() => setCopiedOrder(false), 2400);
+    }).catch(() => {});
   };
 
   return (
@@ -849,7 +855,7 @@ Total: ${fmt(total)}
                   scrollToProductMatch(searchQuery, true);
                 }
               }}
-              placeholder="Buscar por nombre, color, titanio, negro, naranja..."
+              placeholder="Buscar por modelo, color, cargo, denim, negro, verde..."
               className="w-full bg-[#284E25] border-2 border-[#5E9455] text-sm text-white placeholder-[#C8DFC0] rounded-full py-2 pl-10 pr-9 focus:outline-none focus:border-[#9BD08A] focus:ring-2 focus:ring-[#9BD08A]/40 transition-all shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
             />
             {searchQuery && (
@@ -1041,17 +1047,17 @@ Total: ${fmt(total)}
         <div className="animate-marquee font-mark text-xs sm:text-sm tracking-[0.25em] uppercase text-[#E3DCC3] font-semibold flex items-center gap-8">
           <span>000GREEN</span>
           <span>·</span>
-          <span>Relojes Digitales Cyber</span>
+          <span>Pantalones Baggy</span>
           <span>·</span>
           <span>Edición Especial Limitada</span>
           <span>·</span>
-          <span>Caja en Titanio & Acero Cromado</span>
+          <span>Corte Wide-Leg & Oversized</span>
           <span>·</span>
-          <span>Pantalla LED Matricial de Alta Definición</span>
+          <span>Denim 14oz & Ripstop Técnico</span>
           <span>·</span>
-          <span>Diseño Ergonómico Asimétrico</span>
+          <span>Caída Estructurada Premium</span>
           <span>·</span>
-          <span>Máxima Precisión Digital</span>
+          <span>Máxima Comodidad Urbana</span>
           <span>·</span>
           <span>100% Garantía Oficial 000GREEN</span>
           <span>·</span>
@@ -1059,17 +1065,17 @@ Total: ${fmt(total)}
           <span>·</span>
           <span>000GREEN</span>
           <span>·</span>
-          <span>Relojes Digitales Cyber</span>
+          <span>Pantalones Baggy</span>
           <span>·</span>
           <span>Edición Especial Limitada</span>
           <span>·</span>
-          <span>Caja en Titanio & Acero Cromado</span>
+          <span>Corte Wide-Leg & Oversized</span>
           <span>·</span>
-          <span>Pantalla LED Matricial de Alta Definición</span>
+          <span>Denim 14oz & Ripstop Técnico</span>
           <span>·</span>
-          <span>Diseño Ergonómico Asimétrico</span>
+          <span>Caída Estructurada Premium</span>
           <span>·</span>
-          <span>Máxima Precisión Digital</span>
+          <span>Máxima Comodidad Urbana</span>
           <span>·</span>
           <span>100% Garantía Oficial 000GREEN</span>
           <span>·</span>
@@ -1116,7 +1122,7 @@ Total: ${fmt(total)}
                   : 'bg-[#274D24] text-white border border-[#5E9455] hover:border-[#9BD08A] hover:bg-[#32612E]'
               }`}
             >
-              Todos los relojes
+              Todos los pantalones
             </button>
 
             {/* Favoritos Pill */}
@@ -1220,7 +1226,7 @@ Total: ${fmt(total)}
                   Tu lista de favoritos está vacía
                 </h3>
                 <p className="text-xs sm:text-sm text-[#D7E8D3] max-w-md mx-auto leading-relaxed">
-                  Podés guardar tus modelos preferidos tocando el ícono de corazón en cualquier reloj del catálogo para tenerlos siempre a mano y coordinar tu compra.
+                  Podés guardar tus modelos preferidos tocando el ícono de corazón en cualquier pantalón del catálogo para tenerlos siempre a mano y coordinar tu compra.
                 </p>
                 <div className="pt-2">
                   <button
@@ -1231,7 +1237,7 @@ Total: ${fmt(total)}
                     }}
                     className="bg-[#D3C9AC] text-[#0E140D] font-bold px-7 py-3 rounded-full text-xs sm:text-sm hover:bg-white transition-all cursor-pointer shadow-lg hover:scale-105"
                   >
-                    Ver todos los relojes
+                    Ver todos los pantalones
                   </button>
                 </div>
               </>
@@ -1248,7 +1254,7 @@ Total: ${fmt(total)}
                 </p>
                 {/* Search suggestion pills */}
                 <div className="flex flex-wrap justify-center gap-2 pt-1">
-                  {['Verde', 'Titanio', 'Cromado', 'Total Black', 'Naranja', 'Rojo'].map((kw) => (
+                  {['Verde', 'Cargo', 'Denim', 'Parachute', 'Negro', 'Indigo'].map((kw) => (
                     <button
                       key={kw}
                       type="button"
@@ -1325,25 +1331,26 @@ Total: ${fmt(total)}
                     </button>
                   </div>
 
-                  {/* Official Watch Photo Tile (Fixed background color, no hover color shift) */}
+                  {/* Official Baggy Pants Studio Photo Tile */}
                   <div
                     onClick={() => triggerLogoReaction()}
-                    className="aspect-[4/5] rounded-xl bg-[#B8DDB4] border border-[#52864A] mb-4 flex items-center justify-center p-4 relative overflow-hidden shadow-inner cursor-pointer"
+                    className="aspect-[4/5] rounded-xl bg-[#B8DDB4] border border-[#52864A] mb-4 flex items-center justify-center relative overflow-hidden shadow-inner cursor-pointer"
                   >
                     <img
                       src={p.image}
                       alt={p.name}
-                      className="w-full h-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-center transition-transform duration-300 hover:scale-[1.03]"
                     />
                   </div>
 
-                  {/* Recuadro de Información: Nombre, Precio y Pequeña Descripción */}
-                  <div className="bg-[#1E3F1C] border border-[#4D8046] rounded-xl p-4 mb-4 shadow-inner space-y-2">
+                  {/* Recuadro de Información: Nombre, Precio, Descripción y Talles */}
+                  <div className="bg-[#1E3F1C] border border-[#4D8046] rounded-xl p-4 mb-4 shadow-inner space-y-2.5">
                     <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
                       <h3 className="font-bold text-base sm:text-lg text-white leading-snug">
                         {p.name}
                       </h3>
-                      <span className="font-bold text-sm text-[#F0E9D5] whitespace-nowrap bg-[#274D24] px-2.5 py-1 rounded-lg border border-[#5A8E51] font-mono self-start sm:self-auto">
+                      <span className="font-bold text-sm text-[#F0E9D5] whitespace-nowrap bg-[#274D24] px-2.5 py-1 rounded-lg border border-[#5A8E51] font-mono tabular-nums self-start sm:self-auto">
                         {fmt(p.price)}
                       </span>
                     </div>
@@ -1351,6 +1358,33 @@ Total: ${fmt(total)}
                     <p className="text-xs text-[#E3F2DF] leading-relaxed line-clamp-3 font-medium pt-1 border-t border-[#345B31]">
                       {p.desc}
                     </p>
+
+                    {/* Size selector */}
+                    <div className="pt-1.5 border-t border-[#345B31] flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-medium text-[#A8C7A2]">Talle:</span>
+                      <div className="flex items-center gap-1.5">
+                        {p.sizes.map((sz) => {
+                          const isSelected = (selectedSizes[p.id] || 'M') === sz;
+                          return (
+                            <button
+                              key={sz}
+                              type="button"
+                              onClick={() => {
+                                triggerLogoReaction();
+                                setSelectedSizes((prev) => ({ ...prev, [p.id]: sz }));
+                              }}
+                              className={`min-w-[30px] px-2 py-0.5 rounded-md text-[11px] font-mono font-bold transition-all cursor-pointer border ${
+                                isSelected
+                                  ? 'bg-[#D3C9AC] text-[#0E140D] border-[#D3C9AC] shadow-sm'
+                                  : 'bg-[#152B14] text-[#DDECD7] border-[#4D8046] hover:border-[#9BD08A]'
+                              }`}
+                            >
+                              {sz}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1360,11 +1394,14 @@ Total: ${fmt(total)}
                     type="button"
                     onClick={() => {
                       triggerLogoReaction();
+                      const chosenSize = selectedSizes[p.id] || 'M';
                       setCartItems((prev) => {
-                        const existing = prev.find((item) => item.id === p.id);
+                        const existing = prev.find((item) => item.id === p.id && item.size === chosenSize);
                         if (existing) {
                           return prev.map((item) =>
-                            item.id === p.id ? { ...item, qty: item.qty + 1 } : item
+                            item.id === p.id && item.size === chosenSize
+                              ? { ...item, qty: item.qty + 1 }
+                              : item
                           );
                         }
                         return [
@@ -1372,11 +1409,13 @@ Total: ${fmt(total)}
                           {
                             id: p.id,
                             name: p.name,
+                            size: chosenSize,
                             price: p.price,
                             qty: 1,
                           },
                         ];
                       });
+                      setOrderComplete(false);
                       setCartOpen(true);
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-xl transition-colors cursor-pointer shadow-md"
@@ -1389,7 +1428,7 @@ Total: ${fmt(total)}
                         d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                       />
                     </svg>
-                    <span>Comprar / Agregar al carrito</span>
+                    <span>Comprar · Talle {selectedSizes[p.id] || 'M'}</span>
                   </button>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-[#A8C7A2] font-mono">
@@ -1431,7 +1470,7 @@ Total: ${fmt(total)}
             </button>
             <div className="bg-[#1E3F1C] border border-[#4D8046] rounded-xl p-3 shadow-inner">
               <p className="text-xs text-[#E3F2DF] leading-relaxed font-medium">
-                Relojes digitales cyber de alta gama y piezas de diseño con carácter. Estructura ergonómica en titanio, acero cromado y pantallas LED matriciales.
+                Pantalones baggy de alta gama y streetwear con carácter. Corte wide-leg estructurado en denim selvedge de 14oz, sarga de algodón y ripstop técnico.
               </p>
             </div>
           </div>
@@ -1449,8 +1488,8 @@ Total: ${fmt(total)}
               <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Soporte</div>
               <ul className="space-y-2 text-[#E3F2DF] font-medium">
                 <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Envíos y Entregas</span></li>
-                <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Garantía de Precisión</span></li>
-                <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Cuidado del reloj</span></li>
+                <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Guía de Talles y Fit</span></li>
+                <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Cuidado de la prenda</span></li>
               </ul>
             </div>
             <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3 col-span-2 sm:col-span-1">
@@ -1461,14 +1500,14 @@ Total: ${fmt(total)}
                   <span>Asunción, Paraguay</span>
                 </div>
                 <div>
-                  <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">WhatsApp Oficial</span>
+                  <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">Instagram Oficial</span>
                   <a
-                    href="https://wa.me/595976287422"
+                    href="https://www.instagram.com/000green_/?hl=es-la"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-white hover:text-[#9BD08A] font-bold underline transition-colors"
                   >
-                    +595 976 287 422
+                    @000green_
                   </a>
                 </div>
                 <div>
@@ -1533,25 +1572,49 @@ Total: ${fmt(total)}
               </div>
 
               {orderComplete ? (
-                <div className="py-12 text-center space-y-4">
+                <div className="py-10 text-center space-y-4">
                   <div className="w-16 h-16 rounded-full bg-[#9BD08A]/20 text-[#9BD08A] flex items-center justify-center mx-auto text-2xl">
                     ✓
                   </div>
                   <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                    ¡Pedido registrado!
+                    ¡Pedido preparado!
                   </h3>
                   <p className="text-xs text-[#98A18A] leading-relaxed">
-                    Hemos preparado tu resumen de compra por {fmt(total)}. Nos comunicaremos contigo para coordinar la entrega.
+                    Tu selección por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span> está lista. Podés enviarnos tu pedido directamente por correo o Instagram para coordinar el envío.
                   </p>
-                  <a
-                    href={getWhatsAppOrderUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-black font-bold px-5 py-2.5 rounded-full text-xs transition-colors mt-2 shadow-md cursor-pointer"
-                  >
-                    <span>Enviar pedido por WhatsApp</span>
-                    <span>(+595 976 287 422)</span>
-                  </a>
+                  <div className="bg-[#1C271A] border border-[#374C32] rounded-xl p-3 text-left text-xs space-y-1.5">
+                    {cartItems.map((item, i) => (
+                      <div key={i} className="flex justify-between gap-2 text-[#E3DCC3]">
+                        <span className="truncate">{item.name} · Talle {item.size} (x{item.qty})</span>
+                        <span className="font-mono shrink-0 text-[#D3C9AC]">{fmt(item.price * item.qty)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-2.5 pt-2">
+                    <a
+                      href={getEmailOrderUrl()}
+                      onClick={triggerLogoReaction}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold px-5 py-3 rounded-full text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer"
+                    >
+                      <span>Enviar pedido por Correo</span>
+                    </a>
+                    <a
+                      href="https://www.instagram.com/000green_/?hl=es-la"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={triggerLogoReaction}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-bold px-5 py-2.5 rounded-full text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      <span>Coordinar por Instagram (@000green_)</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleCopyOrder}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#1C271A] hover:bg-[#243422] border border-[#374C32] text-[#D3C9AC] font-semibold px-5 py-2.5 rounded-full text-xs transition-colors cursor-pointer"
+                    >
+                      <span>{copiedOrder ? '✓ Resumen copiado al portapapeles' : 'Copiar resumen del pedido'}</span>
+                    </button>
+                  </div>
                   <div>
                     <button
                       type="button"
@@ -1561,9 +1624,9 @@ Total: ${fmt(total)}
                         setCartItems([]);
                         setCartOpen(false);
                       }}
-                      className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-2.5 rounded-full text-xs hover:bg-white transition-colors mt-4 cursor-pointer"
+                      className="text-xs text-[#9BD08A] hover:text-white underline font-semibold mt-2 cursor-pointer"
                     >
-                      Seguir explorando
+                      Finalizar y seguir explorando
                     </button>
                   </div>
                 </div>
@@ -1576,12 +1639,14 @@ Total: ${fmt(total)}
                   ) : (
                     cartItems.map((item, idx) => (
                       <div
-                        key={`${item.id}-${idx}`}
+                        key={`${item.id}-${item.size}-${idx}`}
                         className="py-3 border-b border-[#2A3626] flex items-center justify-between gap-3"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-bold truncate text-[#E3DCC3]">{item.name}</div>
-                          <div className="text-xs text-[#98A18A]">{fmt(item.price)} c/u</div>
+                          <div className="text-xs text-[#98A18A] font-mono">
+                            Talle {item.size} · {fmt(item.price)} c/u
+                          </div>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -1639,26 +1704,22 @@ Total: ${fmt(total)}
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between font-bold text-base text-[#E3DCC3] pt-2 border-t border-[#2A3626]">
                     <span>Total estimado</span>
-                    <span className="font-mono text-[#D3C9AC] text-lg">{fmt(total)}</span>
+                    <span className="font-mono text-[#D3C9AC] text-lg tabular-nums">{fmt(total)}</span>
                   </div>
                 </div>
 
-                <a
-                  href={getWhatsAppOrderUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
                   onClick={() => {
                     triggerLogoReaction();
+                    setOrderComplete(true);
                   }}
-                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-black font-bold py-3.5 px-4 rounded-full text-sm transition-all shadow-[0_4px_20px_rgba(37,211,102,0.4)] hover:shadow-[0_4px_25px_rgba(37,211,102,0.6)] cursor-pointer uppercase tracking-wider text-center group"
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
                 >
-                  <svg className="w-5 h-5 fill-current shrink-0 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                    <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.66 20.15 9.3 19.78 8.12 19.08L7.84 18.91L4.72 19.73L5.55 16.69L5.36 16.39C4.59 15.17 4.19 13.75 4.19 11.91C4.19 7.37 7.88 3.67 12.05 3.67ZM8.83 7.37C8.61 7.37 8.24 7.45 7.94 7.78C7.63 8.11 6.78 8.91 6.78 10.53C6.78 12.15 7.96 13.72 8.12 13.94C8.29 14.16 10.42 17.43 13.68 18.84C14.46 19.18 15.06 19.38 15.54 19.53C16.32 19.78 17.03 19.74 17.59 19.66C18.22 19.56 19.52 18.87 19.79 18.11C20.06 17.35 20.06 16.7 19.98 16.56C19.9 16.42 19.71 16.34 19.42 16.2C19.13 16.05 17.7 15.35 17.44 15.26C17.18 15.16 17 15.12 16.81 15.41C16.63 15.7 16.11 16.34 15.95 16.53C15.79 16.71 15.63 16.73 15.34 16.59C15.05 16.44 14.11 16.13 13 15.14C12.13 14.37 11.55 13.41 11.38 13.12C11.22 12.83 11.36 12.67 11.51 12.53C11.64 12.4 11.8 12.18 11.95 12.01C12.1 11.84 12.15 11.72 12.25 11.52C12.35 11.32 12.3 11.15 12.23 11.01C12.15 10.87 11.59 9.5 11.36 8.94C11.13 8.39 10.9 8.47 10.73 8.46C10.57 8.46 10.38 8.45 10.2 8.45C10.02 8.45 9.72 8.52 9.47 8.79C9.22 9.06 8.52 11.08 8.52 12.44 9.51 13.75 9.65 13.94" />
-                  </svg>
                   <span>Finalizar pedido</span>
-                </a>
+                </button>
                 <p className="text-[11px] text-center text-[#9BD08A] font-medium">
-                  💬 Te redirige a WhatsApp con tu mensaje listo para enviar
+                  Coordiná tu compra por correo o Instagram (@000green_)
                 </p>
               </div>
             )}
@@ -1706,7 +1767,7 @@ Total: ${fmt(total)}
                     No tienes favoritos guardados
                   </h3>
                   <p className="text-xs text-[#98A18A] max-w-xs mx-auto leading-relaxed">
-                    Toca el corazón en cualquier reloj del catálogo para guardarlo aquí y comprarlo fácilmente cuando quieras.
+                    Toca el corazón en cualquier pantalón del catálogo para guardarlo aquí y comprarlo fácilmente cuando quieras.
                   </p>
                   <button
                     type="button"
@@ -1728,13 +1789,15 @@ Total: ${fmt(total)}
                       key={p.id}
                       className="py-3 px-3.5 bg-[#1C271A] rounded-xl border border-[#374C32] flex items-center justify-between gap-3 shadow-sm"
                     >
-                      <div className="w-14 h-14 bg-[#B8DDB4] rounded-lg p-1.5 flex items-center justify-center flex-shrink-0">
-                        <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
+                      <div className="w-14 h-14 bg-[#B8DDB4] rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-bold text-white truncate">{p.name}</div>
-                        <div className="text-xs text-[#D3C9AC] font-mono mt-0.5">{fmt(p.price)}</div>
+                        <div className="text-xs text-[#D3C9AC] font-mono mt-0.5">
+                          Talle {selectedSizes[p.id] || 'M'} · {fmt(p.price)}
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-1.5 items-end">
@@ -1742,15 +1805,19 @@ Total: ${fmt(total)}
                           type="button"
                           onClick={() => {
                             triggerLogoReaction();
+                            const chosenSize = selectedSizes[p.id] || 'M';
                             setCartItems((prev) => {
-                              const existing = prev.find((item) => item.id === p.id);
+                              const existing = prev.find((item) => item.id === p.id && item.size === chosenSize);
                               if (existing) {
                                 return prev.map((item) =>
-                                  item.id === p.id ? { ...item, qty: item.qty + 1 } : item
+                                  item.id === p.id && item.size === chosenSize
+                                    ? { ...item, qty: item.qty + 1 }
+                                    : item
                                 );
                               }
-                              return [...prev, { id: p.id, name: p.name, price: p.price, qty: 1 }];
+                              return [...prev, { id: p.id, name: p.name, size: chosenSize, price: p.price, qty: 1 }];
                             });
+                            setOrderComplete(false);
                             setFavoritesOpen(false);
                             setCartOpen(true);
                           }}
@@ -1782,17 +1849,21 @@ Total: ${fmt(total)}
                     setCartItems((prev) => {
                       let next = [...prev];
                       favProducts.forEach((p) => {
-                        const existing = next.find((item) => item.id === p.id);
+                        const chosenSize = selectedSizes[p.id] || 'M';
+                        const existing = next.find((item) => item.id === p.id && item.size === chosenSize);
                         if (existing) {
                           next = next.map((item) =>
-                            item.id === p.id ? { ...item, qty: item.qty + 1 } : item
+                            item.id === p.id && item.size === chosenSize
+                              ? { ...item, qty: item.qty + 1 }
+                              : item
                           );
                         } else {
-                          next.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
+                          next.push({ id: p.id, name: p.name, size: chosenSize, price: p.price, qty: 1 });
                         }
                       });
                       return next;
                     });
+                    setOrderComplete(false);
                     setFavoritesOpen(false);
                     setCartOpen(true);
                   }}
