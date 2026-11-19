@@ -736,8 +736,6 @@ export default function App() {
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
-  const [emailOpened, setEmailOpened] = useState(false);
-  const [orderComplete, setOrderComplete] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
@@ -1183,18 +1181,12 @@ export default function App() {
     return `https://mail.google.com/mail/?view=cm&fs=1&to=000green@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
-  const getMailtoOrderUrl = () => {
-    const subject = `Pedido 000GREEN - ${fmt(total)}`;
-    return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
-  };
-
   const handleGmailLaunch = () => {
     triggerLogoReaction();
     const text = getOrderSummaryText();
     try {
       void navigator.clipboard?.writeText(text);
     } catch {}
-    setEmailOpened(true);
   };
 
   return (
@@ -2008,7 +2000,6 @@ export default function App() {
                           },
                         ];
                       });
-                      setOrderComplete(false);
                       setCartOpen(true);
                     }}
                     className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold text-xs uppercase tracking-wider py-3 px-4 rounded-xl transition-colors cursor-pointer shadow-md"
@@ -2154,7 +2145,7 @@ export default function App() {
           >
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-[#2A3626]">
-                <h2 className="font-display font-bold text-2xl text-[#E3DCC3]">Tu carrito</h2>
+                <h2 className="font-display font-bold text-2xl text-[#E3DCC3]">Finalizar compra</h2>
                 <button
                   type="button"
                   onClick={() => setCartOpen(false)}
@@ -2164,101 +2155,74 @@ export default function App() {
                 </button>
               </div>
 
-              {orderComplete ? (
-                <div className="py-12 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-[#274D24] border-2 border-[#9BD08A] text-[#9BD08A] flex items-center justify-center mx-auto text-2xl shadow-md">
-                    ✓
+              <div className="py-4 space-y-4">
+                {cartItems.length === 0 ? (
+                  <div className="py-12 text-center text-xs text-[#98A18A]">
+                    El carrito está vacío.
                   </div>
-                  <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                    ¡Gracias por tu pedido!
-                  </h3>
-                  <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
-                    Recibimos la confirmación de tu envío a <strong className="text-[#E3DCC3]">000green@gmail.com</strong> por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Te respondemos a la brevedad.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerLogoReaction();
-                      setOrderComplete(false);
-                      setEmailOpened(false);
-                      setCartItems([]);
-                      setCartOpen(false);
-                    }}
-                    className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-2.5 rounded-full text-xs hover:bg-white transition-colors mt-3 cursor-pointer"
-                  >
-                    Seguir explorando
-                  </button>
-                </div>
-              ) : (
-                <div className="py-4 space-y-4">
-                  {cartItems.length === 0 ? (
-                    <div className="py-12 text-center text-xs text-[#98A18A]">
-                      El carrito está vacío.
-                    </div>
-                  ) : (
-                    cartItems.map((item, idx) => (
-                      <div
-                        key={`${item.id}-${item.size}-${idx}`}
-                        className="py-3 border-b border-[#2A3626] flex items-center justify-between gap-3"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-bold truncate text-[#E3DCC3]">{item.name}</div>
-                          <div className="text-xs text-[#98A18A] font-mono">
-                            Talle {item.size} · {fmt(item.price)} c/u
-                          </div>
+                ) : (
+                  cartItems.map((item, idx) => (
+                    <div
+                      key={`${item.id}-${item.size}-${idx}`}
+                      className="py-3 border-b border-[#2A3626] flex items-center justify-between gap-3"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-bold truncate text-[#E3DCC3]">{item.name}</div>
+                        <div className="text-xs text-[#98A18A] font-mono">
+                          Talle {item.size} · {fmt(item.price)} c/u
                         </div>
+                      </div>
 
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center border border-[#2A3626] rounded-full px-2 py-0.5 text-xs font-mono">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                triggerLogoReaction();
-                                setCartItems((prev) =>
-                                  prev
-                                    .map((p, i) => (i === idx ? { ...p, qty: p.qty - 1 } : p))
-                                    .filter((p) => p.qty > 0)
-                                );
-                              }}
-                              className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
-                            >
-                              -
-                            </button>
-                            <span className="px-2">{item.qty}</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                triggerLogoReaction();
-                                setCartItems((prev) =>
-                                  prev.map((p, i) => (i === idx ? { ...p, qty: p.qty + 1 } : p))
-                                );
-                              }}
-                              className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
-                            >
-                              +
-                            </button>
-                          </div>
-
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center border border-[#2A3626] rounded-full px-2 py-0.5 text-xs font-mono">
                           <button
                             type="button"
                             onClick={() => {
                               triggerLogoReaction();
-                              setCartItems((prev) => prev.filter((_, i) => i !== idx));
+                              setCartItems((prev) =>
+                                prev
+                                  .map((p, i) => (i === idx ? { ...p, qty: p.qty - 1 } : p))
+                                  .filter((p) => p.qty > 0)
+                              );
                             }}
-                            className="text-[11px] text-[#E88C84] hover:underline cursor-pointer"
+                            className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
                           >
-                            Quitar
+                            -
+                          </button>
+                          <span className="px-2">{item.qty}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              triggerLogoReaction();
+                              setCartItems((prev) =>
+                                prev.map((p, i) => (i === idx ? { ...p, qty: p.qty + 1 } : p))
+                              );
+                            }}
+                            className="px-1 text-[#98A18A] hover:text-white cursor-pointer"
+                          >
+                            +
                           </button>
                         </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            triggerLogoReaction();
+                            setCartItems((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                          className="text-[11px] text-[#E88C84] hover:underline cursor-pointer"
+                        >
+                          Quitar
+                        </button>
                       </div>
-                    ))
-                  )}
-                </div>
-              )}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
             {/* Cart Footer */}
-            {!orderComplete && cartItems.length > 0 && (
+            {cartItems.length > 0 && (
               <div className="pt-6 border-t border-[#2A3626] space-y-4">
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between font-bold text-base text-[#E3DCC3] pt-2 border-t border-[#2A3626]">
@@ -2267,47 +2231,18 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="space-y-2.5">
-                  <a
-                    href={getGmailOrderUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={handleGmailLaunch}
-                    className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
-                  >
-                    <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
-                    </svg>
-                    <span>Finalizar compra por Gmail</span>
-                  </a>
-
-                  <a
-                    href={getMailtoOrderUrl()}
-                    onClick={handleGmailLaunch}
-                    className="w-full inline-flex items-center justify-center gap-2 border border-[#4D8046] hover:border-[#9BD08A] bg-[#182C15] hover:bg-[#20391C] text-[#DDECD7] font-semibold py-2.5 px-4 rounded-full text-[11px] transition-all cursor-pointer text-center"
-                  >
-                    <span>Abrir app de correo del celular / PC</span>
-                  </a>
-
-                  {emailOpened && (
-                    <div className="bg-[#1B2C18] border border-[#4D8046] rounded-xl p-3 text-center space-y-2">
-                      <p className="text-[11px] text-[#CDE0C5] leading-relaxed">
-                        Se abrió el redactor hacia <strong className="text-white">000green@gmail.com</strong>. Cuando hayas tocado <strong>Enviar</strong>, confirmá abajo:
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          triggerLogoReaction();
-                          setOrderComplete(true);
-                          setEmailOpened(false);
-                        }}
-                        className="w-full bg-[#9BD08A] hover:bg-[#B4E0A6] text-[#0E140D] font-bold py-2 px-3 rounded-full text-xs transition-colors cursor-pointer"
-                      >
-                        Ya envié el correo · Confirmar y vaciar
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <a
+                  href={getGmailOrderUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={handleGmailLaunch}
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
+                >
+                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
+                  </svg>
+                  <span>Ir al email y enviar correo</span>
+                </a>
               </div>
             )}
           </div>
@@ -2410,7 +2345,6 @@ export default function App() {
                               }
                               return [...prev, { id: p.id, name: p.name, size: chosenSize, price: p.price, qty: 1 }];
                             });
-                            setOrderComplete(false);
                             setFavoritesOpen(false);
                             setCartOpen(true);
                           }}
@@ -2456,7 +2390,6 @@ export default function App() {
                       });
                       return next;
                     });
-                    setOrderComplete(false);
                     setFavoritesOpen(false);
                     setCartOpen(true);
                   }}
