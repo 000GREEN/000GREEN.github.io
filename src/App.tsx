@@ -503,6 +503,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
 
       <div
         ref={wheelRef}
+        data-cursor-interactive="true"
         onPointerDown={(e) => {
           if (e.pointerType === 'touch') return;
           getRouletteAudio();
@@ -584,7 +585,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           }}
           disabled={prevNum === null}
           style={{ touchAction: 'none' }}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-75 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20 touch-none overflow-hidden"
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-75 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20 touch-none overflow-hidden"
           tabIndex={-1}
         >
           <span
@@ -599,6 +600,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
 
         <div
           ref={centerBadgeRef}
+          data-cursor-interactive="true"
           onClick={(e) => {
             e.stopPropagation();
             getRouletteAudio();
@@ -612,7 +614,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
             }
           }}
           style={{ touchAction: 'none' }}
-          className={`relative w-9 h-5 flex items-center justify-center rounded-md overflow-hidden shadow-[0_0_10px_rgba(211,201,172,0.35)] transition-colors touch-none ${
+          className={`relative w-9 h-5 flex items-center justify-center rounded-md overflow-hidden shadow-[0_0_10px_rgba(211,201,172,0.35)] transition-colors touch-none cursor-pointer ${
             isFreeMove || isDragging ? 'bg-[#9BD08A] text-[#0E140D]' : 'bg-[#D3C9AC] text-[#0E140D]'
           }`}
         >
@@ -651,7 +653,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
             }}
             aria-label="Número de talle"
             style={{ touchAction: 'none' }}
-            className={`no-spinner w-full h-full text-center font-mono font-bold text-xs bg-transparent text-[#0E140D] focus:outline-none focus:ring-2 focus:ring-[#9BD08A] cursor-inherit touch-none ${
+            className={`no-spinner w-full h-full text-center font-mono font-bold text-xs bg-transparent text-[#0E140D] focus:outline-none focus:ring-2 focus:ring-[#9BD08A] cursor-pointer touch-none ${
               isEditingText ? 'relative opacity-100 pointer-events-auto' : 'absolute inset-0 opacity-0 pointer-events-none'
             }`}
           />
@@ -671,7 +673,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           }}
           disabled={nextNum === null}
           style={{ touchAction: 'none' }}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-75 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20 touch-none overflow-hidden"
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-75 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20 touch-none overflow-hidden"
           tabIndex={-1}
         >
           <span
