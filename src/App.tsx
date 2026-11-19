@@ -297,7 +297,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       wheelAccumRef.current.lastTs = now;
       wheelAccumRef.current.acc += dir;
 
-      const threshold = 48;
+      const threshold = 78;
       if (Math.abs(wheelAccumRef.current.acc) >= threshold) {
         const delta = wheelAccumRef.current.acc > 0 ? 1 : -1;
         wheelAccumRef.current.acc = 0;
@@ -352,12 +352,12 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       // Right -> smaller (-), Left -> larger (+)
       const dx = origin.x - touch.clientX;
       const dy = origin.y - touch.clientY;
-      if (Math.hypot(dx, dy) > 6 && !origin.moved) {
+      if (Math.hypot(dx, dy) > 8 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 22);
+      const steps = Math.trunc(primaryDelta / 30);
       commitSize(origin.startVal + steps);
     };
 
@@ -415,12 +415,12 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dx = origin.x - e.clientX;
       const dy = origin.y - e.clientY;
       const distance = Math.hypot(dx, dy);
-      if (distance > 6 && !origin.moved) {
+      if (distance > 8 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 22);
+      const steps = Math.trunc(primaryDelta / 30);
       commitSize(origin.startVal + steps);
     };
 
@@ -455,7 +455,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dx = origin.x - e.clientX;
       const dy = origin.y - e.clientY;
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 24);
+      const steps = Math.trunc(primaryDelta / 32);
       commitSize(origin.startVal + steps);
     };
 
@@ -734,6 +734,7 @@ export default function App() {
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
+  const [emailOpened, setEmailOpened] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
@@ -1177,16 +1178,21 @@ export default function App() {
 
   const getGmailOrderUrl = () => {
     const subject = `Pedido 000GREEN - ${fmt(total)}`;
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=000green@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
+  };
+
+  const getMailtoOrderUrl = () => {
+    const subject = `Pedido 000GREEN - ${fmt(total)}`;
     return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
-  const handleGmailCheckout = () => {
+  const handleGmailLaunch = () => {
     triggerLogoReaction();
     const text = getOrderSummaryText();
     try {
       void navigator.clipboard?.writeText(text);
     } catch {}
-    setOrderComplete(true);
+    setEmailOpened(true);
   };
 
   return (
@@ -1618,35 +1624,35 @@ export default function App() {
         <div className="animate-marquee font-mark text-xs sm:text-sm tracking-[0.25em] uppercase text-[#E3DCC3] font-semibold flex items-center gap-8">
           <span>000GREEN</span>
           <span>·</span>
-          <span>Nueva Colección Baggy</span>
+          <span>Corte Amplio Sin Reglas</span>
           <span>·</span>
-          <span>Talle Numérico a Tu Medida</span>
+          <span>Edición Verde Musgo</span>
           <span>·</span>
-          <span>Silueta Oversized Real</span>
+          <span>Talles Reales 26 al 56</span>
           <span>·</span>
-          <span>Denim Lavado, Cargo &amp; Parachute</span>
+          <span>Sarga &amp; Denim Pesado</span>
           <span>·</span>
-          <span>Diseño Exclusivo Urbano</span>
+          <span>Actitud Urbana Independiente</span>
           <span>·</span>
-          <span>Stock Limitado</span>
+          <span>Stock Exclusivo</span>
           <span>·</span>
-          <span>Compra Directa por Gmail</span>
+          <span>Pedidos por Gmail</span>
           <span>·</span>
           <span>000GREEN</span>
           <span>·</span>
-          <span>Nueva Colección Baggy</span>
+          <span>Corte Amplio Sin Reglas</span>
           <span>·</span>
-          <span>Talle Numérico a Tu Medida</span>
+          <span>Edición Verde Musgo</span>
           <span>·</span>
-          <span>Silueta Oversized Real</span>
+          <span>Talles Reales 26 al 56</span>
           <span>·</span>
-          <span>Denim Lavado, Cargo &amp; Parachute</span>
+          <span>Sarga &amp; Denim Pesado</span>
           <span>·</span>
-          <span>Diseño Exclusivo Urbano</span>
+          <span>Actitud Urbana Independiente</span>
           <span>·</span>
-          <span>Stock Limitado</span>
+          <span>Stock Exclusivo</span>
           <span>·</span>
-          <span>Compra Directa por Gmail</span>
+          <span>Pedidos por Gmail</span>
         </div>
       </div>
 
@@ -2162,16 +2168,17 @@ export default function App() {
                     ✓
                   </div>
                   <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                    ¡Pedido listo en tu correo!
+                    ¡Gracias por tu pedido!
                   </h3>
                   <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
-                    Se abrió tu correo hacia <strong className="text-[#E3DCC3]">000green@gmail.com</strong> con el detalle de tu compra por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Solo envialo y te respondemos a la brevedad.
+                    Recibimos la confirmación de tu envío a <strong className="text-[#E3DCC3]">000green@gmail.com</strong> por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Te respondemos a la brevedad.
                   </p>
                   <button
                     type="button"
                     onClick={() => {
                       triggerLogoReaction();
                       setOrderComplete(false);
+                      setEmailOpened(false);
                       setCartItems([]);
                       setCartOpen(false);
                     }}
@@ -2258,16 +2265,47 @@ export default function App() {
                   </div>
                 </div>
 
-                <a
-                  href={getGmailOrderUrl()}
-                  onClick={handleGmailCheckout}
-                  className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
-                >
-                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
-                  </svg>
-                  <span>Finalizar compra por Gmail</span>
-                </a>
+                <div className="space-y-2.5">
+                  <a
+                    href={getGmailOrderUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={handleGmailLaunch}
+                    className="w-full inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold py-3.5 px-4 rounded-full text-xs sm:text-sm transition-all shadow-lg cursor-pointer uppercase tracking-wider text-center"
+                  >
+                    <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                    <span>Finalizar compra por Gmail</span>
+                  </a>
+
+                  <a
+                    href={getMailtoOrderUrl()}
+                    onClick={handleGmailLaunch}
+                    className="w-full inline-flex items-center justify-center gap-2 border border-[#4D8046] hover:border-[#9BD08A] bg-[#182C15] hover:bg-[#20391C] text-[#DDECD7] font-semibold py-2.5 px-4 rounded-full text-[11px] transition-all cursor-pointer text-center"
+                  >
+                    <span>Abrir app de correo del celular / PC</span>
+                  </a>
+
+                  {emailOpened && (
+                    <div className="bg-[#1B2C18] border border-[#4D8046] rounded-xl p-3 text-center space-y-2">
+                      <p className="text-[11px] text-[#CDE0C5] leading-relaxed">
+                        Se abrió el redactor hacia <strong className="text-white">000green@gmail.com</strong>. Cuando hayas tocado <strong>Enviar</strong>, confirmá abajo:
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerLogoReaction();
+                          setOrderComplete(true);
+                          setEmailOpened(false);
+                        }}
+                        className="w-full bg-[#9BD08A] hover:bg-[#B4E0A6] text-[#0E140D] font-bold py-2 px-3 rounded-full text-xs transition-colors cursor-pointer"
+                      >
+                        Ya envié el correo · Confirmar y vaciar
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
