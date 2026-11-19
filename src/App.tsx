@@ -4,12 +4,12 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import baggyMossCargoImg from './assets/images/baggy_moss_cargo_v2_1795108115684.jpg';
-import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_v3_1795108133375.jpg';
-import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_v2_1795108116852.jpg';
-import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_v2_1795108116703.jpg';
-import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_v2_1795108116230.jpg';
-import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_v2_1795108116399.jpg';
+import baggyMossCargoImg from './assets/images/baggy_moss_cargo_v2_1795108115684_cutout.png';
+import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_v3_1795108133375_cutout.png';
+import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_v2_1795108116852_cutout.png';
+import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_v2_1795108116703_cutout.png';
+import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_v2_1795108116230_cutout.png';
+import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_v2_1795108116399_cutout.png';
 
 // 000GREEN Official Baggy Pants Collection
 export interface ProductItem {
@@ -133,9 +133,9 @@ export const EXACT_PRODUCTS: ProductItem[] = [
 ];
 
 let rouletteAudioCtx: AudioContext | null = null;
-let rouletteNoiseBuffer: AudioBuffer | null = null;
+let lastRouletteTickMs = 0;
 
-function getRouletteAudio(): { ctx: AudioContext; noise: AudioBuffer } | null {
+function getRouletteAudio(): AudioContext | null {
   try {
     const AudioCtx =
       window.AudioContext ||
@@ -147,16 +147,7 @@ function getRouletteAudio(): { ctx: AudioContext; noise: AudioBuffer } | null {
     if (rouletteAudioCtx.state === 'suspended') {
       void rouletteAudioCtx.resume().catch(() => {});
     }
-    if (!rouletteNoiseBuffer) {
-      const length = Math.floor(rouletteAudioCtx.sampleRate * 0.022);
-      const buffer = rouletteAudioCtx.createBuffer(1, length, rouletteAudioCtx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (length * 0.24));
-      }
-      rouletteNoiseBuffer = buffer;
-    }
-    return { ctx: rouletteAudioCtx, noise: rouletteNoiseBuffer };
+    return rouletteAudioCtx;
   } catch {
     return null;
   }
@@ -164,49 +155,59 @@ function getRouletteAudio(): { ctx: AudioContext; noise: AudioBuffer } | null {
 
 function playRouletteTick(nextSize: number, prevSize: number) {
   if (nextSize === prevSize) return;
-  const audio = getRouletteAudio();
-  if (!audio) return;
+  const now = performance.now();
+  if (now - lastRouletteTickMs < 22) return;
+  lastRouletteTickMs = now;
 
-  const { ctx, noise } = audio;
-  const stepCount = Math.min(3, Math.abs(nextSize - prevSize));
+  const ctx = getRouletteAudio();
+  if (!ctx) return;
+
   const ratio = Math.max(0, Math.min(1, (nextSize - 26) / 30));
 
   try {
-    for (let i = 0; i < stepCount; i++) {
-      const t = ctx.currentTime + i * 0.018;
+    const t = ctx.currentTime + 0.001;
 
-      const noiseSrc = ctx.createBufferSource();
-      noiseSrc.buffer = noise;
-      const bandpass = ctx.createBiquadFilter();
-      bandpass.type = 'bandpass';
-      bandpass.frequency.setValueAtTime(2000 + ratio * 750, t);
-      bandpass.Q.setValueAtTime(2.5, t);
-      const noiseGain = ctx.createGain();
-      noiseGain.gain.setValueAtTime(0.24, t);
-      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.019);
+    // 1. Razor-sharp ivory/metal fret tick (5.5ms crisp harmonic impulse, zero plastic noise)
+    const clickOsc = ctx.createOscillator();
+    clickOsc.type = 'sine';
+    clickOsc.frequency.setValueAtTime(1750 + ratio * 260, t);
+    const clickGain = ctx.createGain();
+    clickGain.gain.setValueAtTime(0.0001, t);
+    clickGain.gain.linearRampToValueAtTime(0.11, t + 0.0008);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.0065);
+    clickOsc.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    clickOsc.start(t);
+    clickOsc.stop(t + 0.008);
 
-      noiseSrc.connect(bandpass);
-      bandpass.connect(noiseGain);
-      noiseGain.connect(ctx.destination);
-      noiseSrc.start(t);
-      noiseSrc.stop(t + 0.022);
+    // 2. Warm hardwood / roulette pocket resonance tap (10ms clean wood knock)
+    const woodOsc = ctx.createOscillator();
+    woodOsc.type = 'sine';
+    woodOsc.frequency.setValueAtTime(520 + ratio * 130, t);
+    const woodGain = ctx.createGain();
+    woodGain.gain.setValueAtTime(0.0001, t);
+    woodGain.gain.linearRampToValueAtTime(0.12, t + 0.001);
+    woodGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.011);
+    woodOsc.connect(woodGain);
+    woodGain.connect(ctx.destination);
+    woodOsc.start(t);
+    woodOsc.stop(t + 0.013);
 
-      const osc = ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(610 + ratio * 230, t);
-      osc.frequency.exponentialRampToValueAtTime(175, t + 0.021);
-      const oscGain = ctx.createGain();
-      oscGain.gain.setValueAtTime(0.16, t);
-      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.024);
-
-      osc.connect(oscGain);
-      oscGain.connect(ctx.destination);
-      osc.start(t);
-      osc.stop(t + 0.026);
-    }
+    // 3. Subtle low mechanical detent body (8ms weight)
+    const bodyOsc = ctx.createOscillator();
+    bodyOsc.type = 'sine';
+    bodyOsc.frequency.setValueAtTime(210, t);
+    const bodyGain = ctx.createGain();
+    bodyGain.gain.setValueAtTime(0.0001, t);
+    bodyGain.gain.linearRampToValueAtTime(0.08, t + 0.001);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.009);
+    bodyOsc.connect(bodyGain);
+    bodyGain.connect(ctx.destination);
+    bodyOsc.start(t);
+    bodyOsc.stop(t + 0.011);
 
     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-      navigator.vibrate(5);
+      navigator.vibrate(4);
     }
   } catch {
     // Ignore audio errors if blocked before gesture
@@ -1883,24 +1884,49 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Official Baggy Pants Studio Photo Tile */}
+                  {/* Official Baggy Pants Studio Photo Tile (static studio backdrop + floating pants cutout) */}
                   <div
                     onClick={() => triggerLogoReaction()}
-                    className="aspect-[4/5] rounded-xl bg-gradient-to-b from-[#132911] via-[#1C3D19] to-[#0B180A] border-2 border-[#68A85E]/75 mb-4 flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_28px_rgba(0,0,0,0.65)] cursor-pointer group"
+                    className="aspect-[4/5] rounded-xl bg-gradient-to-b from-[#071307] via-[#10260F] to-[#050C05] border-2 border-[#68A85E]/75 mb-4 flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_28px_rgba(0,0,0,0.75)] cursor-pointer group/pant"
                   >
+                    {/* Fixed 000GREEN studio spotlight halo behind the garment (never moves on hover) */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background:
+                          'radial-gradient(circle at 50% 45%, rgba(211, 201, 172, 0.34) 0%, rgba(126, 154, 100, 0.20) 28%, rgba(16, 36, 15, 0) 64%)',
+                      }}
+                    />
+
+                    {/* Fixed dark studio floor plane */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-[16%] bg-gradient-to-t from-[#030703] via-[#081207]/75 to-transparent"
+                    />
+
                     {failedImages[p.id] ? (
-                      <div className="flex flex-col items-center justify-center p-6 text-center gap-2 text-[#D3C9AC]">
+                      <div className="relative z-10 flex flex-col items-center justify-center p-6 text-center gap-2 text-[#D3C9AC]">
                         <span className="text-xs font-mono uppercase tracking-widest text-[#9BD08A]">000GREEN</span>
                         <span className="text-sm font-bold text-white">{p.name}</span>
                       </div>
                     ) : (
-                      <img
-                        src={p.image}
-                        alt={p.name}
-                        referrerPolicy="no-referrer"
-                        onError={() => setFailedImages((prev) => ({ ...prev, [p.id]: true }))}
-                        className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
-                      />
+                      <>
+                        {/* Ground shadow stays on the floor while softening as the pants lift */}
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[52%] h-3.5 rounded-full bg-black/80 blur-[7px] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/pant:scale-90 group-hover/pant:opacity-45 group-hover/pant:blur-[10px]"
+                        />
+
+                        {/* Only the pants cutout lifts smoothly on hover */}
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          referrerPolicy="no-referrer"
+                          onError={() => setFailedImages((prev) => ({ ...prev, [p.id]: true }))}
+                          className="relative z-10 w-full h-full object-contain object-center drop-shadow-[0_10px_14px_rgba(0,0,0,0.65)] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform group-hover/pant:-translate-y-4 group-hover/pant:scale-[1.035] group-hover/pant:drop-shadow-[0_24px_18px_rgba(0,0,0,0.85)]"
+                        />
+                      </>
                     )}
                   </div>
 
@@ -2298,8 +2324,14 @@ export default function App() {
                       key={p.id}
                       className="py-3 px-3.5 bg-[#1C271A] rounded-xl border border-[#374C32] flex items-center justify-between gap-3 shadow-sm"
                     >
-                      <div className="w-14 h-14 bg-[#122610] border border-[#4D8046] rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                      <div
+                        className="w-14 h-14 border border-[#4D8046] rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 p-0.5"
+                        style={{
+                          background:
+                            'radial-gradient(circle at 50% 45%, rgba(211, 201, 172, 0.28) 0%, rgba(16, 36, 15, 0.95) 75%)',
+                        }}
+                      >
+                        <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full h-full object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.65)]" />
                       </div>
 
                       <div className="flex-1 min-w-0">
