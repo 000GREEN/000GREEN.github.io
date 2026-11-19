@@ -33,7 +33,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Moss Cargo / Olive Wide',
     price: 320000,
     image: baggyMossCargoImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Pantalón baggy cargo de sarga pesada en verde musgo oliva, bolsillos fuelle de gran volumen, pinzas articuladas en rodilla y ajuste en botamanga.',
     colors: [
       ['Verde Musgo', '#556B3D'],
@@ -51,7 +51,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Obsidian Wash / Raw Baggy',
     price: 345000,
     image: baggyObsidianDenimImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Jean baggy corte ultra wide-leg en denim japonés selvedge de 14oz lavado en negro obsidiana, caída estructurada y doble costura reforzada.',
     colors: [
       ['Negro Obsidiana', '#1C1E22'],
@@ -68,7 +68,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Stealth Parachute / Slate Ripstop',
     price: 295000,
     image: baggyStealthParachuteImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Baggy parachute confeccionado en ripstop técnico liviano color gris pizarra mate, cintura elástica con cordón y topes regulables en tobillos.',
     colors: [
       ['Gris Pizarra', '#5C6468'],
@@ -85,7 +85,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Bio Stitch / Carpenter Black',
     price: 335000,
     image: baggyBioStitchImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Pantalón baggy carpenter en lona duck negra de alto gramaje con costuras triples en contraste verde salvia 000GREEN y panel doble en rodillas.',
     colors: [
       ['Negro Duck', '#141516'],
@@ -102,7 +102,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Bone Canvas / Double Pleat',
     price: 315000,
     image: baggyBonePleatedImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Baggy arquitectónico de doble pinza frontal en gabardina cruda tono hueso, caída amplia fluida y cintura sastrera de calce relajado.',
     colors: [
       ['Hueso Crudo', '#E5DEC9'],
@@ -119,7 +119,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Vintage Indigo / Acid Baggy',
     price: 330000,
     image: baggyVintageIndigoImg,
-    sizes: ['S', 'M', 'L', 'XL'],
+    sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Jean super baggy estilo skate 90s en denim índigo con lavado ácido vintage, botamanga extra ancha y remaches metálicos de alta resistencia.',
     colors: [
       ['Índigo Ácido', '#4D647D'],
@@ -131,6 +131,159 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     ],
   },
 ];
+
+interface SizeWheelProps {
+  value: number;
+  min?: number;
+  max?: number;
+  onChange: (nextSize: number) => void;
+  onInteract?: () => void;
+}
+
+function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWheelProps) {
+  const wheelRef = useRef<HTMLDivElement | null>(null);
+  const dragStartXRef = useRef<number | null>(null);
+  const dragStartValRef = useRef<number>(value);
+  const [draftValue, setDraftValue] = useState<string>(String(value));
+
+  useEffect(() => {
+    setDraftValue(String(value));
+  }, [value]);
+
+  const clamp = (n: number) => Math.max(min, Math.min(max, n));
+
+  const stepSize = (delta: number) => {
+    const next = clamp(value + delta);
+    if (next !== value) {
+      onInteract?.();
+      onChange(next);
+    }
+  };
+
+  // Smooth non-passive mouse-wheel rolling directly on the ruedita
+  useEffect(() => {
+    const el = wheelRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const dir = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (dir === 0) return;
+      const delta = dir > 0 ? 1 : -1;
+      onInteract?.();
+      onChange(clamp(value + delta));
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, [value, min, max, onChange, onInteract]);
+
+  const prevNum = value > min ? value - 1 : null;
+  const nextNum = value < max ? value + 1 : null;
+
+  return (
+    <div className="flex items-center gap-1.5 select-none">
+      <button
+        type="button"
+        onClick={() => stepSize(-1)}
+        disabled={value <= min}
+        aria-label="Disminuir talle"
+        className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+      >
+        ‹
+      </button>
+
+      <div
+        ref={wheelRef}
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).tagName === 'INPUT') return;
+          dragStartXRef.current = e.clientX;
+          dragStartValRef.current = value;
+          (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          if (dragStartXRef.current === null) return;
+          const dx = e.clientX - dragStartXRef.current;
+          const steps = Math.trunc(-dx / 18);
+          const next = clamp(dragStartValRef.current + steps);
+          if (next !== value) {
+            onInteract?.();
+            onChange(next);
+          }
+        }}
+        onPointerUp={() => {
+          dragStartXRef.current = null;
+        }}
+        onPointerCancel={() => {
+          dragStartXRef.current = null;
+        }}
+        title="Girá la ruedita o escribí tu número de talle"
+        className="relative flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border border-[#5E9455] shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] cursor-ew-resize"
+      >
+        {/* Subtle wheel drum notch ticks */}
+        <span className="pointer-events-none absolute inset-x-3 top-0 h-[2px] flex justify-between opacity-40" aria-hidden="true">
+          <span className="w-[1px] h-full bg-[#9BD08A]" />
+          <span className="w-[1px] h-full bg-[#9BD08A]" />
+          <span className="w-[1px] h-full bg-[#9BD08A]" />
+          <span className="w-[1px] h-full bg-[#9BD08A]" />
+          <span className="w-[1px] h-full bg-[#9BD08A]" />
+        </span>
+
+        <button
+          type="button"
+          onClick={() => prevNum !== null && stepSize(-1)}
+          disabled={prevNum === null}
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-65 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20"
+          tabIndex={-1}
+        >
+          {prevNum ?? '·'}
+        </button>
+
+        <input
+          type="number"
+          min={min}
+          max={max}
+          value={draftValue}
+          onChange={(e) => {
+            const raw = e.target.value;
+            setDraftValue(raw);
+            const parsed = parseInt(raw, 10);
+            if (!Number.isNaN(parsed) && parsed >= min && parsed <= max) {
+              onInteract?.();
+              onChange(parsed);
+            }
+          }}
+          onBlur={() => {
+            const parsed = parseInt(draftValue, 10);
+            const finalVal = Number.isNaN(parsed) ? value : clamp(parsed);
+            setDraftValue(String(finalVal));
+            if (finalVal !== value) onChange(finalVal);
+          }}
+          aria-label="Número de talle"
+          className="no-spinner w-9 text-center bg-[#D3C9AC] text-[#0E140D] font-mono font-bold text-xs py-0.5 rounded-md shadow-[0_0_10px_rgba(211,201,172,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9BD08A]"
+        />
+
+        <button
+          type="button"
+          onClick={() => nextNum !== null && stepSize(1)}
+          disabled={nextNum === null}
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-65 hover:opacity-100 hover:text-white transition-all cursor-pointer disabled:opacity-20"
+          tabIndex={-1}
+        >
+          {nextNum ?? '·'}
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => stepSize(1)}
+        disabled={value >= max}
+        aria-label="Aumentar talle"
+        className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+      >
+        ›
+      </button>
+    </div>
+  );
+}
 
 export default function App() {
   // Logo Jump / Reaction state
@@ -153,20 +306,18 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('rel');
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({
-    b1: 'M',
-    b2: 'M',
-    b3: 'M',
-    b4: 'M',
-    b5: 'M',
-    b6: 'M',
+    b1: '40',
+    b2: '40',
+    b3: '40',
+    b4: '40',
+    b5: '40',
+    b6: '40',
   });
   const [favorites, setFavorites] = useState<string[]>([]);
   const [favoritesOpen, setFavoritesOpen] = useState<boolean>(false);
   const [cartOpen, setCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<{ id: string; name: string; size: string; price: number; qty: number }[]>([]);
   const [orderComplete, setOrderComplete] = useState(false);
-  const [copiedOrder, setCopiedOrder] = useState(false);
-  const [customerNote, setCustomerNote] = useState('');
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Official 000GREEN YouTube Soundtrack Engine (Video ID: NFa7KlLyzGY @ 503s) - SOLE AUDIO ENGINE
@@ -596,62 +747,27 @@ export default function App() {
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-  const INSTAGRAM_DM_URL = 'https://ig.me/m/000green_';
-
   const getOrderSummaryText = () => {
     if (cartItems.length === 0) {
       return 'Hola @000green_! Me gustaría consultar sobre la colección de pantalones baggy.';
     }
     const itemsList = cartItems
-      .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} — ${fmt(item.price * item.qty)}`)
+      .map((item) => `• ${item.name} (Talle ${item.size}) x${item.qty} - ${fmt(item.price * item.qty)}`)
       .join('\n');
 
-    const noteLine = customerNote.trim() ? `\nDatos / Ciudad: ${customerNote.trim()}\n` : '\n';
-
-    return `Hola @000green_! Quiero finalizar mi compra:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}${noteLine}\n¿Me confirman disponibilidad para coordinar el envío?`;
+    return `Hola @000green_! Quiero finalizar mi compra:\n\n${itemsList}\n\nTotal estimado: ${fmt(total)}\n\n¿Me confirman para coordinar la entrega?`;
   };
 
-  const getEmailOrderUrl = () => {
-    const subject = 'Nuevo Pedido 000GREEN · Pantalones Baggy';
-    return `mailto:000green@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
-  };
-
-  const copyOrderToClipboard = async () => {
-    const text = getOrderSummaryText();
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        setCopiedOrder(true);
-        return true;
-      }
-    } catch {}
-
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.setAttribute('readonly', '');
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(textarea);
-      if (ok) {
-        setCopiedOrder(true);
-        return true;
-      }
-    } catch {}
-    return false;
-  };
-
-  const handleCopyOrder = () => {
-    triggerLogoReaction();
-    void copyOrderToClipboard();
+  const getInstagramOrderUrl = () => {
+    return `https://ig.me/m/000green_?text=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
   const handleInstagramCheckout = () => {
     triggerLogoReaction();
-    void copyOrderToClipboard();
+    const text = getOrderSummaryText();
+    try {
+      void navigator.clipboard?.writeText(text);
+    } catch {}
     setOrderComplete(true);
   };
 
@@ -1084,39 +1200,35 @@ export default function App() {
         <div className="animate-marquee font-mark text-xs sm:text-sm tracking-[0.25em] uppercase text-[#E3DCC3] font-semibold flex items-center gap-8">
           <span>000GREEN</span>
           <span>·</span>
-          <span>Pantalones Baggy</span>
+          <span>Nueva Colección Baggy</span>
           <span>·</span>
-          <span>Edición Especial Limitada</span>
+          <span>Talle Numérico a Tu Medida</span>
           <span>·</span>
-          <span>Corte Wide-Leg & Oversized</span>
+          <span>Silueta Oversized Real</span>
           <span>·</span>
-          <span>Denim 14oz & Ripstop Técnico</span>
+          <span>Denim Lavado, Cargo &amp; Parachute</span>
           <span>·</span>
-          <span>Caída Estructurada Premium</span>
+          <span>Diseño Exclusivo Urbano</span>
           <span>·</span>
-          <span>Máxima Comodidad Urbana</span>
+          <span>Stock Limitado</span>
           <span>·</span>
-          <span>100% Garantía Oficial 000GREEN</span>
-          <span>·</span>
-          <span>Envíos Seguros a Todo el País</span>
+          <span>Compra Directa por Instagram</span>
           <span>·</span>
           <span>000GREEN</span>
           <span>·</span>
-          <span>Pantalones Baggy</span>
+          <span>Nueva Colección Baggy</span>
           <span>·</span>
-          <span>Edición Especial Limitada</span>
+          <span>Talle Numérico a Tu Medida</span>
           <span>·</span>
-          <span>Corte Wide-Leg & Oversized</span>
+          <span>Silueta Oversized Real</span>
           <span>·</span>
-          <span>Denim 14oz & Ripstop Técnico</span>
+          <span>Denim Lavado, Cargo &amp; Parachute</span>
           <span>·</span>
-          <span>Caída Estructurada Premium</span>
+          <span>Diseño Exclusivo Urbano</span>
           <span>·</span>
-          <span>Máxima Comodidad Urbana</span>
+          <span>Stock Limitado</span>
           <span>·</span>
-          <span>100% Garantía Oficial 000GREEN</span>
-          <span>·</span>
-          <span>Envíos Seguros a Todo el País</span>
+          <span>Compra Directa por Instagram</span>
         </div>
       </div>
 
@@ -1404,31 +1516,16 @@ export default function App() {
                       {p.desc}
                     </p>
 
-                    {/* Size selector */}
-                    <div className="pt-1.5 border-t border-[#345B31] flex items-center justify-between gap-2">
+                    {/* Size wheel selector ("Ruedita de talle") */}
+                    <div className="pt-2 border-t border-[#345B31] flex items-center justify-between gap-2">
                       <span className="text-[11px] font-medium text-[#A8C7A2]">Talle:</span>
-                      <div className="flex items-center gap-1.5">
-                        {p.sizes.map((sz) => {
-                          const isSelected = (selectedSizes[p.id] || 'M') === sz;
-                          return (
-                            <button
-                              key={sz}
-                              type="button"
-                              onClick={() => {
-                                triggerLogoReaction();
-                                setSelectedSizes((prev) => ({ ...prev, [p.id]: sz }));
-                              }}
-                              className={`min-w-[30px] px-2 py-0.5 rounded-md text-[11px] font-mono font-bold transition-all cursor-pointer border ${
-                                isSelected
-                                  ? 'bg-[#D3C9AC] text-[#0E140D] border-[#D3C9AC] shadow-sm'
-                                  : 'bg-[#152B14] text-[#DDECD7] border-[#4D8046] hover:border-[#9BD08A]'
-                              }`}
-                            >
-                              {sz}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      <SizeWheel
+                        value={parseInt(selectedSizes[p.id] || '40', 10) || 40}
+                        onInteract={triggerLogoReaction}
+                        onChange={(nextNum) =>
+                          setSelectedSizes((prev) => ({ ...prev, [p.id]: String(nextNum) }))
+                        }
+                      />
                     </div>
                   </div>
                 </div>
@@ -1439,7 +1536,7 @@ export default function App() {
                     type="button"
                     onClick={() => {
                       triggerLogoReaction();
-                      const chosenSize = selectedSizes[p.id] || 'M';
+                      const chosenSize = selectedSizes[p.id] || '40';
                       setCartItems((prev) => {
                         const existing = prev.find((item) => item.id === p.id && item.size === chosenSize);
                         if (existing) {
@@ -1473,7 +1570,7 @@ export default function App() {
                         d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                       />
                     </svg>
-                    <span>Comprar · Talle {selectedSizes[p.id] || 'M'}</span>
+                    <span>Comprar · Talle {selectedSizes[p.id] || '40'}</span>
                   </button>
 
                   <div className="flex items-center justify-center gap-2 text-[10px] text-[#A8C7A2] font-mono">
@@ -1617,85 +1714,28 @@ export default function App() {
               </div>
 
               {orderComplete ? (
-                <div className="py-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-[#274D24] border-2 border-[#9BD08A] text-[#9BD08A] flex items-center justify-center mx-auto text-2xl shadow-md">
+                <div className="py-12 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-[#274D24] border-2 border-[#9BD08A] text-[#9BD08A] flex items-center justify-center mx-auto text-2xl shadow-md">
                     ✓
                   </div>
-                  <div className="space-y-1.5">
-                    <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
-                      ¡Pedido listo para Instagram!
-                    </h3>
-                    <p className="text-xs text-[#C8DFC0] leading-relaxed">
-                      {copiedOrder
-                        ? 'El mensaje de tu compra se copió automáticamente. Solo pegalo y envialo en el chat de @000green_.'
-                        : 'Copiá el mensaje de abajo y envialo directamente al chat de @000green_ en Instagram.'}
-                    </p>
-                  </div>
-
-                  {/* Ready-to-send Instagram Message Preview */}
-                  <div className="bg-[#0E180D] border border-[#4D8046] rounded-xl p-3.5 text-left space-y-2">
-                    <div className="flex items-center justify-between gap-2 text-[11px] font-mono text-[#9BD08A]">
-                      <span>Mensaje para @000green_</span>
-                      {copiedOrder && <span className="font-bold">✓ Copiado</span>}
-                    </div>
-                    <pre className="whitespace-pre-wrap font-sans text-xs text-[#E3DCC3] leading-relaxed select-all">
-                      {getOrderSummaryText()}
-                    </pre>
-                  </div>
-
-                  <div className="flex flex-col gap-2.5 pt-1">
-                    <a
-                      href={INSTAGRAM_DM_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={handleInstagramCheckout}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold px-5 py-3.5 rounded-full text-xs uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
-                    >
-                      <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                      <span>Abrir chat de Instagram (@000green_) ↗</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={handleCopyOrder}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-bold px-5 py-2.5 rounded-full text-xs uppercase tracking-wider transition-colors cursor-pointer"
-                    >
-                      <span>{copiedOrder ? '✓ Mensaje copiado (listo para pegar)' : 'Copiar mensaje del pedido'}</span>
-                    </button>
-                    <a
-                      href={getEmailOrderUrl()}
-                      onClick={triggerLogoReaction}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#1C271A] hover:bg-[#243422] border border-[#374C32] text-[#D3C9AC] font-semibold px-5 py-2.5 rounded-full text-xs transition-colors cursor-pointer"
-                    >
-                      <span>Enviar por Correo (000green@gmail.com)</span>
-                    </a>
-                  </div>
-                  <div className="flex items-center justify-center gap-4 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerLogoReaction();
-                        setOrderComplete(false);
-                      }}
-                      className="text-xs text-[#98A18A] hover:text-white underline cursor-pointer"
-                    >
-                      Volver al carrito
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        triggerLogoReaction();
-                        setOrderComplete(false);
-                        setCopiedOrder(false);
-                        setCartItems([]);
-                        setCartOpen(false);
-                      }}
-                      className="text-xs text-[#9BD08A] hover:text-white underline font-semibold cursor-pointer"
-                    >
-                      Finalizar y vaciar carrito
-                    </button>
-                  </div>
+                  <h3 className="font-display font-bold text-2xl text-[#E3DCC3]">
+                    ¡Pedido enviado a Instagram!
+                  </h3>
+                  <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
+                    Se abrió el chat de <strong className="text-[#E3DCC3]">@000green_</strong> con el detalle de tu compra por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(total)}</span>. Solo envialo y te respondemos al instante.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerLogoReaction();
+                      setOrderComplete(false);
+                      setCartItems([]);
+                      setCartOpen(false);
+                    }}
+                    className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-2.5 rounded-full text-xs hover:bg-white transition-colors mt-3 cursor-pointer"
+                  >
+                    Seguir explorando
+                  </button>
                 </div>
               ) : (
                 <div className="py-4 space-y-4">
@@ -1767,7 +1807,7 @@ export default function App() {
 
             {/* Cart Footer */}
             {!orderComplete && cartItems.length > 0 && (
-              <div className="pt-5 border-t border-[#2A3626] space-y-3.5">
+              <div className="pt-6 border-t border-[#2A3626] space-y-4">
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between font-bold text-base text-[#E3DCC3] pt-2 border-t border-[#2A3626]">
                     <span>Total estimado</span>
@@ -1775,18 +1815,8 @@ export default function App() {
                   </div>
                 </div>
 
-                <div>
-                  <input
-                    type="text"
-                    value={customerNote}
-                    onChange={(e) => setCustomerNote(e.target.value)}
-                    placeholder="Tu nombre o ciudad para el envío (opcional)"
-                    className="w-full bg-[#1C271A] border border-[#374C32] focus:border-[#9BD08A] rounded-xl px-3.5 py-2 text-xs text-[#E3DCC3] placeholder-[#7F8B78] focus:outline-none transition-colors"
-                  />
-                </div>
-
                 <a
-                  href={INSTAGRAM_DM_URL}
+                  href={getInstagramOrderUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleInstagramCheckout}
@@ -1795,24 +1825,8 @@ export default function App() {
                   <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                   </svg>
-                  <span>Finalizar compra por Instagram ↗</span>
+                  <span>Finalizar compra por Instagram</span>
                 </a>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    triggerLogoReaction();
-                    void copyOrderToClipboard();
-                    setOrderComplete(true);
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#274D24] hover:bg-[#32612E] border border-[#5E9455] text-white font-semibold py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer"
-                >
-                  <span>Ver mensaje / Otras opciones (Correo)</span>
-                </button>
-
-                <p className="text-[11px] text-center text-[#9BD08A] font-medium">
-                  Se copia tu pedido y se abre el chat directo con @000green_
-                </p>
               </div>
             )}
           </div>
@@ -1888,7 +1902,7 @@ export default function App() {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-bold text-white truncate">{p.name}</div>
                         <div className="text-xs text-[#D3C9AC] font-mono mt-0.5">
-                          Talle {selectedSizes[p.id] || 'M'} · {fmt(p.price)}
+                          Talle {selectedSizes[p.id] || '40'} · {fmt(p.price)}
                         </div>
                       </div>
 
@@ -1897,7 +1911,7 @@ export default function App() {
                           type="button"
                           onClick={() => {
                             triggerLogoReaction();
-                            const chosenSize = selectedSizes[p.id] || 'M';
+                            const chosenSize = selectedSizes[p.id] || '40';
                             setCartItems((prev) => {
                               const existing = prev.find((item) => item.id === p.id && item.size === chosenSize);
                               if (existing) {
@@ -1941,7 +1955,7 @@ export default function App() {
                     setCartItems((prev) => {
                       let next = [...prev];
                       favProducts.forEach((p) => {
-                        const chosenSize = selectedSizes[p.id] || 'M';
+                        const chosenSize = selectedSizes[p.id] || '40';
                         const existing = next.find((item) => item.id === p.id && item.size === chosenSize);
                         if (existing) {
                           next = next.map((item) =>
