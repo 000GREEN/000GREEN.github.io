@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import baggyMossCargoImg from './assets/images/baggy_moss_cargo_v2_1795108115684.jpg';
 import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_v3_1795108133375.jpg';
 import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_v2_1795108116852.jpg';
@@ -132,6 +132,87 @@ export const EXACT_PRODUCTS: ProductItem[] = [
   },
 ];
 
+let rouletteAudioCtx: AudioContext | null = null;
+let rouletteNoiseBuffer: AudioBuffer | null = null;
+
+function getRouletteAudio(): { ctx: AudioContext; noise: AudioBuffer } | null {
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return null;
+    if (!rouletteAudioCtx) {
+      rouletteAudioCtx = new AudioCtx();
+    }
+    if (rouletteAudioCtx.state === 'suspended') {
+      void rouletteAudioCtx.resume().catch(() => {});
+    }
+    if (!rouletteNoiseBuffer) {
+      const length = Math.floor(rouletteAudioCtx.sampleRate * 0.022);
+      const buffer = rouletteAudioCtx.createBuffer(1, length, rouletteAudioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (length * 0.24));
+      }
+      rouletteNoiseBuffer = buffer;
+    }
+    return { ctx: rouletteAudioCtx, noise: rouletteNoiseBuffer };
+  } catch {
+    return null;
+  }
+}
+
+function playRouletteTick(nextSize: number, prevSize: number) {
+  if (nextSize === prevSize) return;
+  const audio = getRouletteAudio();
+  if (!audio) return;
+
+  const { ctx, noise } = audio;
+  const stepCount = Math.min(3, Math.abs(nextSize - prevSize));
+  const ratio = Math.max(0, Math.min(1, (nextSize - 26) / 30));
+
+  try {
+    for (let i = 0; i < stepCount; i++) {
+      const t = ctx.currentTime + i * 0.018;
+
+      const noiseSrc = ctx.createBufferSource();
+      noiseSrc.buffer = noise;
+      const bandpass = ctx.createBiquadFilter();
+      bandpass.type = 'bandpass';
+      bandpass.frequency.setValueAtTime(2000 + ratio * 750, t);
+      bandpass.Q.setValueAtTime(2.5, t);
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.24, t);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.019);
+
+      noiseSrc.connect(bandpass);
+      bandpass.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      noiseSrc.start(t);
+      noiseSrc.stop(t + 0.022);
+
+      const osc = ctx.createOscillator();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(610 + ratio * 230, t);
+      osc.frequency.exponentialRampToValueAtTime(175, t + 0.021);
+      const oscGain = ctx.createGain();
+      oscGain.gain.setValueAtTime(0.16, t);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, t + 0.024);
+
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.026);
+    }
+
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(5);
+    }
+  } catch {
+    // Ignore audio errors if blocked before gesture
+  }
+}
+
 interface SizeWheelProps {
   value: number;
   min?: number;
@@ -143,6 +224,8 @@ interface SizeWheelProps {
 function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWheelProps) {
   const wheelRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const prevBtnRef = useRef<HTMLButtonElement | null>(null);
+  const nextBtnRef = useRef<HTMLButtonElement | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [isFreeMove, setIsFreeMove] = useState(false);
@@ -150,6 +233,14 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
   const [draftValue, setDraftValue] = useState<string>(String(value));
 
   const dragOriginRef = useRef<{ x: number; y: number; startVal: number; moved: boolean } | null>(null);
+  const touchOriginRef = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    startVal: number;
+    moved: boolean;
+    target: EventTarget | null;
+  } | null>(null);
   const lastDragMovedRef = useRef<boolean>(false);
   const freeMoveOriginRef = useRef<{ x: number; y: number; startVal: number } | null>(null);
   const valueRef = useRef<number>(value);
@@ -159,15 +250,28 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
     setDraftValue(String(value));
   }, [value]);
 
-  const clamp = (n: number) => Math.max(min, Math.min(max, n));
+  const clamp = useCallback((n: number) => Math.max(min, Math.min(max, n)), [min, max]);
 
-  const stepSize = (delta: number) => {
-    const next = clamp(valueRef.current + delta);
-    if (next !== valueRef.current) {
-      onInteract?.();
-      onChange(next);
-    }
-  };
+  const commitSize = useCallback(
+    (nextRaw: number) => {
+      const next = clamp(nextRaw);
+      const prev = valueRef.current;
+      if (next !== prev) {
+        valueRef.current = next;
+        playRouletteTick(next, prev);
+        onInteract?.();
+        onChange(next);
+      }
+    },
+    [clamp, onChange, onInteract]
+  );
+
+  const stepSize = useCallback(
+    (delta: number) => {
+      commitSize(valueRef.current + delta);
+    },
+    [commitSize]
+  );
 
   // Smooth non-passive mouse-wheel rolling directly on the ruedita
   useEffect(() => {
@@ -178,37 +282,128 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dir = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
       if (dir === 0) return;
       const delta = dir > 0 ? 1 : -1;
-      onInteract?.();
-      onChange(clamp(valueRef.current + delta));
+      commitSize(valueRef.current + delta);
     };
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [min, max, onChange, onInteract]);
+  }, [commitSize]);
 
-  // Global pointer tracking while grabbing ("agarrarlo") so dragging works smoothly even outside the box
+  // Mobile finger-touch glide: put finger anywhere on the ruedita and slide smoothly across 26..56
   useEffect(() => {
-    if (!isDragging) return;
+    const el = wheelRef.current;
+    if (!el) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (isEditingText && e.target === inputRef.current) return;
+      const touch = e.changedTouches[0];
+      if (!touch) return;
+
+      e.preventDefault();
+      getRouletteAudio();
+      lastDragMovedRef.current = false;
+      setIsFreeMove(false);
+      freeMoveOriginRef.current = null;
+
+      touchOriginRef.current = {
+        id: touch.identifier,
+        x: touch.clientX,
+        y: touch.clientY,
+        startVal: valueRef.current,
+        moved: false,
+        target: e.target,
+      };
+      setIsDragging(true);
+    };
+
+    const handleWindowTouchMove = (e: TouchEvent) => {
+      const origin = touchOriginRef.current;
+      if (!origin) return;
+
+      let touch: Touch | undefined;
+      for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === origin.id) {
+          touch = e.touches[i];
+          break;
+        }
+      }
+      if (!touch) return;
+
+      e.preventDefault();
+      const dx = touch.clientX - origin.x;
+      const dy = origin.y - touch.clientY;
+      if (Math.hypot(dx, dy) > 4 && !origin.moved) {
+        origin.moved = true;
+        inputRef.current?.blur();
+      }
+      const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
+      const steps = Math.trunc(primaryDelta / 10);
+      commitSize(origin.startVal + steps);
+    };
+
+    const handleWindowTouchEnd = (e: TouchEvent) => {
+      const origin = touchOriginRef.current;
+      if (!origin) return;
+
+      let ended = false;
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === origin.id) {
+          ended = true;
+          break;
+        }
+      }
+      if (!ended) return;
+
+      lastDragMovedRef.current = origin.moved;
+      const tapTarget = origin.target;
+      touchOriginRef.current = null;
+      setIsDragging(false);
+
+      if (!origin.moved) {
+        if (tapTarget === prevBtnRef.current) {
+          stepSize(-1);
+        } else if (tapTarget === nextBtnRef.current) {
+          stepSize(1);
+        } else if (tapTarget === inputRef.current) {
+          setIsEditingText(true);
+          inputRef.current?.focus();
+        }
+      }
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleWindowTouchMove, { passive: false });
+    window.addEventListener('touchend', handleWindowTouchEnd);
+    window.addEventListener('touchcancel', handleWindowTouchEnd);
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleWindowTouchMove);
+      window.removeEventListener('touchend', handleWindowTouchEnd);
+      window.removeEventListener('touchcancel', handleWindowTouchEnd);
+    };
+  }, [isEditingText, commitSize, stepSize]);
+
+  // Global mouse/pen pointer tracking while grabbing ("agarrarlo") on desktop
+  useEffect(() => {
+    if (!isDragging || touchOriginRef.current) return;
 
     const handleWindowMove = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
       const origin = dragOriginRef.current;
       if (!origin) return;
       const dx = e.clientX - origin.x;
-      const dy = origin.y - e.clientY; // dragging up also increases size
+      const dy = origin.y - e.clientY;
       const distance = Math.hypot(dx, dy);
       if (distance > 3 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 12);
-      const next = clamp(origin.startVal + steps);
-      if (next !== valueRef.current) {
-        onInteract?.();
-        onChange(next);
-      }
+      const steps = Math.trunc(primaryDelta / 10);
+      commitSize(origin.startVal + steps);
     };
 
-    const handleWindowUp = () => {
+    const handleWindowUp = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
       lastDragMovedRef.current = dragOriginRef.current?.moved ?? false;
       dragOriginRef.current = null;
       setIsDragging(false);
@@ -222,9 +417,9 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       window.removeEventListener('pointerup', handleWindowUp);
       window.removeEventListener('pointercancel', handleWindowUp);
     };
-  }, [isDragging, min, max, onChange, onInteract]);
+  }, [isDragging, commitSize]);
 
-  // Double-click / double-tap free-move mode: move mouse to glide size 26..56, single click to lock
+  // Double-click free-move mode: move mouse to glide size 26..56, single click to lock
   useEffect(() => {
     if (!isFreeMove) return;
 
@@ -237,12 +432,8 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       const dx = e.clientX - origin.x;
       const dy = origin.y - e.clientY;
       const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 12);
-      const next = clamp(origin.startVal + steps);
-      if (next !== valueRef.current) {
-        onInteract?.();
-        onChange(next);
-      }
+      const steps = Math.trunc(primaryDelta / 10);
+      commitSize(origin.startVal + steps);
     };
 
     const handleLockOnOutsideClick = (e: MouseEvent) => {
@@ -266,7 +457,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       window.removeEventListener('mousedown', handleLockOnOutsideClick);
       window.removeEventListener('keydown', handleKeyLock);
     };
-  }, [isFreeMove, min, max, onChange, onInteract]);
+  }, [isFreeMove, commitSize]);
 
   const prevNum = value > min ? value - 1 : null;
   const nextNum = value < max ? value + 1 : null;
@@ -276,6 +467,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       <button
         type="button"
         onClick={() => {
+          getRouletteAudio();
           setIsFreeMove(false);
           stepSize(-1);
         }}
@@ -289,14 +481,14 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       <div
         ref={wheelRef}
         onPointerDown={(e) => {
+          if (e.pointerType === 'touch') return;
+          getRouletteAudio();
           if (isFreeMove) {
-            // Single click while in double-click free-move mode locks the chosen size
             e.preventDefault();
             setIsFreeMove(false);
             freeMoveOriginRef.current = null;
             return;
           }
-          // Allow grabbing the wheel from anywhere (including center number)
           if (isEditingText && e.target === inputRef.current) return;
           e.preventDefault();
           lastDragMovedRef.current = false;
@@ -311,6 +503,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         onDoubleClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          getRouletteAudio();
           onInteract?.();
           setIsDragging(false);
           setIsEditingText(false);
@@ -323,14 +516,12 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           setIsFreeMove((prev) => !prev);
         }}
         style={{ touchAction: 'none' }}
-        title="Agarrá y arrastrá la ruedita, o tocá 2 veces encima para moverla libremente (26–56)"
-        className={`relative flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all ${
-          isFreeMove
-            ? 'border-[#9BD08A] ring-2 ring-[#9BD08A]/70 cursor-ew-resize shadow-[0_0_14px_rgba(155,208,138,0.45)]'
-            : isDragging
-            ? 'border-[#D3C9AC] ring-1 ring-[#D3C9AC]/60 cursor-grabbing scale-[1.03]'
-            : 'border-[#5E9455] hover:border-[#9BD08A] cursor-grab'
-        }`}
+        title="En compu: agarrá o tocá 2 veces encima. En celular: apoyá el dedo y deslizá (26–56)"
+        className={`relative flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all touch-none ${
+          isFreeMove || isDragging
+            ? 'border-[#9BD08A] ring-2 ring-[#9BD08A]/70 shadow-[0_0_14px_rgba(155,208,138,0.45)]'
+            : 'border-[#5E9455] hover:border-[#9BD08A]'
+        } ${isFreeMove ? 'cursor-ew-resize' : isDragging ? 'cursor-grabbing scale-[1.03]' : 'cursor-grab'}`}
       >
         {/* Subtle wheel drum notch ticks */}
         <span className="pointer-events-none absolute inset-x-3 top-0 h-[2px] flex justify-between opacity-45" aria-hidden="true">
@@ -342,13 +533,16 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         </span>
 
         <button
+          ref={prevBtnRef}
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            getRouletteAudio();
             if (!isFreeMove && !lastDragMovedRef.current && prevNum !== null) stepSize(-1);
           }}
           disabled={prevNum === null}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20"
+          style={{ touchAction: 'none' }}
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20 touch-none"
           tabIndex={-1}
         >
           {prevNum ?? '·'}
@@ -362,6 +556,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           value={draftValue}
           onFocus={() => setIsEditingText(true)}
           onClick={(e) => {
+            getRouletteAudio();
             if (!isFreeMove && !lastDragMovedRef.current) {
               setIsEditingText(true);
               inputRef.current?.focus();
@@ -374,8 +569,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
             setDraftValue(raw);
             const parsed = parseInt(raw, 10);
             if (!Number.isNaN(parsed) && parsed >= min && parsed <= max) {
-              onInteract?.();
-              onChange(parsed);
+              commitSize(parsed);
             }
           }}
           onBlur={() => {
@@ -383,22 +577,26 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
             const parsed = parseInt(draftValue, 10);
             const finalVal = Number.isNaN(parsed) ? value : clamp(parsed);
             setDraftValue(String(finalVal));
-            if (finalVal !== value) onChange(finalVal);
+            if (finalVal !== value) commitSize(finalVal);
           }}
           aria-label="Número de talle"
-          className={`no-spinner w-9 text-center font-mono font-bold text-xs py-0.5 rounded-md shadow-[0_0_10px_rgba(211,201,172,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9BD08A] cursor-inherit ${
-            isFreeMove ? 'bg-[#9BD08A] text-[#0E140D]' : 'bg-[#D3C9AC] text-[#0E140D]'
+          style={{ touchAction: 'none' }}
+          className={`no-spinner w-9 text-center font-mono font-bold text-xs py-0.5 rounded-md shadow-[0_0_10px_rgba(211,201,172,0.35)] focus:outline-none focus:ring-2 focus:ring-[#9BD08A] cursor-inherit touch-none ${
+            isFreeMove || isDragging ? 'bg-[#9BD08A] text-[#0E140D]' : 'bg-[#D3C9AC] text-[#0E140D]'
           }`}
         />
 
         <button
+          ref={nextBtnRef}
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            if (!isFreeMove && nextNum !== null) stepSize(1);
+            getRouletteAudio();
+            if (!isFreeMove && !lastDragMovedRef.current && nextNum !== null) stepSize(1);
           }}
           disabled={nextNum === null}
-          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20"
+          style={{ touchAction: 'none' }}
+          className="w-6 text-center text-[11px] font-mono text-[#86A87E] opacity-70 hover:opacity-100 hover:text-white transition-all cursor-inherit disabled:opacity-20 touch-none"
           tabIndex={-1}
         >
           {nextNum ?? '·'}
@@ -408,6 +606,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       <button
         type="button"
         onClick={() => {
+          getRouletteAudio();
           setIsFreeMove(false);
           stepSize(1);
         }}
