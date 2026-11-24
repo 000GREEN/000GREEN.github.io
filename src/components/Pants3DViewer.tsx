@@ -27,7 +27,7 @@ interface StudioProfile {
   heroCam: [number, number, number];
 }
 
-// Deep, atmospheric 000GREEN architectural studio palettes per pant (moody, rich contrast, never black)
+// Deep, atmospheric 000GREEN architectural studio palettes per pant (moody green contrast, never black)
 const STUDIO_PROFILES: Record<string, StudioProfile> = {
   b1: {
     bgHex: 0x0c1d0c,
@@ -38,7 +38,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0x90cb7c,
     plinthHex: 0x132613,
     plinthAccentHex: 0x7cb96c,
-    heroCam: [0.54, 1.04, 2.48],
+    heroCam: [0.46, 1.03, 2.46],
   },
   b2: {
     bgHex: 0x0b1c13,
@@ -49,7 +49,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0x98d6b6,
     plinthHex: 0x11241a,
     plinthAccentHex: 0x77b895,
-    heroCam: [-0.46, 1.0, 2.48],
+    heroCam: [-0.42, 1.01, 2.46],
   },
   b3: {
     bgHex: 0x0b1d17,
@@ -60,7 +60,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0x8cc9b3,
     plinthHex: 0x11251f,
     plinthAccentHex: 0x72b09a,
-    heroCam: [0.58, 1.04, 2.5],
+    heroCam: [0.5, 1.03, 2.48],
   },
   b4: {
     bgHex: 0x0e1f0b,
@@ -71,7 +71,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0xb2e695,
     plinthHex: 0x142712,
     plinthAccentHex: 0x7ab461,
-    heroCam: [-0.62, 1.02, 2.46],
+    heroCam: [-0.5, 1.02, 2.46],
   },
   b5: {
     bgHex: 0x121f10,
@@ -82,7 +82,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0xc2d89f,
     plinthHex: 0x182816,
     plinthAccentHex: 0xaab986,
-    heroCam: [0.36, 1.04, 2.48],
+    heroCam: [0.34, 1.03, 2.46],
   },
   b6: {
     bgHex: 0x0a1c17,
@@ -93,7 +93,7 @@ const STUDIO_PROFILES: Record<string, StudioProfile> = {
     rimHex: 0x88cbb5,
     plinthHex: 0x10231d,
     plinthAccentHex: 0x6fb19c,
-    heroCam: [0.5, 1.0, 2.48],
+    heroCam: [0.44, 1.01, 2.46],
   },
 };
 
@@ -106,7 +106,7 @@ const DEFAULT_STUDIO_PROFILE: StudioProfile = {
   rimHex: 0x90cb7c,
   plinthHex: 0x132613,
   plinthAccentHex: 0x7cb96c,
-  heroCam: [0, 1.04, 2.48],
+  heroCam: [0, 1.03, 2.46],
 };
 
 interface ModelCalibration {
@@ -114,6 +114,7 @@ interface ModelCalibration {
   backWaistSkipRatio: number;
   roughness: number;
   sheen: number;
+  specularIntensity: number;
   sheenColor: number;
   weaveKind: 'denim' | 'ripstop' | 'canvas';
   liningColor: number;
@@ -130,13 +131,14 @@ interface ModelCalibration {
 const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
   b1: {
     frontWaistSkipRatio: 0.012,
-    backWaistSkipRatio: 0.008,
-    roughness: 0.9,
-    sheen: 0.16,
-    sheenColor: 0x9aa888,
+    backWaistSkipRatio: 0.006,
+    roughness: 0.93,
+    sheen: 0.08,
+    specularIntensity: 0.14,
+    sheenColor: 0x8f9d7d,
     weaveKind: 'canvas',
-    liningColor: 0x262f1f,
-    pocketBagColor: 0xaba68f,
+    liningColor: 0x47523a,
+    pocketBagColor: 0xb0aa92,
     cargoBulge: true,
     pleatRidges: false,
     kneeDarts: false,
@@ -146,14 +148,15 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     elasticWaist: false,
   },
   b2: {
-    frontWaistSkipRatio: 0.092,
-    backWaistSkipRatio: 0.01,
-    roughness: 0.84,
-    sheen: 0.18,
-    sheenColor: 0x8a939c,
+    frontWaistSkipRatio: 0.095,
+    backWaistSkipRatio: 0.008,
+    roughness: 0.89,
+    sheen: 0.1,
+    specularIntensity: 0.16,
+    sheenColor: 0x7f878f,
     weaveKind: 'denim',
-    liningColor: 0x1a1d21,
-    pocketBagColor: 0xbcb5a2,
+    liningColor: 0x41464d,
+    pocketBagColor: 0xc2baa7,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -163,14 +166,15 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     elasticWaist: false,
   },
   b3: {
-    frontWaistSkipRatio: 0.01,
-    backWaistSkipRatio: 0.008,
-    roughness: 0.64,
-    sheen: 0.32,
-    sheenColor: 0x859994,
+    frontWaistSkipRatio: 0.008,
+    backWaistSkipRatio: 0.006,
+    roughness: 0.72,
+    sheen: 0.18,
+    specularIntensity: 0.24,
+    sheenColor: 0x869793,
     weaveKind: 'ripstop',
-    liningColor: 0x242c2e,
-    pocketBagColor: 0x454f50,
+    liningColor: 0x3b4446,
+    pocketBagColor: 0x576162,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: true,
@@ -180,14 +184,15 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     elasticWaist: true,
   },
   b4: {
-    frontWaistSkipRatio: 0.02,
-    backWaistSkipRatio: 0.008,
-    roughness: 0.88,
-    sheen: 0.15,
-    sheenColor: 0x8c9783,
+    frontWaistSkipRatio: 0.016,
+    backWaistSkipRatio: 0.006,
+    roughness: 0.92,
+    sheen: 0.08,
+    specularIntensity: 0.14,
+    sheenColor: 0x848f7c,
     weaveKind: 'canvas',
-    liningColor: 0x1b1e1a,
-    pocketBagColor: 0xb8b09a,
+    liningColor: 0x363b35,
+    pocketBagColor: 0xbfb7a1,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -197,14 +202,15 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     elasticWaist: false,
   },
   b5: {
-    frontWaistSkipRatio: 0.012,
-    backWaistSkipRatio: 0.008,
-    roughness: 0.86,
-    sheen: 0.22,
-    sheenColor: 0xede4d0,
+    frontWaistSkipRatio: 0.01,
+    backWaistSkipRatio: 0.006,
+    roughness: 0.9,
+    sheen: 0.12,
+    specularIntensity: 0.15,
+    sheenColor: 0xebe1cc,
     weaveKind: 'canvas',
-    liningColor: 0x9c917b,
-    pocketBagColor: 0xd6ccb6,
+    liningColor: 0xb7ac94,
+    pocketBagColor: 0xded4be,
     cargoBulge: false,
     pleatRidges: true,
     kneeDarts: false,
@@ -214,14 +220,15 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     elasticWaist: false,
   },
   b6: {
-    frontWaistSkipRatio: 0.084,
-    backWaistSkipRatio: 0.01,
-    roughness: 0.82,
-    sheen: 0.2,
-    sheenColor: 0x88a0bd,
+    frontWaistSkipRatio: 0.086,
+    backWaistSkipRatio: 0.008,
+    roughness: 0.88,
+    sheen: 0.1,
+    specularIntensity: 0.16,
+    sheenColor: 0x839bb8,
     weaveKind: 'denim',
-    liningColor: 0x223042,
-    pocketBagColor: 0xc2bba8,
+    liningColor: 0x58687a,
+    pocketBagColor: 0xc4bca8,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -243,7 +250,6 @@ interface Pants3DViewerProps {
 
 interface MaskData {
   canvas: HTMLCanvasElement;
-  normalCanvas: HTMLCanvasElement;
   pixels: Uint8ClampedArray;
   width: number;
   height: number;
@@ -273,6 +279,10 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
   return t * t * (3 - 2 * t);
 }
 
+function superPow(v: number, exp: number): number {
+  return Math.sign(v) * Math.pow(Math.abs(v), exp);
+}
+
 function loadHtmlImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -284,13 +294,74 @@ function loadHtmlImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+// Filters out isolated tiny cord loops / drawstring toggles while keeping pockets & main fabric spans
+function filterMainGarmentBounds(
+  data: Uint8ClampedArray,
+  y: number,
+  xStart: number,
+  xEnd: number,
+  W: number
+): [number, number, number] {
+  const runs: Array<[number, number, number]> = [];
+  let inRun = false;
+  let rStart = 0;
+
+  for (let x = xStart; x <= xEnd; x++) {
+    const opaque = data[(y * W + x) * 4 + 3] > 85;
+    if (opaque && !inRun) {
+      inRun = true;
+      rStart = x;
+    } else if (!opaque && inRun) {
+      inRun = false;
+      runs.push([rStart, x - 1, x - rStart]);
+    }
+  }
+  if (inRun) {
+    runs.push([rStart, xEnd, xEnd - rStart + 1]);
+  }
+
+  if (runs.length === 0) return [W, -1, 0];
+
+  // Merge runs separated by small stitch gaps <= 7px
+  const merged: Array<[number, number, number]> = [runs[0]];
+  for (let i = 1; i < runs.length; i++) {
+    const prev = merged[merged.length - 1];
+    const cur = runs[i];
+    if (cur[0] - prev[1] <= 7) {
+      prev[1] = cur[1];
+      prev[2] = prev[1] - prev[0] + 1;
+    } else {
+      merged.push([cur[0], cur[1], cur[2]]);
+    }
+  }
+
+  const maxSpan = merged.reduce((acc, r) => Math.max(acc, r[2]), 0);
+  const minKeepSpan = Math.max(20, Math.round(W * 0.022));
+
+  let minX = W;
+  let maxX = -1;
+  let totalWidth = 0;
+
+  for (let i = 0; i < merged.length; i++) {
+    const [a, b, len] = merged[i];
+    if (len >= minKeepSpan || (maxSpan < 40 && len >= 10)) {
+      if (a < minX) minX = a;
+      if (b > maxX) maxX = b;
+      totalWidth += len;
+    }
+  }
+
+  return [minX, maxX, totalWidth];
+}
+
 function extractAndDilateCutout(
   img: HTMLImageElement,
   removeWhiteBg: boolean,
   isLightGarment: boolean
 ): MaskData {
-  const W = 640;
-  const H = 800;
+  // High-resolution 960x1200 baking keeps stitching, denim slub, rivets, and fabric weave razor-sharp
+  const W = 960;
+  const H = 1200;
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -385,36 +456,28 @@ function extractAndDilateCutout(
     }
   }
 
-  // Record exact garment silhouette bounds BEFORE dilation
+  // Record clean main garment silhouette bounds BEFORE edge color dilation
   let topY = H - 1;
   let botY = 0;
   const wholeBounds: Array<[number, number]> = new Array(H);
   let weightedX = 0;
   let totalOpaque = 0;
+  const minSubstantiveRowWidth = Math.round(W * 0.08); // filters out thin dangling bottom cord loops
 
   for (let y = 0; y < H; y++) {
-    let minX = W;
-    let maxX = -1;
-    let count = 0;
-    for (let x = 0; x < W; x++) {
-      if (data[(y * W + x) * 4 + 3] > 80) {
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        count++;
-        weightedX += x;
-        totalOpaque++;
-      }
-    }
-    if (count > 20) {
+    const [minX, maxX, spanW] = filterMainGarmentBounds(data, y, 0, W - 1, W);
+    if (spanW >= minSubstantiveRowWidth && maxX > minX) {
       if (y < topY) topY = y;
       if (y > botY) botY = y;
       wholeBounds[y] = [minX, maxX];
+      weightedX += (minX + maxX) * 0.5 * spanW;
+      totalOpaque += spanW;
     } else {
       wholeBounds[y] = [Math.round(W * 0.25), Math.round(W * 0.75)];
     }
   }
 
-  if (botY <= topY + 40) {
+  if (botY <= topY + 60) {
     topY = Math.round(H * 0.08);
     botY = Math.round(H * 0.92);
   }
@@ -429,9 +492,9 @@ function extractAndDilateCutout(
     const [rMin, rMax] = wholeBounds[y];
     const centerGap =
       data[(y * W + midX) * 4 + 3] < 60 &&
-      data[(y * W + midX - 5) * 4 + 3] < 60 &&
-      data[(y * W + midX + 5) * 4 + 3] < 60;
-    if (centerGap && rMin < midX - 24 && rMax > midX + 24) {
+      data[(y * W + midX - 8) * 4 + 3] < 60 &&
+      data[(y * W + midX + 8) * 4 + 3] < 60;
+    if (centerGap && rMin < midX - 36 && rMax > midX + 36) {
       crotchY = y;
       break;
     }
@@ -441,27 +504,20 @@ function extractAndDilateCutout(
   const rightLegBounds: Array<[number, number]> = new Array(H);
 
   for (let y = 0; y < H; y++) {
-    let lMin = W;
-    let lMax = -1;
-    let rMin = W;
-    let rMax = -1;
-    for (let x = 0; x < W; x++) {
-      if (data[(y * W + x) * 4 + 3] > 80) {
-        if (x < midX) {
-          if (x < lMin) lMin = x;
-          if (x > lMax) lMax = x;
-        } else {
-          if (x < rMin) rMin = x;
-          if (x > rMax) rMax = x;
-        }
-      }
-    }
-    if (lMax <= lMin + 10) {
+    const [lMinRaw, lMaxRaw, lSpan] = filterMainGarmentBounds(data, y, 0, midX - 1, W);
+    const [rMinRaw, rMaxRaw, rSpan] = filterMainGarmentBounds(data, y, midX, W - 1, W);
+
+    let lMin = lMinRaw;
+    let lMax = lMaxRaw;
+    let rMin = rMinRaw;
+    let rMax = rMaxRaw;
+
+    if (lSpan < 16 || lMax <= lMin + 14) {
       lMin = wholeBounds[y][0];
-      lMax = midX - 5;
+      lMax = midX - 8;
     }
-    if (rMax <= rMin + 10) {
-      rMin = midX + 5;
+    if (rSpan < 16 || rMax <= rMin + 14) {
+      rMin = midX + 8;
       rMax = wholeBounds[y][1];
     }
     leftLegBounds[y] = [lMin, lMax];
@@ -471,7 +527,7 @@ function extractAndDilateCutout(
   // Keep a clean copy of original pixels for mask/relief queries
   const cleanPixels = new Uint8ClampedArray(data);
 
-  // Dilate pure garment fabric colors outward by 8px so texture filtering NEVER bleeds background/white halos
+  // Dilate pure garment fabric colors outward by 10px so mipmapping/UV wrap NEVER bleeds white edges
   let valid = new Uint8Array(W * H);
   for (let p = 0; p < W * H; p++) {
     if (data[p * 4 + 3] >= 200) {
@@ -482,7 +538,7 @@ function extractAndDilateCutout(
     }
   }
 
-  for (let pass = 0; pass < 8; pass++) {
+  for (let pass = 0; pass < 10; pass++) {
     const nextValid = new Uint8Array(valid);
     for (let y = 1; y < H - 1; y++) {
       for (let x = 1; x < W - 1; x++) {
@@ -521,7 +577,7 @@ function extractAndDilateCutout(
   let sumG = 0;
   let sumB = 0;
   let sumN = 0;
-  for (let p = 0; p < W * H; p += 13) {
+  for (let p = 0; p < W * H; p += 17) {
     if (cleanPixels[p * 4 + 3] >= 200) {
       sumR += cleanPixels[p * 4];
       sumG += cleanPixels[p * 4 + 1];
@@ -544,12 +600,8 @@ function extractAndDilateCutout(
 
   ctx.putImageData(imgData, 0, 0);
 
-  // Build 1:1 photo-matched wrinkle, pocket, seam & stitching normal map
-  const normalCanvas = buildGarmentDetailNormalCanvas(cleanPixels, data, W, H);
-
   return {
     canvas,
-    normalCanvas,
     pixels: cleanPixels,
     width: W,
     height: H,
@@ -561,92 +613,6 @@ function extractAndDilateCutout(
     leftLegBounds,
     rightLegBounds,
   };
-}
-
-function buildGarmentDetailNormalCanvas(
-  cleanPixels: Uint8ClampedArray,
-  dilatedData: Uint8ClampedArray,
-  W: number,
-  H: number
-): HTMLCanvasElement {
-  const total = W * H;
-  const luma = new Float32Array(total);
-  for (let p = 0; p < total; p++) {
-    const p4 = p * 4;
-    luma[p] =
-      (dilatedData[p4] * 0.299 + dilatedData[p4 + 1] * 0.587 + dilatedData[p4 + 2] * 0.114) / 255;
-  }
-
-  // Separable 5-tap blur for smooth fabric fold heightfield without noisy grain
-  const temp = new Float32Array(total);
-  const smooth = new Float32Array(total);
-  for (let y = 0; y < H; y++) {
-    const rowOff = y * W;
-    for (let x = 0; x < W; x++) {
-      let sum = 0;
-      for (let k = -3; k <= 3; k++) {
-        const sx = Math.max(0, Math.min(W - 1, x + k));
-        sum += luma[rowOff + sx];
-      }
-      temp[rowOff + x] = sum / 7;
-    }
-  }
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      let sum = 0;
-      for (let k = -3; k <= 3; k++) {
-        const sy = Math.max(0, Math.min(H - 1, y + k));
-        sum += temp[sy * W + x];
-      }
-      smooth[y * W + x] = sum / 7;
-    }
-  }
-
-  const normalCanvas = document.createElement('canvas');
-  normalCanvas.width = W;
-  normalCanvas.height = H;
-  const nCtx = normalCanvas.getContext('2d')!;
-  const nData = nCtx.createImageData(W, H);
-  const nd = nData.data;
-
-  const strength = 2.6;
-  for (let y = 0; y < H; y++) {
-    const ym = Math.max(0, y - 2);
-    const yp = Math.min(H - 1, y + 2);
-    for (let x = 0; x < W; x++) {
-      const xm = Math.max(0, x - 2);
-      const xp = Math.min(W - 1, x + 2);
-      const p = y * W + x;
-      const p4 = p * 4;
-
-      // Attenuate normals smoothly within 3px of outer mask border so silhouette edge stays clean
-      const edgeA =
-        Math.min(
-          cleanPixels[p4 + 3],
-          cleanPixels[(y * W + Math.max(0, x - 3)) * 4 + 3],
-          cleanPixels[(y * W + Math.min(W - 1, x + 3)) * 4 + 3],
-          cleanPixels[(Math.max(0, y - 3) * W + x) * 4 + 3],
-          cleanPixels[(Math.min(H - 1, y + 3) * W + x) * 4 + 3]
-        ) / 255;
-
-      const hL = 0.55 * luma[y * W + xm] + 0.45 * smooth[y * W + xm];
-      const hR = 0.55 * luma[y * W + xp] + 0.45 * smooth[y * W + xp];
-      const hU = 0.55 * luma[ym * W + x] + 0.45 * smooth[ym * W + x];
-      const hD = 0.55 * luma[yp * W + x] + 0.45 * smooth[yp * W + x];
-
-      const dx = (hR - hL) * 0.5 * strength * edgeA;
-      const dy = (hD - hU) * 0.5 * strength * edgeA;
-      const nz = 1.0;
-      const invLen = 1 / Math.sqrt(dx * dx + dy * dy + nz * nz);
-
-      nd[p4] = Math.round(((-dx * invLen) * 0.5 + 0.5) * 255);
-      nd[p4 + 1] = Math.round(((dy * invLen) * 0.5 + 0.5) * 255);
-      nd[p4 + 2] = Math.round(((nz * invLen) * 0.5 + 0.5) * 255);
-      nd[p4 + 3] = 255;
-    }
-  }
-  nCtx.putImageData(nData, 0, 0);
-  return normalCanvas;
 }
 
 async function getOrBuildGarmentAssets(spec: Pants3DSpec): Promise<BakedGarmentCacheEntry> {
@@ -678,17 +644,17 @@ function getFabricNormalCanvas(weaveKind: 'denim' | 'ripstop' | 'canvas'): HTMLC
     for (let x = 0; x < S; x++) {
       let h = 0.5;
       if (weaveKind === 'ripstop') {
-        const gridX = x % 10 === 0 || x % 10 === 1 ? 0.24 : 0;
-        const gridY = y % 10 === 0 || y % 10 === 1 ? 0.24 : 0;
-        h = 0.46 + Math.max(gridX, gridY) + ((((x + y) & 1) * 2 - 1) * 0.04);
+        const gridX = x % 10 === 0 || x % 10 === 1 ? 0.2 : 0;
+        const gridY = y % 10 === 0 || y % 10 === 1 ? 0.2 : 0;
+        h = 0.46 + Math.max(gridX, gridY) + ((((x + y) & 1) * 2 - 1) * 0.035);
       } else if (weaveKind === 'denim') {
         const diag = (x + y * 2) % 6;
-        const twill = diag < 4 ? 0.14 : -0.15;
-        const slub = Math.sin(x * 0.5) * 0.03 + Math.cos(y * 0.3) * 0.03;
+        const twill = diag < 4 ? 0.12 : -0.13;
+        const slub = Math.sin(x * 0.5) * 0.025 + Math.cos(y * 0.3) * 0.025;
         h = 0.5 + twill + slub;
       } else {
-        const warp = Math.sin(x * 1.5) * 0.07;
-        const weft = Math.cos(y * 1.5) * 0.07;
+        const warp = Math.sin(x * 1.5) * 0.06;
+        const weft = Math.cos(y * 1.5) * 0.06;
         h = 0.5 + warp + weft;
       }
       heightField[y * S + x] = Math.max(0, Math.min(1, h));
@@ -701,7 +667,7 @@ function getFabricNormalCanvas(weaveKind: 'denim' | 'ripstop' | 'canvas'): HTMLC
   const nCtx = normalCanvas.getContext('2d')!;
   const nData = nCtx.createImageData(S, S);
   const nd = nData.data;
-  const strength = weaveKind === 'denim' ? 1.85 : weaveKind === 'ripstop' ? 1.7 : 1.35;
+  const strength = weaveKind === 'denim' ? 1.5 : weaveKind === 'ripstop' ? 1.45 : 1.15;
 
   for (let y = 0; y < S; y++) {
     const ym = (y - 1 + S) % S;
@@ -740,8 +706,7 @@ function createStudioFloorTexture(centerHex: string, edgeHex: string): THREE.Can
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, S, S);
 
-  // Subtle architectural concentric studio rings on the deep green showroom floor
-  ctx.strokeStyle = 'rgba(211, 201, 172, 0.09)';
+  ctx.strokeStyle = 'rgba(211, 201, 172, 0.08)';
   ctx.lineWidth = 2;
   [105, 165, 225].forEach((r) => {
     ctx.beginPath();
@@ -838,20 +803,6 @@ function weldCoincidentNormals(geo: THREE.BufferGeometry, vertexCountToWeld: num
   normAttr.needsUpdate = true;
 }
 
-function sampleLumaRelief(mask: MaskData, px: number, py: number): number {
-  const ix = Math.max(2, Math.min(mask.width - 3, Math.round(px)));
-  const iy = Math.max(2, Math.min(mask.height - 3, Math.round(py)));
-  const idx = (iy * mask.width + ix) * 4;
-  if (mask.pixels[idx + 3] < 160) return 0;
-  const luma = (mask.pixels[idx] * 0.299 + mask.pixels[idx + 1] * 0.587 + mask.pixels[idx + 2] * 0.114) / 255;
-  // Local 6px contrast captures creases/folds without warping flat silhouette
-  const idxL = (iy * mask.width + Math.max(0, ix - 6)) * 4;
-  const idxR = (iy * mask.width + Math.min(mask.width - 1, ix + 6)) * 4;
-  const lL = (mask.pixels[idxL] * 0.299 + mask.pixels[idxL + 1] * 0.587 + mask.pixels[idxL + 2] * 0.114) / 255;
-  const lR = (mask.pixels[idxR] * 0.299 + mask.pixels[idxR + 1] * 0.587 + mask.pixels[idxR + 2] * 0.114) / 255;
-  return luma - (lL + lR) * 0.5;
-}
-
 interface UnifiedTrouserMetrics {
   waistRx: number;
   waistRz: number;
@@ -859,10 +810,11 @@ interface UnifiedTrouserMetrics {
   tagPos: [number, number, number];
 }
 
-// Builds ONE seamless, water-tight, 1:1 photo-silhouette-matched 3D trouser mesh:
-// - Uses exact true pixel-to-world aspect ratio from the garment cutout
-// - Projects exact Front photo UVs (`uv`) and Back photo UVs (`aUvBack`) directly in GPU shader
-// - Sculpts subtle 3D relief for cargo pockets, pleats, knee darts, selvedge cuffs, & fabric wrinkles
+// Tailored 1:1 Photo-Matched 3D Trouser Builder:
+// - Uses clean superellipse garment cross-section matching invisible-mannequin studio drape (no game-like sausage blobs)
+// - Reads BOTH Front and Back photo silhouettes cleanly (ignoring dangling cord loops)
+// - Angle-compensated UVs prevent horizontal pixel smearing on side seams
+// - Sealed double-sided opaque interior (pelvis, sealed crotch bridge, inside legs, cuffs, & front pocket bags)
 function createPhotoMatchedTrouserMesh(
   specId: string,
   frontMask: MaskData,
@@ -878,8 +830,8 @@ function createPhotoMatchedTrouserMesh(
   const yWaist = 1.84;
   const worldGarmentH = yWaist - yHem; // 1.80
 
-  const frontGarmentPixH = Math.max(40, frontMask.botY - frontMask.topY);
-  const backGarmentPixH = Math.max(40, backMask.botY - backMask.topY);
+  const frontGarmentPixH = Math.max(60, frontMask.botY - frontMask.topY);
+  const backGarmentPixH = Math.max(60, backMask.botY - backMask.topY);
   const pixelToWorld = worldGarmentH / frontGarmentPixH;
 
   // Exact crotch split height from front cutout photo
@@ -901,11 +853,10 @@ function createPhotoMatchedTrouserMesh(
       mask.topY,
       Math.min(mask.botY, Math.round(THREE.MathUtils.lerp(yStart, yEnd, 1 - tFromBottom)))
     );
-    // Smooth 5-row vertical average so silhouette curve is silky-smooth
     let mnSum = 0;
     let mxSum = 0;
     let cnt = 0;
-    for (let dy = -2; dy <= 2; dy++) {
+    for (let dy = -3; dy <= 3; dy++) {
       const sy = Math.max(mask.topY, Math.min(mask.botY, py + dy));
       mnSum += boundsArr[sy][0];
       mxSum += boundsArr[sy][1];
@@ -913,21 +864,25 @@ function createPhotoMatchedTrouserMesh(
     }
     const mn = mnSum / cnt;
     const mx = mxSum / cnt;
-    const rx = Math.max(0.06, (mx - mn) * 0.5 * (worldGarmentH / Math.max(40, mask.botY - mask.topY)));
-    const cx = ((mn + mx) * 0.5 - mask.midX) * (worldGarmentH / Math.max(40, mask.botY - mask.topY));
+    const pScale = worldGarmentH / Math.max(60, mask.botY - mask.topY);
+    const rx = Math.max(0.06, (mx - mn) * 0.5 * pScale);
+    const cx = ((mn + mx) * 0.5 - mask.midX) * pScale;
     return { mn, mx, rx, cx, py };
   };
 
-  // True photo waist & hip proportions with realistic standing baggy depth (not flat!)
-  const waistF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, 0.96);
+  // Sample front waist & hip (using backMask for waist width when front photo shows open collar)
+  const frontWaistCheckV = calib.frontWaistSkipRatio > 0.05 ? 0.88 : 0.96;
+  const waistF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, frontWaistCheckV);
+  const waistB = sampleSpanAndCx(backMask, backMask.wholeBounds, backMask.topY, backMask.crotchY, 0.96);
   const hipF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, 0.12);
-  const waistRx = waistF.rx;
-  const waistRz = waistRx * 0.65;
 
-  // Exact bifurcation geometry matching the photo's hip width & 3D volume
+  const waistRx = THREE.MathUtils.lerp(waistF.rx, waistB.rx, 0.35);
+  const waistRz = waistRx * 0.62;
+
+  // Bifurcation geometry matching exact hip proportions
   const splitLegRx = Math.max(0.12, hipF.rx * 0.515);
-  const splitLegRz = splitLegRx * 0.84;
-  const splitCrotchHalfZ = 0.04;
+  const splitLegRz = splitLegRx * 0.82;
+  const splitCrotchHalfZ = 0.038;
   const splitInnerAngle = Math.acos(Math.min(0.97, splitCrotchHalfZ / splitLegRz));
   const splitLegCx = splitLegRx * Math.sin(splitInnerAngle);
 
@@ -970,42 +925,53 @@ function createPhotoMatchedTrouserMesh(
     return { x, z };
   };
 
+  // Angle-compensated horizontal sample ratio: stays 1:1 on front/back faces while preventing side-seam texture smearing
+  const evalAngleCompensatedRatio = (nxSin: number, nzCos: number): number => {
+    const ang = Math.atan2(nxSin, nzCos); // -PI..PI, 0 = front (+Z)
+    if (Math.abs(ang) <= Math.PI * 0.5) {
+      return THREE.MathUtils.lerp(nxSin, ang / (Math.PI * 0.5), 0.22);
+    }
+    return Math.sign(nxSin || 1) * 0.99;
+  };
+
   // Compute Front & Back UVs for Pelvis directly from photo bounds
-  const computePelvisUVs = (x: number, cosP: number, vPelvis: number) => {
-    const fTop = frontMask.topY + frontGarmentPixH * calib.frontWaistSkipRatio * smoothstep(-0.1, 0.75, cosP);
+  const computePelvisUVs = (x: number, sinP: number, cosP: number, vPelvis: number) => {
+    // For open-waist photos (b2/b6), bowl curve skips interior back collar cleanly at front center while climbing to side waistband
+    const fWorldApproxNx = THREE.MathUtils.clamp(sinP, -1, 1);
+    const bowlFactor = calib.frontWaistSkipRatio > 0.05 ? 1.0 - 0.78 * fWorldApproxNx * fWorldApproxNx : 1.0;
+    const fTop =
+      frontMask.topY +
+      frontGarmentPixH * calib.frontWaistSkipRatio * smoothstep(-0.08, 0.7, cosP) * bowlFactor;
     const bTop = backMask.topY + backGarmentPixH * calib.backWaistSkipRatio;
-    const fY = THREE.MathUtils.lerp(frontMask.crotchY + 3, fTop, vPelvis);
-    const bY = THREE.MathUtils.lerp(backMask.crotchY + 3, bTop, vPelvis);
+    const fY = THREE.MathUtils.lerp(frontMask.crotchY + 4, fTop, vPelvis);
+    const bY = THREE.MathUtils.lerp(backMask.crotchY + 4, bTop, vPelvis);
 
     const fRow = Math.max(frontMask.topY, Math.min(frontMask.botY, Math.round(fY)));
     const bRow = Math.max(backMask.topY, Math.min(backMask.botY, Math.round(bY)));
     const [fMin, fMax] = frontMask.wholeBounds[fRow];
     const [bMin, bMax] = backMask.wholeBounds[bRow];
 
-    const fSpan = Math.max(12, fMax - fMin);
-    const bSpan = Math.max(12, bMax - bMin);
+    const fSpan = Math.max(16, fMax - fMin);
+    const bSpan = Math.max(16, bMax - bMin);
     const fMid = (fMin + fMax) * 0.5;
     const bMid = (bMin + bMax) * 0.5;
 
-    // Normalize x cleanly across actual pixel width
     const fWorldHalf = fSpan * 0.5 * pixelToWorld;
-    const nx = THREE.MathUtils.clamp(x / Math.max(0.05, fWorldHalf), -1, 1);
+    const nxGeom = THREE.MathUtils.clamp(x / Math.max(0.05, fWorldHalf), -1, 1);
 
-    const fPx = fMid + nx * (fSpan * 0.485);
-    const bPx = bMid - nx * (bSpan * 0.485);
+    const uRatioF = evalAngleCompensatedRatio(nxGeom, cosP);
+    const uRatioB = evalAngleCompensatedRatio(nxGeom, -cosP);
+
+    const fPx = fMid + uRatioF * (fSpan * 0.488);
+    const bPx = bMid - uRatioB * (bSpan * 0.488);
 
     return {
       uF: THREE.MathUtils.clamp(fPx / fW, 0.002, 0.998),
       vF: 1.0 - THREE.MathUtils.clamp(fY / fH, 0.002, 0.998),
       uB: THREE.MathUtils.clamp(bPx / bW, 0.002, 0.998),
       vB: 1.0 - THREE.MathUtils.clamp(bY / bH, 0.002, 0.998),
-      fPx,
-      fY,
     };
   };
-
-  // Belt-loop angles around waistband (2 front, 2 side, 2 back)
-  const loopAngles = [0.54, 1.6, 2.58, 3.7, 4.68, 5.74];
 
   // 1. PELVIS & WAIST TRUNK (vPelvis: 0 crotch -> 1 waist)
   const pelvisGrid: number[][] = [];
@@ -1014,9 +980,10 @@ function createPhotoMatchedTrouserMesh(
     const baseY = THREE.MathUtils.lerp(ySplit, yWaist, v);
 
     const sliceF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, v);
-    const ovalRx = sliceF.rx;
-    const ovalRz = ovalRx * 0.68;
-    const splitBlend = 1 - smoothstep(0.0, 0.52, v);
+    const sliceB = sampleSpanAndCx(backMask, backMask.wholeBounds, backMask.topY, backMask.crotchY, v);
+    const ovalRx = THREE.MathUtils.lerp(sliceF.rx, sliceB.rx, 0.22);
+    const ovalRz = ovalRx * 0.62;
+    const splitBlend = 1 - smoothstep(0.0, 0.5, v);
 
     const row: number[] = [];
     for (let c = 0; c <= pelvisCols; c++) {
@@ -1025,9 +992,13 @@ function createPhotoMatchedTrouserMesh(
       const sinP = Math.sin(phi);
       const cosP = Math.cos(phi);
 
-      const seatDepth = cosP < 0 ? 1.18 - 0.05 * v : 1.04;
-      let ox = sliceF.cx * (1 - splitBlend) + sinP * ovalRx;
-      let oz = cosP * ovalRz * seatDepth;
+      // Tailored superellipse cross-section keeps front & back flat-draped like the studio photos
+      const sSinP = superPow(sinP, 0.88);
+      const sCosP = superPow(cosP, 0.88);
+      const seatDepth = cosP < 0 ? 1.12 - 0.06 * v : 1.0;
+
+      let ox = sliceF.cx * (1 - splitBlend) + sSinP * ovalRx;
+      let oz = sCosP * ovalRz * seatDepth;
 
       if (splitBlend > 0) {
         const isRightHalf = c <= outerHalfCols;
@@ -1038,88 +1009,33 @@ function createPhotoMatchedTrouserMesh(
         oz = THREE.MathUtils.lerp(oz, sp.z, splitBlend);
       }
 
-      const { uF, vF, uB, vB, fPx, fY } = computePelvisUVs(ox, cosP, v);
+      const { uF, vF, uB, vB } = computePelvisUVs(ox, sinP, cosP, v);
 
-      // Subtle photo-driven surface relief & tailored waistband/fly/pockets/belt-loops
-      const photoRelief = cosP > 0 ? sampleLumaRelief(frontMask, fPx, fY) * 0.022 : 0;
-      let relief = photoRelief * Math.sin(v * Math.PI);
+      // Clean, strictly photo-aligned structural shaping (zero fake blobs)
+      let relief = 0;
       let pelvisAO = 1.0;
 
-      // Tailored waistband ridge + seam groove
-      if (v > 0.922) {
-        relief += 0.006 * smoothstep(0.922, 0.955, v);
-      } else if (v > 0.895) {
-        relief -= 0.0028 * Math.sin(((v - 0.895) / 0.027) * Math.PI);
-        pelvisAO = Math.min(pelvisAO, 0.94);
+      if (v > 0.925) {
+        relief += 0.004 * smoothstep(0.925, 0.96, v);
       }
 
-      // 6 sculpted vertical belt loops around waistband (skip for elasticWaist)
-      if (!calib.elasticWaist && v > 0.895 && v < 0.992) {
-        for (let li = 0; li < loopAngles.length; li++) {
-          const dPhi = Math.abs(Math.atan2(Math.sin(phi - loopAngles[li]), Math.cos(phi - loopAngles[li])));
-          if (dPhi < 0.14) {
-            const loopBump = Math.exp(-Math.pow(dPhi * 24, 2));
-            relief += 0.0072 * loopBump;
-            if (dPhi > 0.045 && dPhi < 0.12) pelvisAO = Math.min(pelvisAO, 0.92);
-          }
-        }
-      }
-
-      // Front fly J-placket ridge & central seam
-      if (cosP > 0.84 && v > 0.34 && v < 0.92) {
-        const flyProfile = smoothstep(0.84, 0.97, cosP) * Math.sin(((v - 0.34) / 0.58) * Math.PI);
-        relief += 0.0052 * flyProfile;
-      }
-
-      // Front side slant pocket welt relief
-      if (cosP > 0.32 && Math.abs(sinP) > 0.56 && Math.abs(sinP) < 0.88 && v > 0.54 && v < 0.9) {
-        const weltRidge = Math.exp(-Math.pow((Math.abs(sinP) - 0.72) * 14, 2));
-        relief += 0.0042 * weltRidge * Math.sin(((v - 0.54) / 0.36) * Math.PI);
-      }
-
-      // Back yoke curved crease & patch pockets puff
-      if (cosP < -0.25 && v > 0.7 && v < 0.82) {
-        const yokeLine = Math.exp(-Math.pow((v - (0.75 + Math.abs(sinP) * 0.03)) * 55, 2));
-        relief -= 0.003 * yokeLine;
-        if (yokeLine > 0.4) pelvisAO = Math.min(pelvisAO, 0.93);
-      }
-      if (cosP < -0.45 && Math.abs(sinP) > 0.16 && Math.abs(sinP) < 0.65 && v > 0.22 && v < 0.58) {
-        const pockWidth = Math.sin(((Math.abs(sinP) - 0.16) / 0.49) * Math.PI);
-        const pockHeight = Math.sin(((v - 0.22) / 0.36) * Math.PI);
-        relief += 0.0068 * pockWidth * pockHeight * smoothstep(-0.45, -0.75, cosP);
-      }
-
-      // Elastic waistband gathering ripples (b3)
-      if (calib.elasticWaist && v > 0.915) {
-        const gather = Math.sin(phi * 26) * smoothstep(0.915, 0.96, v);
-        relief += 0.004 * gather;
-        if (gather < -0.3) pelvisAO = Math.min(pelvisAO, 0.93);
-      }
-
-      // Back right waistband leather patch micro-relief (b2)
-      if (calib.cuffStep && cosP < -0.55 && sinP < -0.15 && sinP > -0.62 && v > 0.85 && v < 0.97) {
-        relief += 0.0055 * smoothstep(-0.55, -0.78, cosP);
-      }
-
-      if (calib.pleatRidges && cosP > 0.25) {
-        const p1 = Math.exp(-Math.pow((sinP - 0.33) * 9.5, 2)) + Math.exp(-Math.pow((sinP + 0.33) * 9.5, 2));
-        const p2 = Math.exp(-Math.pow((sinP - 0.56) * 10.5, 2)) + Math.exp(-Math.pow((sinP + 0.56) * 10.5, 2));
-        relief += (p1 * 0.018 + p2 * 0.012) * smoothstep(0.25, 0.85, cosP) * smoothstep(0.05, 0.42, v);
+      if (calib.pleatRidges && cosP > 0.35) {
+        const p1 = Math.exp(-Math.pow((sinP - 0.32) * 10, 2)) + Math.exp(-Math.pow((sinP + 0.32) * 10, 2));
+        const p2 = Math.exp(-Math.pow((sinP - 0.56) * 11, 2)) + Math.exp(-Math.pow((sinP + 0.56) * 11, 2));
+        relief += (p1 * 0.011 + p2 * 0.008) * smoothstep(0.35, 0.85, cosP) * smoothstep(0.05, 0.35, v);
       }
       ox += sinP * relief;
       oz += cosP * relief;
 
-      // Anatomical waistband profile: slight back rise, slight front button dip for b2/b6
-      const frontDip = calib.frontWaistSkipRatio > 0.05 ? -0.022 : -0.008;
+      const frontDip = calib.frontWaistSkipRatio > 0.05 ? -0.018 : -0.006;
       const waistTilt =
         v > 0.72
-          ? ((v - 0.72) / 0.28) * (cosP < 0 ? 0.022 * Math.abs(cosP) : frontDip * cosP)
+          ? ((v - 0.72) / 0.28) * (cosP < 0 ? 0.016 * Math.abs(cosP) : frontDip * cosP)
           : 0;
-      const crotchDip = v < 0.22 ? -0.028 * Math.pow(Math.abs(cosP), 2.5) * (1 - v / 0.22) : 0;
+      const crotchDip = v < 0.22 ? -0.026 * Math.pow(Math.abs(cosP), 2.5) * (1 - v / 0.22) : 0;
 
-      // Subtle crevice AO at crotch saddle
-      if (v < 0.24) {
-        pelvisAO = Math.min(pelvisAO, 1 - 0.14 * (1 - v / 0.24) * (1 - Math.abs(sinP) * 0.45));
+      if (v < 0.22) {
+        pelvisAO = Math.min(pelvisAO, 1 - 0.1 * (1 - v / 0.22) * (1 - Math.abs(sinP) * 0.45));
       }
 
       row.push(pushVert(ox, baseY + waistTilt + crotchDip, oz, uF, vF, uB, vB, pelvisAO));
@@ -1137,25 +1053,26 @@ function createPhotoMatchedTrouserMesh(
     }
   }
 
-  // 2. LEFT & RIGHT LEGS (1:1 pixel-matched to photo's exact leg contour & inner gap)
+  // 2. LEFT & RIGHT LEGS (1:1 silhouette from BOTH front & back photos)
   const evalLegSlice = (isLeft: boolean, vLeg: number) => {
-    const bounds = isLeft ? frontMask.leftLegBounds : frontMask.rightLegBounds;
-    const sl = sampleSpanAndCx(frontMask, bounds, frontMask.crotchY, frontMask.botY, vLeg);
+    const fBounds = isLeft ? frontMask.leftLegBounds : frontMask.rightLegBounds;
+    const bBounds = isLeft ? backMask.rightLegBounds : backMask.leftLegBounds;
+    const slF = sampleSpanAndCx(frontMask, fBounds, frontMask.crotchY, frontMask.botY, vLeg);
+    const slB = sampleSpanAndCx(backMask, bBounds, backMask.crotchY, backMask.botY, vLeg);
     const splitBlend = smoothstep(0.76, 1.0, vLeg);
 
     let cutMod = 0;
-    if (calib.cuffStep && vLeg < 0.095 && vLeg > 0.008) {
-      // Turned-up selvedge cuff with subtle top fold indentation around vLeg ≈ 0.088
-      const cuffBody = smoothstep(0.008, 0.026, vLeg) * (1 - smoothstep(0.082, 0.095, vLeg));
-      const foldTuck = Math.exp(-Math.pow((vLeg - 0.086) * 90, 2));
-      cutMod = 0.011 * cuffBody - 0.0055 * foldTuck;
+    if (calib.cuffStep && vLeg < 0.09 && vLeg > 0.008) {
+      const cuffBody = smoothstep(0.008, 0.026, vLeg) * (1 - smoothstep(0.078, 0.09, vLeg));
+      cutMod = 0.007 * cuffBody;
     }
 
-    const rx = THREE.MathUtils.lerp(sl.rx + cutMod, splitLegRx, splitBlend);
-    const rz = rx * (0.87 - 0.05 * splitBlend);
-    const cx = THREE.MathUtils.lerp(sl.cx, isLeft ? -splitLegCx : splitLegCx, splitBlend);
-    const cz = Math.sin(vLeg * Math.PI) * 0.018 - Math.sin(vLeg * Math.PI * 2) * 0.008;
-    return { rx, rz, cx, cz, fMin: sl.mn, fMax: sl.mx, fPy: sl.py };
+    const baseRx = THREE.MathUtils.lerp(slF.rx, slB.rx, 0.22) + cutMod;
+    const rx = THREE.MathUtils.lerp(baseRx, splitLegRx, splitBlend);
+    const rz = rx * (0.82 - 0.04 * splitBlend);
+    const cx = THREE.MathUtils.lerp(slF.cx, isLeft ? -splitLegCx : splitLegCx, splitBlend);
+    const cz = Math.sin(vLeg * Math.PI) * 0.012;
+    return { rx, rz, cx, cz, fMin: slF.mn, fMax: slF.mx, fPy: slF.py };
   };
 
   const legGrids: { left: number[][]; right: number[][] } = { left: [], right: [] };
@@ -1164,7 +1081,6 @@ function createPhotoMatchedTrouserMesh(
     const side: 1 | -1 = isLeft ? -1 : 1;
     const halfInnerCols = Math.floor(innerArcCols / 2);
     const bBoundsArr = isLeft ? backMask.rightLegBounds : backMask.leftLegBounds;
-    const legSeed = isLeft ? 1.85 : -0.45;
 
     const legGrid: number[][] = [];
     for (let r = 0; r <= legRows; r++) {
@@ -1176,10 +1092,10 @@ function createPhotoMatchedTrouserMesh(
       const bY = THREE.MathUtils.lerp(backMask.botY - 1, backMask.crotchY, vLeg);
       const bRow = Math.max(backMask.topY, Math.min(backMask.botY, Math.round(bY)));
       const [bMin, bMax] = bBoundsArr[bRow];
-      const bSpan = Math.max(12, bMax - bMin);
+      const bSpan = Math.max(16, bMax - bMin);
       const bMid = (bMin + bMax) * 0.5;
 
-      const fSpan = Math.max(12, prof.fMax - prof.fMin);
+      const fSpan = Math.max(16, prof.fMax - prof.fMin);
       const fMid = (prof.fMin + prof.fMax) * 0.5;
 
       const row: number[] = [];
@@ -1191,8 +1107,8 @@ function createPhotoMatchedTrouserMesh(
         if (c < halfInnerCols) {
           const tInner = 0.5 + (c / halfInnerCols) * 0.5;
           const ang = THREE.MathUtils.lerp(-phiEdge, -(Math.PI * 2 - phiEdge), tInner);
-          const legX = prof.cx + side * prof.rx * Math.cos(ang);
-          const legZ = prof.cz + prof.rz * Math.sin(ang);
+          const legX = prof.cx + side * prof.rx * superPow(Math.cos(ang), 0.9);
+          const legZ = prof.cz + prof.rz * superPow(Math.sin(ang), 0.9);
 
           const spZ = THREE.MathUtils.lerp(-splitCrotchHalfZ, splitCrotchHalfZ, tInner);
           px = THREE.MathUtils.lerp(legX, 0, topSplitBlend);
@@ -1206,8 +1122,8 @@ function createPhotoMatchedTrouserMesh(
           const ang = THREE.MathUtils.lerp(phiEdge, -phiEdge, alpha);
 
           const sp = evalSplitRingPoint(side, alpha);
-          const legX = prof.cx + side * prof.rx * Math.cos(ang);
-          const legZ = prof.cz + prof.rz * Math.sin(ang);
+          const legX = prof.cx + side * prof.rx * superPow(Math.cos(ang), 0.9);
+          const legZ = prof.cz + prof.rz * superPow(Math.sin(ang), 0.9);
 
           px = THREE.MathUtils.lerp(legX, sp.x, topSplitBlend);
           pz = THREE.MathUtils.lerp(legZ, sp.z, topSplitBlend);
@@ -1218,8 +1134,8 @@ function createPhotoMatchedTrouserMesh(
         } else {
           const tInner = ((c - halfInnerCols - outerHalfCols) / halfInnerCols) * 0.5;
           const ang = THREE.MathUtils.lerp(-phiEdge, -(Math.PI * 2 - phiEdge), tInner);
-          const legX = prof.cx + side * prof.rx * Math.cos(ang);
-          const legZ = prof.cz + prof.rz * Math.sin(ang);
+          const legX = prof.cx + side * prof.rx * superPow(Math.cos(ang), 0.9);
+          const legZ = prof.cz + prof.rz * superPow(Math.sin(ang), 0.9);
 
           const spZ = THREE.MathUtils.lerp(-splitCrotchHalfZ, splitCrotchHalfZ, tInner);
           px = THREE.MathUtils.lerp(legX, 0, topSplitBlend);
@@ -1230,84 +1146,55 @@ function createPhotoMatchedTrouserMesh(
           if (vLeg > 0.85) py -= 0.012 * saddleArch * smoothstep(0.85, 1.0, vLeg);
         }
 
-        // Exact front/back screen-space UV from actual leg horizontal ratio
-        const nx = THREE.MathUtils.clamp((px - prof.cx) / Math.max(0.02, prof.rx), -1, 1);
-        const fPx = fMid + nx * (fSpan * 0.485);
-        const bPx = bMid - nx * (bSpan * 0.485);
-
-        const uF = THREE.MathUtils.clamp(fPx / fW, 0.002, 0.998);
-        const vF = 1.0 - THREE.MathUtils.clamp(prof.fPy / fH, 0.002, 0.998);
-        const uB = THREE.MathUtils.clamp(bPx / bW, 0.002, 0.998);
-        const vB = 1.0 - THREE.MathUtils.clamp(bY / bH, 0.002, 0.998);
-
-        // Multi-scale photo relief + organic cloth gravity drape + model sculptural features
         const lx = px - prof.cx;
         const lz = pz - prof.cz;
         const texTheta = Math.atan2(lx, lz);
         const outDirX = Math.sin(texTheta);
         const outDirZ = Math.cos(texTheta);
 
-        let disp = (outDirZ > 0 ? sampleLumaRelief(frontMask, fPx, prof.fPy) : 0) * 0.019 * Math.sin(vLeg * Math.PI);
+        // Angle-compensated front/back UVs (zero side-seam horizontal texture smearing!)
+        const nxGeom = THREE.MathUtils.clamp(lx / Math.max(0.02, prof.rx), -1, 1);
+        const uRatioF = evalAngleCompensatedRatio(nxGeom, outDirZ);
+        const uRatioB = evalAngleCompensatedRatio(nxGeom, -outDirZ);
+
+        const fPx = fMid + uRatioF * (fSpan * 0.488);
+        const bPx = bMid - uRatioB * (bSpan * 0.488);
+
+        const uF = THREE.MathUtils.clamp(fPx / fW, 0.002, 0.998);
+        const vF = 1.0 - THREE.MathUtils.clamp(prof.fPy / fH, 0.002, 0.998);
+        const uB = THREE.MathUtils.clamp(bPx / bW, 0.002, 0.998);
+        const vB = 1.0 - THREE.MathUtils.clamp(bY / bH, 0.002, 0.998);
+
+        // Clean, restrained sculptural silhouettes matched strictly to each garment
+        let disp = 0;
         let legAO = 1.0;
 
-        // Organic hanging cloth flutes + knee break / back-of-knee crease (subtle so photo silhouette stays crisp)
-        const drapeMask = Math.sin(vLeg * Math.PI) * (1 - Math.abs(outDirX) * 0.42);
-        const clothFlute =
-          Math.sin(texTheta * 3 + vLeg * 4.5 + legSeed) * 0.0085 +
-          Math.cos(texTheta * 5 - vLeg * 6.5 + legSeed) * 0.0045;
-        disp += clothFlute * drapeMask;
-        if (clothFlute < -0.004) legAO -= 0.045 * drapeMask;
-
-        // Subtle anatomical knee slack in front & hollow behind knee
-        if (vLeg > 0.35 && vLeg < 0.6) {
-          const kneeBell = Math.sin(((vLeg - 0.35) / 0.25) * Math.PI);
-          if (outDirZ > 0.3) {
-            disp += 0.0075 * kneeBell * smoothstep(0.3, 0.85, outDirZ);
-          } else if (outDirZ < -0.35) {
-            const backHollow = Math.sin(((vLeg - 0.35) / 0.25) * Math.PI * 2);
-            disp -= 0.0055 * Math.abs(backHollow) * smoothstep(-0.35, -0.85, outDirZ);
-            legAO -= 0.055 * kneeBell * smoothstep(-0.35, -0.85, outDirZ);
-          }
-        }
-
-        if (calib.cargoBulge && vLeg > 0.56 && vLeg < 0.88) {
-          // Sculpted 3D cargo bellow relief + flap overhang tuck crease
-          const outerSide = isLeft ? smoothstep(-0.35, -0.92, outDirX) : smoothstep(0.35, 0.92, outDirX);
-          const pocketBox = smoothstep(0.56, 0.62, vLeg) * (1 - smoothstep(0.82, 0.88, vLeg));
-          const flapTuck = Math.exp(-Math.pow((vLeg - 0.79) * 58, 2));
-          disp += (0.028 * pocketBox - 0.007 * flapTuck) * outerSide * (1 - topSplitBlend);
-          if (flapTuck > 0.35) legAO -= 0.07 * outerSide * flapTuck;
-        } else if (calib.cargoBulge && vLeg > 0.03 && vLeg < 0.09) {
-          const outerSide = isLeft ? smoothstep(-0.45, -0.92, outDirX) : smoothstep(0.45, 0.92, outDirX);
-          disp += 0.0055 * outerSide * Math.sin(((vLeg - 0.03) / 0.06) * Math.PI);
-        } else if (calib.kneeDarts && vLeg > 0.38 && vLeg < 0.68) {
-          const kneeZone = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI);
-          const dartPleat = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI * 2) * 0.005;
-          disp += (0.017 * kneeZone + dartPleat) * smoothstep(0.15, 0.85, outDirZ);
-        } else if (calib.elasticWaist && vLeg < 0.075) {
-          const cuffGather = Math.sin(texTheta * 20) * 0.004 * (1 - vLeg / 0.075);
-          disp += cuffGather;
-        } else if (calib.doubleKnee && vLeg > 0.28 && vLeg < 0.9) {
-          const panelStep = smoothstep(0.28, 0.32, vLeg) * (1 - smoothstep(0.86, 0.9, vLeg));
-          disp += 0.0055 * panelStep * smoothstep(0.32, 0.72, outDirZ);
-        } else if (calib.puddleHem && vLeg < 0.26) {
-          const stackZone = 1 - vLeg / 0.26;
-          const phaseOffset = isLeft ? 1.3 : -0.6;
-          const stackWave = Math.sin(vLeg * 38 + texTheta * 2 + phaseOffset);
-          disp += 0.016 * stackZone * stackWave;
-          if (stackWave < -0.25) legAO -= 0.07 * stackZone * (-stackWave);
-        } else if (calib.pleatRidges && vLeg > 0.38) {
-          const frontCrease = Math.exp(-Math.pow(outDirX * 5.2, 2)) * smoothstep(0.35, 0.9, outDirZ);
-          disp += 0.013 * frontCrease * (1 - topSplitBlend * 0.3);
+        if (calib.cargoBulge && vLeg > 0.54 && vLeg < 0.84) {
+          const outerSide = isLeft ? smoothstep(-0.38, -0.92, outDirX) : smoothstep(0.38, 0.92, outDirX);
+          const pocketBox = smoothstep(0.54, 0.62, vLeg) * (1 - smoothstep(0.76, 0.84, vLeg));
+          disp += 0.02 * outerSide * pocketBox * (1 - topSplitBlend);
+        } else if (calib.kneeDarts && vLeg > 0.39 && vLeg < 0.64) {
+          const kneeZone = Math.sin(((vLeg - 0.39) / 0.25) * Math.PI);
+          disp += 0.011 * kneeZone * smoothstep(0.25, 0.85, outDirZ);
+        } else if (calib.doubleKnee && vLeg > 0.28 && vLeg < 0.88) {
+          const panelStep = smoothstep(0.28, 0.32, vLeg) * (1 - smoothstep(0.84, 0.88, vLeg));
+          disp += 0.004 * panelStep * smoothstep(0.35, 0.72, outDirZ);
+        } else if (calib.puddleHem && vLeg < 0.22) {
+          const stackZone = 1 - vLeg / 0.22;
+          const phaseOffset = isLeft ? 1.2 : -0.6;
+          disp += 0.01 * stackZone * Math.sin(vLeg * 30 + texTheta * 2 + phaseOffset);
+        } else if (calib.pleatRidges && vLeg > 0.42) {
+          const frontCrease = Math.exp(-Math.pow(outDirX * 5.2, 2)) * smoothstep(0.4, 0.92, outDirZ);
+          disp += 0.01 * frontCrease * (1 - topSplitBlend * 0.3);
         }
 
         px += outDirX * disp * (1 - topSplitBlend * 0.7);
         pz += outDirZ * disp * (1 - topSplitBlend * 0.7);
 
-        // Subtle inner-thigh saddle & crotch contact darkening
+        // Subtle inner-thigh contact occlusion only near crotch saddle
         const isInnerVert = c < halfInnerCols || c > halfInnerCols + outerHalfCols;
-        if (isInnerVert && vLeg > 0.68) {
-          legAO = Math.min(legAO, 1 - 0.18 * smoothstep(0.68, 1.0, vLeg));
+        if (isInnerVert && vLeg > 0.72) {
+          legAO = Math.min(legAO, 1 - 0.14 * smoothstep(0.72, 1.0, vLeg));
         }
 
         row.push(pushVert(px, py, pz, uF, vF, uB, vB, legAO));
@@ -1348,8 +1235,7 @@ function createPhotoMatchedTrouserMesh(
   outerGeo.computeVertexNormals();
   weldCoincidentNormals(outerGeo, posList.length / 3);
 
-  // 3. COMPLETE SOLID OPAQUE GARMENT INTERIOR + ROLLED WAISTBAND & HEM RIMS + POCKET BAGS
-  // Never transparent from top view, side angles, or underneath!
+  // 3. COMPLETE SEALED OPAQUE GARMENT INTERIOR (DoubleSide + Sealed Crotch Saddle + Pocket Bags + Rims)
   const posAttr = outerGeo.attributes.position as THREE.BufferAttribute;
   const normAttr = outerGeo.attributes.normal as THREE.BufferAttribute;
 
@@ -1388,7 +1274,7 @@ function createPhotoMatchedTrouserMesh(
     const nz = normAttr.getZ(outerIdx);
     return {
       x: ox - nx * thickness,
-      y: lockY ? oy : oy - ny * thickness * 0.4,
+      y: lockY ? oy : oy - ny * thickness * 0.35,
       z: oz - nz * thickness,
     };
   };
@@ -1399,7 +1285,7 @@ function createPhotoMatchedTrouserMesh(
     const v = r / pelvisRows;
     const isWaistBand = v > 0.91;
     const colTint = isWaistBand ? waistTapeC : baseLinC;
-    const cavAO = isWaistBand ? 0.88 + 0.1 * ((v - 0.91) / 0.09) : 0.34 + 0.44 * v;
+    const cavAO = isWaistBand ? 0.9 + 0.08 * ((v - 0.91) / 0.09) : 0.48 + 0.4 * v;
 
     const row: number[] = [];
     for (let c = 0; c <= pelvisCols; c++) {
@@ -1414,7 +1300,6 @@ function createPhotoMatchedTrouserMesh(
       const b = innerPelvisGrid[r][c + 1];
       const d = innerPelvisGrid[r + 1][c];
       const e = innerPelvisGrid[r + 1][c + 1];
-      // Reversed from outer pelvis (a, b, d) -> inward normals!
       linIdx.push(a, d, b, b, d, e);
     }
   }
@@ -1436,11 +1321,10 @@ function createPhotoMatchedTrouserMesh(
 
     outerTopRing.push(pushInnerVert(ox, oy, oz, c / pelvisCols, 0.96, waistTapeC, 0.96));
     midRimRing.push(
-      pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 + 0.0045, (oz + iz) * 0.5, c / pelvisCols, 0.98, waistTapeC, 1.0)
+      pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 + 0.0042, (oz + iz) * 0.5, c / pelvisCols, 0.98, waistTapeC, 1.0)
     );
   }
   for (let c = 0; c < pelvisCols; c++) {
-    // outerTopRing -> midRimRing -> topInnerRow (upward normals!)
     linIdx.push(
       outerTopRing[c],
       outerTopRing[c + 1],
@@ -1459,15 +1343,16 @@ function createPhotoMatchedTrouserMesh(
     );
   }
 
-  // 3c. Full Inner Left & Right Leg Tubes (r: 0 hem -> legRows split) + Bottom Hem Rolled Rim
+  // 3c. Full Inner Left & Right Leg Tubes + Bottom Hem Rolled Rim
+  const innerLegTopRows: { left: number[]; right: number[] } = { left: [], right: [] };
   const buildInnerLeg = (isLeft: boolean) => {
     const outerGrid = isLeft ? legGrids.left : legGrids.right;
     const innerLegGrid: number[][] = [];
     for (let r = 0; r <= legRows; r++) {
       const vLeg = r / legRows;
-      // Cavity AO: realistic shadow inside thigh/knee, soft floor bounce near hem
+      // Rich interior visibility (bright enough from top view without crushing into a black hole)
       const cavAO =
-        vLeg < 0.2 ? THREE.MathUtils.lerp(0.32, 0.16, vLeg / 0.2) : THREE.MathUtils.lerp(0.16, 0.34, (vLeg - 0.2) / 0.8);
+        vLeg < 0.25 ? THREE.MathUtils.lerp(0.45, 0.34, vLeg / 0.25) : THREE.MathUtils.lerp(0.34, 0.52, (vLeg - 0.25) / 0.75);
       const row: number[] = [];
       for (let c = 0; c <= legCols; c++) {
         const p = offsetInwardVert(outerGrid[r][c], clothThickness, r === 0);
@@ -1475,6 +1360,9 @@ function createPhotoMatchedTrouserMesh(
       }
       innerLegGrid.push(row);
     }
+
+    if (isLeft) innerLegTopRows.left = innerLegGrid[legRows];
+    else innerLegTopRows.right = innerLegGrid[legRows];
 
     for (let r = 0; r < legRows; r++) {
       for (let c = 0; c < legCols; c++) {
@@ -1490,7 +1378,7 @@ function createPhotoMatchedTrouserMesh(
       }
     }
 
-    // Rolled bottom hem edge connecting outerHem -> midHem -> innerHem
+    // Rolled bottom hem edge
     const outerHemRing: number[] = [];
     const midHemRing: number[] = [];
     const outBotRow = outerGrid[0];
@@ -1505,9 +1393,9 @@ function createPhotoMatchedTrouserMesh(
       const iy = linPos[ii * 3 + 1];
       const iz = linPos[ii * 3 + 2];
 
-      outerHemRing.push(pushInnerVert(ox, oy, oz, c / legCols, 0.0, baseLinC, 0.42));
+      outerHemRing.push(pushInnerVert(ox, oy, oz, c / legCols, 0.0, baseLinC, 0.55));
       midHemRing.push(
-        pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 - 0.0025, (oz + iz) * 0.5, c / legCols, 0.02, baseLinC, 0.36)
+        pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 - 0.0025, (oz + iz) * 0.5, c / legCols, 0.02, baseLinC, 0.48)
       );
     }
     for (let c = 0; c < legCols; c++) {
@@ -1552,7 +1440,36 @@ function createPhotoMatchedTrouserMesh(
   buildInnerLeg(false);
   buildInnerLeg(true);
 
-  // 3d. Subtle Cotton Inner Pocket Bags visible from Top View on Left & Right Front Hips
+  // 3d. Airtight Inner Crotch Saddle Bridge sealing innerPelvis[0] <-> innerLeftLeg[top] <-> innerRightLeg[top]
+  const bridgeHalf = Math.floor(innerArcCols / 2);
+  const rightTop = innerLegTopRows.right;
+  const leftTop = innerLegTopRows.left;
+  const stitchBridgeSide = (topRing: number[]) => {
+    for (let i = 0; i < bridgeHalf; i++) {
+      const i0 = topRing[i];
+      const i1 = topRing[i + 1];
+      const j0 = topRing[legCols - i];
+      const j1 = topRing[legCols - i - 1];
+      linIdx.push(i0, i1, j0, i1, j1, j0);
+    }
+  };
+  stitchBridgeSide(rightTop);
+  stitchBridgeSide(leftTop);
+
+  // Also seal front-to-back crotch seam between innerRightLeg[0] and innerLeftLeg[0] across x = 0
+  for (let i = 0; i < bridgeHalf; i++) {
+    const r0 = rightTop[i];
+    const r1 = rightTop[i + 1];
+    const l0 = leftTop[legCols - i];
+    const l1 = leftTop[legCols - i - 1];
+    linIdx.push(r0, r1, l0, r1, l1, l0);
+  }
+  const pelSplitFront = innerPelvisGrid[0][0];
+  const pelSplitBack = innerPelvisGrid[0][outerHalfCols];
+  linIdx.push(pelSplitFront, rightTop[0], leftTop[legCols]);
+  linIdx.push(pelSplitBack, leftTop[bridgeHalf], rightTop[bridgeHalf]);
+
+  // 3e. Cotton Inner Pocket Bags visible from Top View on Left & Right Front Hips
   const buildInnerPocketBag = (isLeft: boolean) => {
     const startCol = isLeft ? pelvisCols - 15 : 4;
     const endCol = isLeft ? pelvisCols - 4 : 15;
@@ -1567,12 +1484,11 @@ function createPhotoMatchedTrouserMesh(
         const oi = pelvisGrid[r][c];
         const nx = normAttr.getX(oi);
         const nz = normAttr.getZ(oi);
-        // Gentle pouch sag inward (0.011m at center of pocket, 0.005m at stitched seams)
         const bagPouch = 0.0055 + 0.008 * Math.sin(tU * Math.PI) * Math.sin(tV * Math.PI);
         const px = posAttr.getX(oi) - nx * bagPouch;
         const py = posAttr.getY(oi);
         const pz = posAttr.getZ(oi) - nz * bagPouch;
-        const bagAO = 0.46 + 0.36 * tV;
+        const bagAO = 0.56 + 0.34 * tV;
         row.push(pushInnerVert(px, py, pz, tU * 0.5, tV * 0.5, pocketC, bagAO));
       }
       pGrid.push(row);
@@ -1659,7 +1575,7 @@ export default function Pants3DViewer({
 
   useEffect(() => {
     if (!presetRequest) return;
-    const dist = 2.48;
+    const dist = 2.46;
     switch (presetRequest.key) {
       case 'hero': {
         const p = STUDIO_PROFILES[spec.id] ?? DEFAULT_STUDIO_PROFILE;
@@ -1667,16 +1583,16 @@ export default function Pants3DViewer({
         break;
       }
       case 'front':
-        presetTargetRef.current = new THREE.Vector3(0, 1.04, dist);
+        presetTargetRef.current = new THREE.Vector3(0, 1.03, dist);
         break;
       case 'angle45':
-        presetTargetRef.current = new THREE.Vector3(dist * 0.707, 1.1, dist * 0.707);
+        presetTargetRef.current = new THREE.Vector3(dist * 0.707, 1.08, dist * 0.707);
         break;
       case 'side':
-        presetTargetRef.current = new THREE.Vector3(dist, 1.04, 0.02);
+        presetTargetRef.current = new THREE.Vector3(dist, 1.03, 0.02);
         break;
       case 'back':
-        presetTargetRef.current = new THREE.Vector3(0, 1.04, -dist);
+        presetTargetRef.current = new THREE.Vector3(0, 1.03, -dist);
         break;
       case 'top':
         presetTargetRef.current = new THREE.Vector3(0, 2.7, 0.92);
@@ -1727,7 +1643,7 @@ export default function Pants3DViewer({
     });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.96;
+    renderer.toneMappingExposure = 1.02;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = !isSoftwareGl;
@@ -1743,7 +1659,7 @@ export default function Pants3DViewer({
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(stageProfile.bgHex);
     scene.fog = new THREE.FogExp2(stageProfile.bgHex, 0.078);
-    scene.environmentIntensity = 0.28;
+    scene.environmentIntensity = 0.16;
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const envTex = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -1772,12 +1688,12 @@ export default function Pants3DViewer({
     };
     controls.addEventListener('start', handleControlStart);
 
-    // Moody, sculpted 000GREEN fashion studio lighting (focused on garment, deep green room)
-    const hemiLight = new THREE.HemisphereLight(0xd9ebd0, stageProfile.bgHex, 0.56);
+    // Photo-faithful balanced studio lighting: broad soft wrap preserves true photographed folds & color
+    const hemiLight = new THREE.HemisphereLight(0xf3f7ef, stageProfile.bgHex, 0.96);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.38);
-    keyLight.position.set(2.8, 3.6, 2.5);
+    const keyLight = new THREE.DirectionalLight(0xfffdf8, 0.78);
+    keyLight.position.set(2.4, 3.8, 2.8);
     keyLight.castShadow = !isSoftwareGl;
     keyLight.shadow.mapSize.width = 1024;
     keyLight.shadow.mapSize.height = 1024;
@@ -1789,15 +1705,15 @@ export default function Pants3DViewer({
     keyLight.shadow.camera.top = d;
     keyLight.shadow.camera.bottom = -d;
     keyLight.shadow.bias = -0.00025;
-    keyLight.shadow.normalBias = 0.012;
+    keyLight.shadow.normalBias = 0.015;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xb2d4b4, 0.44);
+    const fillLight = new THREE.DirectionalLight(0xd9ebd9, 0.44);
     fillLight.position.set(-2.9, 2.2, 2.0);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 0.96);
-    rimLight.position.set(-1.6, 2.6, -2.9);
+    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 0.72);
+    rimLight.position.set(-1.5, 2.6, -3.0);
     scene.add(rimLight);
 
     const disposables: Array<{ dispose: () => void }> = [envTex];
@@ -1895,7 +1811,6 @@ export default function Pants3DViewer({
     shadowPlane.position.y = 0.003;
     rootGroup.add(shadowPlane);
 
-    // Subtle botanical motes floating quietly in studio air
     const moteCount = 36;
     const motePos = new Float32Array(moteCount * 3);
     for (let i = 0; i < moteCount; i++) {
@@ -1911,7 +1826,7 @@ export default function Pants3DViewer({
       color: stageProfile.rimHex,
       size: 0.018,
       transparent: true,
-      opacity: 0.3,
+      opacity: 0.28,
       sizeAttenuation: true,
       depthWrite: false,
     });
@@ -1979,7 +1894,7 @@ export default function Pants3DViewer({
       const dist = _offsetVec.length();
       const rawDeg = THREE.MathUtils.radToDeg(Math.atan2(_offsetVec.x, _offsetVec.z));
       const normDeg = Math.round(((rawDeg % 360) + 360) % 360);
-      const zoomRatio = Number((2.48 / Math.max(0.8, dist)).toFixed(2));
+      const zoomRatio = Number((2.46 / Math.max(0.8, dist)).toFixed(2));
       if (normDeg !== lastTelemetryRef.current.deg || zoomRatio !== lastTelemetryRef.current.zoom) {
         lastTelemetryRef.current = { deg: normDeg, zoom: zoomRatio, ts: now };
         onTelemetryRef.current(normDeg, zoomRatio);
@@ -2094,33 +2009,22 @@ export default function Pants3DViewer({
         const weaveNormTex = new THREE.CanvasTexture(normalCanvas);
         weaveNormTex.wrapS = THREE.RepeatWrapping;
         weaveNormTex.wrapT = THREE.RepeatWrapping;
-        weaveNormTex.repeat.set(18, 22);
+        weaveNormTex.repeat.set(24, 30);
         weaveNormTex.anisotropy = maxAniso;
         weaveNormTex.needsUpdate = true;
 
-        const frontNormTex = new THREE.CanvasTexture(frontMask.normalCanvas);
-        frontNormTex.wrapS = THREE.ClampToEdgeWrapping;
-        frontNormTex.wrapT = THREE.ClampToEdgeWrapping;
-        frontNormTex.anisotropy = maxAniso;
-        frontNormTex.needsUpdate = true;
+        disposables.push(frontTex, backTex, weaveNormTex);
 
-        const backNormTex = new THREE.CanvasTexture(backMask.normalCanvas);
-        backNormTex.wrapS = THREE.ClampToEdgeWrapping;
-        backNormTex.wrapT = THREE.ClampToEdgeWrapping;
-        backNormTex.anisotropy = maxAniso;
-        backNormTex.needsUpdate = true;
-
-        disposables.push(frontTex, backTex, weaveNormTex, frontNormTex, backNormTex);
-
-        // Full native-photo Dual-Projection + Photo-Normal PBR Material
+        // Photogrammetry-inspired Dual-Projection PBR Material (true studio look, zero plastic sheen)
         const garmentMat = new THREE.MeshPhysicalMaterial({
           map: frontTex,
           normalMap: weaveNormTex,
-          normalScale: new THREE.Vector2(0.24, 0.24),
+          normalScale: new THREE.Vector2(0.16, 0.16),
           roughness: calib.roughness,
-          metalness: 0.02,
+          metalness: 0.0,
+          specularIntensity: calib.specularIntensity,
           sheen: calib.sheen,
-          sheenRoughness: 0.82,
+          sheenRoughness: 0.88,
           sheenColor: new THREE.Color(calib.sheenColor),
           vertexColors: true,
           side: THREE.FrontSide,
@@ -2128,8 +2032,6 @@ export default function Pants3DViewer({
 
         garmentMat.onBeforeCompile = (shader) => {
           shader.uniforms.uBackMap = { value: backTex };
-          shader.uniforms.uFrontNormMap = { value: frontNormTex };
-          shader.uniforms.uBackNormMap = { value: backNormTex };
 
           shader.vertexShader =
             'attribute vec2 aUvBack;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
@@ -2148,7 +2050,7 @@ export default function Pants3DViewer({
           );
 
           shader.fragmentShader =
-            'uniform sampler2D uBackMap;\nuniform sampler2D uFrontNormMap;\nuniform sampler2D uBackNormMap;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
+            'uniform sampler2D uBackMap;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
             shader.fragmentShader;
 
           shader.fragmentShader = shader.fragmentShader.replace(
@@ -2157,39 +2059,24 @@ export default function Pants3DViewer({
                vec4 frontSample = texture2D( map, vMapUv );
                vec4 backSample = texture2D( uBackMap, vUvBack );
                float nZ = normalize( vObjNormal ).z;
-               float sideMix = smoothstep( -0.22, 0.22, nZ );
-               float seamAO = 1.0 - 0.08 * ( 1.0 - smoothstep( 0.0, 0.14, abs( nZ ) ) );
+               float sideMix = smoothstep( -0.32, 0.32, nZ );
+               float seamAO = 1.0 - 0.03 * ( 1.0 - smoothstep( 0.0, 0.15, abs( nZ ) ) );
                vec3 blendedPhoto = mix( backSample.rgb, frontSample.rgb, sideMix ) * seamAO;
                diffuseColor *= vec4( blendedPhoto, 1.0 );
              #endif`
           );
-
-          shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <normal_fragment_maps>',
-            `#ifdef USE_NORMALMAP_TANGENTSPACE
-               vec3 weaveN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
-               weaveN.xy *= normalScale;
-               vec3 fDetN = texture2D( uFrontNormMap, vMapUv ).xyz * 2.0 - 1.0;
-               vec3 bDetN = texture2D( uBackNormMap, vUvBack ).xyz * 2.0 - 1.0;
-               bDetN.x = -bDetN.x;
-               float nZNorm = normalize( vObjNormal ).z;
-               float normMix = smoothstep( -0.22, 0.22, nZNorm );
-               vec3 detailN = mix( bDetN, fDetN, normMix );
-               vec3 mapN = normalize( vec3( weaveN.xy + detailN.xy * 0.88, max( 0.25, weaveN.z ) ) );
-               normal = normalize( tbn * mapN );
-             #endif`
-          );
         };
-        garmentMat.customProgramCacheKey = () => `pants-dual-proj-v2-${spec.id}`;
+        garmentMat.customProgramCacheKey = () => `pants-dual-proj-v3-${spec.id}`;
 
+        // DoubleSide opaque interior lining so looking from ANY top or bottom angle is 100% solid
         const liningMat = new THREE.MeshStandardMaterial({
           color: 0xffffff,
           normalMap: weaveNormTex,
-          normalScale: new THREE.Vector2(0.22, 0.22),
+          normalScale: new THREE.Vector2(0.18, 0.18),
           roughness: 0.94,
-          metalness: 0.02,
+          metalness: 0.0,
           vertexColors: true,
-          side: THREE.FrontSide,
+          side: THREE.DoubleSide,
         });
 
         const { outerGeo, liningGeo, metrics } = createPhotoMatchedTrouserMesh(

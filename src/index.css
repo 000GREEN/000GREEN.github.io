@@ -278,29 +278,7 @@ input[type="number"].no-spinner {
   animation: wheel-flash-pulse 0.32s ease-out both;
 }
 
-/* 000GREEN Interactive Welcome Intro & 3D Garment Showcase (GPU Composited) */
-@keyframes intro-portal-in {
-  0% {
-    opacity: 0;
-    transform: translateY(14px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes intro-ring-breathe {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  50% {
-    transform: scale(1.09);
-    opacity: 0.9;
-  }
-}
-
+/* 000GREEN 3D Garment Showcase (GPU Composited) */
 @keyframes modal-3d-in {
   0% {
     opacity: 0;
@@ -312,24 +290,12 @@ input[type="number"].no-spinner {
   }
 }
 
-.animate-intro-portal {
-  animation: intro-portal-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: transform, opacity;
-}
-
-.animate-intro-ring {
-  animation: intro-ring-breathe 3.8s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
 .animate-modal-3d {
   animation: modal-3d-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-intro-portal,
-  .animate-intro-ring,
   .animate-modal-3d,
   .animate-logo-jump,
   .letter-hop {

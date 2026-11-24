@@ -754,112 +754,6 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
   );
 }
 
-interface IntroOverlayProps {
-  isClosing: boolean;
-  logoBumping: boolean;
-  onLogoTap: () => void;
-  onEnter: () => void;
-  onSkip: () => void;
-}
-
-function IntroOverlay({ isClosing, logoBumping, onLogoTap, onEnter, onSkip }: IntroOverlayProps) {
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onSkip();
-      } else if (e.key === 'Enter') {
-        onEnter();
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onEnter, onSkip]);
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Bienvenida a 000GREEN"
-      className={`fixed inset-0 z-[70] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 transition-all duration-300 ease-out ${
-        isClosing ? 'opacity-0 scale-[1.03] pointer-events-none' : 'opacity-100 scale-100'
-      }`}
-    >
-      {/* Atmospheric forest radial glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(circle at 50% 42%, rgba(126, 154, 100, 0.22) 0%, rgba(24, 50, 22, 0.35) 38%, rgba(0, 0, 0, 0.92) 78%)',
-        }}
-      />
-
-      <div className="relative z-10 max-w-lg w-full bg-[#0E180D]/95 border-2 border-[#548A4C] rounded-3xl p-7 sm:p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-hidden animate-intro-portal">
-        {/* Top subtle accent line */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#9BD08A]/70 to-transparent"
-        />
-
-        {/* Reactive Brand Crest with Breathing Ring */}
-        <div className="relative mx-auto w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center mb-5">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 rounded-full border border-[#9BD08A]/45 bg-[#183216]/45 animate-intro-ring"
-          />
-          <button
-            type="button"
-            onClick={onLogoTap}
-            className={`relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-[#D3C9AC] overflow-hidden flex items-center justify-center bg-[#182C15] shadow-[0_0_25px_rgba(155,208,138,0.3)] cursor-pointer transition-transform ${
-              logoBumping ? 'animate-logo-jump ring-2 ring-[#9BD08A]' : 'hover:scale-105'
-            }`}
-            title="000GREEN"
-          >
-            <img
-              src={BRAND_LOGO_SRC}
-              alt="000GREEN Logo Oficial"
-              className="w-full h-full object-contain"
-            />
-          </button>
-        </div>
-
-        <h1
-          translate="no"
-          className="notranslate font-mark font-bold text-3xl sm:text-4xl tracking-[0.22em] text-[#E3DCC3] mb-2"
-        >
-          000GREEN
-        </h1>
-
-        <p className="font-display italic text-xl sm:text-2xl text-[#D3C9AC] mb-3">
-          Siluetas baggy de edición independiente
-        </p>
-
-        <p className="text-xs sm:text-sm text-[#A8C7A2] leading-relaxed max-w-sm mx-auto mb-7">
-          Explorá cada pantalón en vista 3D interactiva 360°, elegí tu talle y completá tu pedido directo.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={onEnter}
-            className="w-full sm:w-auto min-h-[46px] inline-flex items-center justify-center gap-2.5 bg-[#D3C9AC] hover:bg-white text-[#0E140D] font-bold px-7 py-3.5 rounded-full text-xs sm:text-sm uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_24px_rgba(155,208,138,0.28)]"
-          >
-            <span>Entrar al catálogo</span>
-            <span aria-hidden="true">→</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onSkip}
-            className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center px-5 py-3 rounded-full border border-[#4D8046] hover:border-[#9BD08A] bg-[#162B15]/80 text-[#D3C9AC] hover:text-white font-semibold text-xs uppercase tracking-wider transition-colors cursor-pointer"
-          >
-            Omitir
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 interface Garment3DModalProps {
   product: ProductItem;
@@ -1240,16 +1134,7 @@ export default function App() {
   const pendingGmailReturnRef = useRef<{ totalSnapshot: number; leftPage: boolean; launchedAt: number } | null>(null);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
-  // Interactive Welcome Intro (session-aware) & 3D Garment Inspector State
-  const [showIntro, setShowIntro] = useState<boolean>(() => {
-    try {
-      return window.sessionStorage.getItem('000green_intro_seen') !== '1';
-    } catch {
-      return true;
-    }
-  });
-  const [isClosingIntro, setIsClosingIntro] = useState<boolean>(false);
-  const introTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 3D Garment Inspector & Card Tilt State
   const [inspectedProductId, setInspectedProductId] = useState<string | null>(null);
   const [cardTilt, setCardTilt] = useState<Record<string, { rx: number; ry: number; lx: number; ly: number }>>({});
 
@@ -1448,33 +1333,6 @@ export default function App() {
           ytPlayerRef.current.destroy();
         }
       } catch {}
-    };
-  }, []);
-
-  const dismissIntro = useCallback((withAudio: boolean) => {
-    triggerLogoReaction();
-    if (withAudio) {
-      getRouletteAudio();
-      hasUserTriggeredMusic.current = true;
-      startBgMusicRef.current?.();
-    }
-    try {
-      window.sessionStorage.setItem('000green_intro_seen', '1');
-    } catch {}
-    setIsClosingIntro(true);
-    if (introTimerRef.current) clearTimeout(introTimerRef.current);
-    introTimerRef.current = setTimeout(() => {
-      setShowIntro(false);
-      setIsClosingIntro(false);
-    }, 360);
-  }, []);
-
-  const handleEnterIntro = useCallback(() => dismissIntro(true), [dismissIntro]);
-  const handleSkipIntro = useCallback(() => dismissIntro(false), [dismissIntro]);
-
-  useEffect(() => {
-    return () => {
-      if (introTimerRef.current) clearTimeout(introTimerRef.current);
     };
   }, []);
 
@@ -2679,22 +2537,6 @@ export default function App() {
               <ul className="space-y-2 text-[#E3F2DF] font-medium">
                 <li><a href="#catalogo" onClick={triggerLogoReaction} className="hover:text-white transition-colors block py-0.5">Catálogo Oficial</a></li>
                 <li><button type="button" onClick={() => { triggerLogoReaction(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white transition-colors block py-0.5 text-left cursor-pointer">Volver al inicio</button></li>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      triggerLogoReaction();
-                      try {
-                        window.sessionStorage.removeItem('000green_intro_seen');
-                      } catch {}
-                      setIsClosingIntro(false);
-                      setShowIntro(true);
-                    }}
-                    className="hover:text-[#9BD08A] transition-colors block py-0.5 text-left cursor-pointer"
-                  >
-                    Ver intro
-                  </button>
-                </li>
               </ul>
             </div>
             <div className="bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-5 shadow-md space-y-3">
@@ -3128,16 +2970,6 @@ export default function App() {
         );
       })()}
 
-      {/* INTERACTIVE WELCOME INTRO OVERLAY */}
-      {showIntro && (
-        <IntroOverlay
-          isClosing={isClosingIntro}
-          logoBumping={logoBumping}
-          onLogoTap={triggerLogoReaction}
-          onEnter={handleEnterIntro}
-          onSkip={handleSkipIntro}
-        />
-      )}
     </div>
   );
 }
