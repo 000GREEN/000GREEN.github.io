@@ -27,85 +27,85 @@ interface StudioProfile {
   heroCam: [number, number, number];
 }
 
-// Rich, lush 000GREEN architectural studio palettes per pant (never black, never empty)
+// Deep, atmospheric 000GREEN architectural studio palettes per pant (moody, rich contrast, never black)
 const STUDIO_PROFILES: Record<string, StudioProfile> = {
   b1: {
-    bgHex: 0x1b3a1a,
-    wallHex: 0x264e24,
-    floorCenterHex: '#356630',
-    floorEdgeHex: '#183317',
-    columnHex: 0x20441e,
-    rimHex: 0xaee398,
-    plinthHex: 0x244221,
-    plinthAccentHex: 0x9bd08a,
+    bgHex: 0x0c1d0c,
+    wallHex: 0x132b13,
+    floorCenterHex: '#1d3c1b',
+    floorEdgeHex: '#0a170a',
+    columnHex: 0x102510,
+    rimHex: 0x90cb7c,
+    plinthHex: 0x132613,
+    plinthAccentHex: 0x7cb96c,
     heroCam: [0.54, 1.04, 2.48],
   },
   b2: {
-    bgHex: 0x163424,
-    wallHex: 0x204933,
-    floorCenterHex: '#2d6245',
-    floorEdgeHex: '#142f20',
-    columnHex: 0x1b3f2b,
-    rimHex: 0xb7ead0,
-    plinthHex: 0x1f3a2b,
-    plinthAccentHex: 0x8fd2ae,
+    bgHex: 0x0b1c13,
+    wallHex: 0x112a1d,
+    floorCenterHex: '#193b29',
+    floorEdgeHex: '#091710',
+    columnHex: 0x0e2318,
+    rimHex: 0x98d6b6,
+    plinthHex: 0x11241a,
+    plinthAccentHex: 0x77b895,
     heroCam: [-0.46, 1.0, 2.48],
   },
   b3: {
-    bgHex: 0x17372c,
-    wallHex: 0x224e3f,
-    floorCenterHex: '#2f6855',
-    floorEdgeHex: '#143127',
-    columnHex: 0x1c4336,
-    rimHex: 0xa8e0cb,
-    plinthHex: 0x1f3e34,
-    plinthAccentHex: 0x8bc9b3,
+    bgHex: 0x0b1d17,
+    wallHex: 0x112b22,
+    floorCenterHex: '#1a3d31',
+    floorEdgeHex: '#091813',
+    columnHex: 0x0e241d,
+    rimHex: 0x8cc9b3,
+    plinthHex: 0x11251f,
+    plinthAccentHex: 0x72b09a,
     heroCam: [0.58, 1.04, 2.5],
   },
   b4: {
-    bgHex: 0x1d3c18,
-    wallHex: 0x285222,
-    floorCenterHex: '#396b30',
-    floorEdgeHex: '#193415',
-    columnHex: 0x22461d,
+    bgHex: 0x0e1f0b,
+    wallHex: 0x152e12,
+    floorCenterHex: '#20411a',
+    floorEdgeHex: '#0b1909',
+    columnHex: 0x12270f,
     rimHex: 0xb2e695,
-    plinthHex: 0x25421f,
-    plinthAccentHex: 0x93cb78,
+    plinthHex: 0x142712,
+    plinthAccentHex: 0x7ab461,
     heroCam: [-0.62, 1.02, 2.46],
   },
   b5: {
-    bgHex: 0x233c1e,
-    wallHex: 0x31522a,
-    floorCenterHex: '#416938',
-    floorEdgeHex: '#1e351a',
-    columnHex: 0x294624,
-    rimHex: 0xd9ebb8,
-    plinthHex: 0x2c4426,
-    plinthAccentHex: 0xc5d69f,
+    bgHex: 0x121f10,
+    wallHex: 0x1a2e16,
+    floorCenterHex: '#263e20',
+    floorEdgeHex: '#0e190c',
+    columnHex: 0x162713,
+    rimHex: 0xc2d89f,
+    plinthHex: 0x182816,
+    plinthAccentHex: 0xaab986,
     heroCam: [0.36, 1.04, 2.48],
   },
   b6: {
-    bgHex: 0x15352b,
-    wallHex: 0x1e4a3d,
-    floorCenterHex: '#2a6251',
-    floorEdgeHex: '#132f26',
-    columnHex: 0x193f34,
-    rimHex: 0x9fdfca,
-    plinthHex: 0x1c3a31,
-    plinthAccentHex: 0x82c7b1,
+    bgHex: 0x0a1c17,
+    wallHex: 0x102921,
+    floorCenterHex: '#183a2f',
+    floorEdgeHex: '#081712',
+    columnHex: 0x0e231c,
+    rimHex: 0x88cbb5,
+    plinthHex: 0x10231d,
+    plinthAccentHex: 0x6fb19c,
     heroCam: [0.5, 1.0, 2.48],
   },
 };
 
 const DEFAULT_STUDIO_PROFILE: StudioProfile = {
-  bgHex: 0x1b3a1a,
-  wallHex: 0x264e24,
-  floorCenterHex: '#356630',
-  floorEdgeHex: '#183317',
-  columnHex: 0x20441e,
-  rimHex: 0xaee398,
-  plinthHex: 0x244221,
-  plinthAccentHex: 0x9bd08a,
+  bgHex: 0x0c1d0c,
+  wallHex: 0x132b13,
+  floorCenterHex: '#1d3c1b',
+  floorEdgeHex: '#0a170a',
+  columnHex: 0x102510,
+  rimHex: 0x90cb7c,
+  plinthHex: 0x132613,
+  plinthAccentHex: 0x7cb96c,
   heroCam: [0, 1.04, 2.48],
 };
 
@@ -121,6 +121,8 @@ interface ModelCalibration {
   kneeDarts: boolean;
   cuffStep: boolean;
   puddleHem: boolean;
+  doubleKnee: boolean;
+  elasticWaist: boolean;
 }
 
 const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
@@ -136,6 +138,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: false,
     cuffStep: false,
     puddleHem: false,
+    doubleKnee: false,
+    elasticWaist: false,
   },
   b2: {
     frontWaistSkipRatio: 0.092,
@@ -149,6 +153,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: false,
     cuffStep: true,
     puddleHem: false,
+    doubleKnee: false,
+    elasticWaist: false,
   },
   b3: {
     frontWaistSkipRatio: 0.01,
@@ -162,6 +168,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: true,
     cuffStep: false,
     puddleHem: false,
+    doubleKnee: false,
+    elasticWaist: true,
   },
   b4: {
     frontWaistSkipRatio: 0.02,
@@ -175,6 +183,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: false,
     cuffStep: false,
     puddleHem: false,
+    doubleKnee: true,
+    elasticWaist: false,
   },
   b5: {
     frontWaistSkipRatio: 0.012,
@@ -188,6 +198,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: false,
     cuffStep: false,
     puddleHem: false,
+    doubleKnee: false,
+    elasticWaist: false,
   },
   b6: {
     frontWaistSkipRatio: 0.084,
@@ -201,6 +213,8 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     kneeDarts: false,
     cuffStep: false,
     puddleHem: true,
+    doubleKnee: false,
+    elasticWaist: false,
   },
 };
 
@@ -621,8 +635,8 @@ function createStudioFloorTexture(centerHex: string, edgeHex: string): THREE.Can
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, S, S);
 
-  // Subtle architectural concentric studio rings on the green showroom floor
-  ctx.strokeStyle = 'rgba(211, 201, 172, 0.14)';
+  // Subtle architectural concentric studio rings on the deep green showroom floor
+  ctx.strokeStyle = 'rgba(211, 201, 172, 0.09)';
   ctx.lineWidth = 2;
   [105, 165, 225].forEach((r) => {
     ctx.beginPath();
@@ -821,6 +835,7 @@ function createPhotoMatchedTrouserMesh(
   const posList: number[] = [];
   const uvFrontList: number[] = [];
   const uvBackList: number[] = [];
+  const aoList: number[] = [];
   const idxList: number[] = [];
 
   const pushVert = (
@@ -830,12 +845,14 @@ function createPhotoMatchedTrouserMesh(
     uF: number,
     vF: number,
     uB: number,
-    vB: number
+    vB: number,
+    ao = 1.0
   ) => {
     const idx = posList.length / 3;
     posList.push(x, y, z);
     uvFrontList.push(uF, vF);
     uvBackList.push(uB, vB);
+    aoList.push(ao, ao, ao);
     return idx;
   };
 
@@ -914,14 +931,36 @@ function createPhotoMatchedTrouserMesh(
 
       const { uF, vF, uB, vB, fPx, fY } = computePelvisUVs(ox, cosP, v);
 
-      // Subtle photo-driven surface relief & model-specific waist/pleat sculpting
+      // Subtle photo-driven surface relief & tailored waistband/fly/model sculpting
       const photoRelief = cosP > 0 ? sampleLumaRelief(frontMask, fPx, fY) * 0.016 : 0;
       let relief = photoRelief * Math.sin(v * Math.PI);
 
+      // Tailored waistband ridge + seam groove
+      if (v > 0.925) {
+        relief += 0.0045 * smoothstep(0.925, 0.955, v);
+      } else if (v > 0.9) {
+        relief -= 0.002 * Math.sin(((v - 0.9) / 0.025) * Math.PI);
+      }
+
+      // Subtle front fly panel relief
+      if (cosP > 0.84 && v > 0.34 && v < 0.92) {
+        relief += 0.0038 * smoothstep(0.84, 0.97, cosP) * Math.sin(((v - 0.34) / 0.58) * Math.PI);
+      }
+
+      // Elastic waistband gathering ripples (b3)
+      if (calib.elasticWaist && v > 0.915) {
+        relief += 0.0032 * Math.sin(phi * 26) * smoothstep(0.915, 0.96, v);
+      }
+
+      // Back right waistband leather patch micro-relief (b2)
+      if (calib.cuffStep && cosP < -0.55 && sinP < -0.15 && sinP > -0.62 && v > 0.85 && v < 0.97) {
+        relief += 0.0048 * smoothstep(-0.55, -0.78, cosP);
+      }
+
       if (calib.pleatRidges && cosP > 0.25) {
-        const p1 = Math.exp(-Math.pow((sinP - 0.34) * 9, 2)) + Math.exp(-Math.pow((sinP + 0.34) * 9, 2));
-        const p2 = Math.exp(-Math.pow((sinP - 0.56) * 10, 2)) + Math.exp(-Math.pow((sinP + 0.56) * 10, 2));
-        relief += (p1 * 0.015 + p2 * 0.01) * smoothstep(0.25, 0.85, cosP) * smoothstep(0.05, 0.4, v);
+        const p1 = Math.exp(-Math.pow((sinP - 0.33) * 9.5, 2)) + Math.exp(-Math.pow((sinP + 0.33) * 9.5, 2));
+        const p2 = Math.exp(-Math.pow((sinP - 0.56) * 10.5, 2)) + Math.exp(-Math.pow((sinP + 0.56) * 10.5, 2));
+        relief += (p1 * 0.016 + p2 * 0.011) * smoothstep(0.25, 0.85, cosP) * smoothstep(0.05, 0.42, v);
       }
       ox += sinP * relief;
       oz += cosP * relief;
@@ -934,7 +973,11 @@ function createPhotoMatchedTrouserMesh(
           : 0;
       const crotchDip = v < 0.22 ? -0.028 * Math.pow(Math.abs(cosP), 2.5) * (1 - v / 0.22) : 0;
 
-      row.push(pushVert(ox, baseY + waistTilt + crotchDip, oz, uF, vF, uB, vB));
+      // Subtle crevice AO at crotch saddle & waistband stitch groove
+      const crotchAO = v < 0.24 ? 1 - 0.13 * (1 - v / 0.24) * (1 - Math.abs(sinP) * 0.45) : 1.0;
+      const waistSeamAO = v > 0.9 && v < 0.94 ? 0.95 : 1.0;
+
+      row.push(pushVert(ox, baseY + waistTilt + crotchDip, oz, uF, vF, uB, vB, Math.min(crotchAO, waistSeamAO)));
     }
     pelvisGrid.push(row);
   }
@@ -956,8 +999,11 @@ function createPhotoMatchedTrouserMesh(
     const splitBlend = smoothstep(0.76, 1.0, vLeg);
 
     let cutMod = 0;
-    if (calib.cuffStep && vLeg < 0.085 && vLeg > 0.01) {
-      cutMod = 0.009 * smoothstep(0.01, 0.03, vLeg);
+    if (calib.cuffStep && vLeg < 0.095 && vLeg > 0.008) {
+      // Turned-up selvedge cuff with subtle top fold indentation around vLeg ≈ 0.088
+      const cuffBody = smoothstep(0.008, 0.026, vLeg) * (1 - smoothstep(0.082, 0.095, vLeg));
+      const foldTuck = Math.exp(-Math.pow((vLeg - 0.086) * 90, 2));
+      cutMod = 0.01 * cuffBody - 0.005 * foldTuck;
     }
 
     const rx = THREE.MathUtils.lerp(sl.rx + cutMod, splitLegRx, splitBlend);
@@ -1054,27 +1100,49 @@ function createPhotoMatchedTrouserMesh(
         const outDirZ = Math.cos(texTheta);
 
         let disp = (outDirZ > 0 ? sampleLumaRelief(frontMask, fPx, prof.fPy) : 0) * 0.014 * Math.sin(vLeg * Math.PI);
+        let legAO = 1.0;
 
         if (calib.cargoBulge && vLeg > 0.56 && vLeg < 0.88) {
-          // Sculpted 3D cargo bellow relief right where the photographed cargo pockets sit
+          // Sculpted 3D cargo bellow relief + flap overhang tuck crease
           const outerSide = isLeft ? smoothstep(-0.35, -0.92, outDirX) : smoothstep(0.35, 0.92, outDirX);
           const pocketBox = smoothstep(0.56, 0.62, vLeg) * (1 - smoothstep(0.82, 0.88, vLeg));
-          disp += 0.026 * outerSide * pocketBox * (1 - topSplitBlend);
+          const flapTuck = Math.exp(-Math.pow((vLeg - 0.79) * 58, 2));
+          disp += (0.026 * pocketBox - 0.0065 * flapTuck) * outerSide * (1 - topSplitBlend);
+          if (flapTuck > 0.35) legAO -= 0.06 * outerSide * flapTuck;
+        } else if (calib.cargoBulge && vLeg > 0.03 && vLeg < 0.09) {
+          const outerSide = isLeft ? smoothstep(-0.45, -0.92, outDirX) : smoothstep(0.45, 0.92, outDirX);
+          disp += 0.005 * outerSide * Math.sin(((vLeg - 0.03) / 0.06) * Math.PI);
         } else if (calib.kneeDarts && vLeg > 0.38 && vLeg < 0.68) {
           const kneeZone = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI);
-          disp += 0.016 * kneeZone * smoothstep(0.15, 0.85, outDirZ);
-        } else if (calib.puddleHem && vLeg < 0.24) {
-          const stackZone = 1 - vLeg / 0.24;
-          disp += 0.014 * stackZone * Math.sin(vLeg * 38 + texTheta * 2);
+          const dartPleat = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI * 2) * 0.0045;
+          disp += (0.016 * kneeZone + dartPleat) * smoothstep(0.15, 0.85, outDirZ);
+        } else if (calib.elasticWaist && vLeg < 0.075) {
+          const cuffGather = Math.sin(texTheta * 20) * 0.0035 * (1 - vLeg / 0.075);
+          disp += cuffGather;
+        } else if (calib.doubleKnee && vLeg > 0.28 && vLeg < 0.9) {
+          const panelStep = smoothstep(0.28, 0.32, vLeg) * (1 - smoothstep(0.86, 0.9, vLeg));
+          disp += 0.0048 * panelStep * smoothstep(0.32, 0.72, outDirZ);
+        } else if (calib.puddleHem && vLeg < 0.26) {
+          const stackZone = 1 - vLeg / 0.26;
+          const phaseOffset = isLeft ? 1.3 : -0.6;
+          const stackWave = Math.sin(vLeg * 38 + texTheta * 2 + phaseOffset);
+          disp += 0.014 * stackZone * stackWave;
+          if (stackWave < -0.25) legAO -= 0.06 * stackZone * (-stackWave);
         } else if (calib.pleatRidges && vLeg > 0.38) {
           const frontCrease = Math.exp(-Math.pow(outDirX * 5.2, 2)) * smoothstep(0.35, 0.9, outDirZ);
-          disp += 0.011 * frontCrease * (1 - topSplitBlend * 0.3);
+          disp += 0.012 * frontCrease * (1 - topSplitBlend * 0.3);
         }
 
         px += outDirX * disp * (1 - topSplitBlend * 0.7);
         pz += outDirZ * disp * (1 - topSplitBlend * 0.7);
 
-        row.push(pushVert(px, py, pz, uF, vF, uB, vB));
+        // Subtle inner-thigh saddle & crotch contact darkening
+        const isInnerVert = c < halfInnerCols || c > halfInnerCols + outerHalfCols;
+        if (isInnerVert && vLeg > 0.7) {
+          legAO = Math.min(legAO, 1 - 0.16 * smoothstep(0.7, 1.0, vLeg));
+        }
+
+        row.push(pushVert(px, py, pz, uF, vF, uB, vB, legAO));
       }
       legGrid.push(row);
     }
@@ -1101,20 +1169,23 @@ function createPhotoMatchedTrouserMesh(
   outerGeo.setAttribute('position', new THREE.Float32BufferAttribute(posList, 3));
   outerGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uvFrontList, 2));
   outerGeo.setAttribute('aUvBack', new THREE.Float32BufferAttribute(uvBackList, 2));
+  outerGeo.setAttribute('color', new THREE.Float32BufferAttribute(aoList, 3));
   outerGeo.setIndex(idxList);
   outerGeo.computeVertexNormals();
   weldCoincidentNormals(outerGeo, posList.length / 3);
 
-  // Inner rolled waistband & hem lining
+  // Inner rolled waistband & hem lining with clean UVs for subtle fabric weave
   const linPos: number[] = [];
+  const linUv: number[] = [];
   const linIdx: number[] = [];
   const topRow = pelvisGrid[pelvisRows];
   const posAttr = outerGeo.attributes.position as THREE.BufferAttribute;
 
   const waistSteps = [
     { scale: 1.0, yOff: 0.0 },
-    { scale: 0.96, yOff: 0.006 },
-    { scale: 0.91, yOff: -0.024 },
+    { scale: 0.985, yOff: 0.004 },
+    { scale: 0.95, yOff: 0.005 },
+    { scale: 0.91, yOff: -0.022 },
     { scale: 0.87, yOff: -0.17 },
   ];
   const waistLinGrid: number[][] = [];
@@ -1129,6 +1200,7 @@ function createPhotoMatchedTrouserMesh(
         posAttr.getY(vIdx) + st.yOff,
         posAttr.getZ(vIdx) * st.scale
       );
+      linUv.push(c / pelvisCols, s / (waistSteps.length - 1));
       row.push(idx);
     }
     waistLinGrid.push(row);
@@ -1162,6 +1234,7 @@ function createPhotoMatchedTrouserMesh(
           st.y,
           prof0.cz + Math.cos(ang) * prof0.rz * st.scale
         );
+        linUv.push(c / 28, s / (hemSteps.length - 1));
         row.push(idx);
       }
       hGrid.push(row);
@@ -1179,6 +1252,7 @@ function createPhotoMatchedTrouserMesh(
 
   const liningGeo = new THREE.BufferGeometry();
   liningGeo.setAttribute('position', new THREE.Float32BufferAttribute(linPos, 3));
+  liningGeo.setAttribute('uv', new THREE.Float32BufferAttribute(linUv, 2));
   liningGeo.setIndex(linIdx);
   liningGeo.computeVertexNormals();
 
@@ -1302,7 +1376,7 @@ export default function Pants3DViewer({
     });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.96;
     renderer.setPixelRatio(isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
     renderer.shadowMap.enabled = !isSoftwareGl;
@@ -1317,8 +1391,8 @@ export default function Pants3DViewer({
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(stageProfile.bgHex);
-    scene.fog = new THREE.FogExp2(stageProfile.bgHex, 0.055);
-    scene.environmentIntensity = 0.35;
+    scene.fog = new THREE.FogExp2(stageProfile.bgHex, 0.078);
+    scene.environmentIntensity = 0.28;
 
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     const envTex = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -1347,11 +1421,11 @@ export default function Pants3DViewer({
     };
     controls.addEventListener('start', handleControlStart);
 
-    // Bright, balanced 000GREEN fashion studio lighting
-    const hemiLight = new THREE.HemisphereLight(0xeef6e8, stageProfile.bgHex, 0.82);
+    // Moody, sculpted 000GREEN fashion studio lighting (focused on garment, deep green room)
+    const hemiLight = new THREE.HemisphereLight(0xd9ebd0, stageProfile.bgHex, 0.56);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.35);
+    const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.32);
     keyLight.position.set(2.4, 4.2, 3.2);
     keyLight.castShadow = !isSoftwareGl;
     keyLight.shadow.mapSize.width = 1024;
@@ -1367,62 +1441,55 @@ export default function Pants3DViewer({
     keyLight.shadow.normalBias = 0.02;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xc8e4c8, 0.72);
+    const fillLight = new THREE.DirectionalLight(0xb2d4b4, 0.48);
     fillLight.position.set(-2.9, 2.2, 2.0);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 1.05);
+    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 0.92);
     rimLight.position.set(-1.3, 2.8, -3.2);
     scene.add(rimLight);
-
-    // Soft uplight to illuminate the green architectural studio backdrop
-    const backdropGlow = new THREE.PointLight(stageProfile.rimHex, 2.8, 12, 1.5);
-    backdropGlow.position.set(0, 1.5, -2.5);
-    scene.add(backdropGlow);
 
     const disposables: Array<{ dispose: () => void }> = [envTex];
     const rootGroup = new THREE.Group();
     scene.add(rootGroup);
 
-    // 1. GREEN ARCHITECTURAL STUDIO FLOOR + CURVED CYCLORAMA WALLS + COLUMNS
+    // 1. DEEP GREEN ARCHITECTURAL STUDIO FLOOR + CURVED CYCLORAMA + INSTANCED COLUMNS
     const floorTex = createStudioFloorTexture(stageProfile.floorCenterHex, stageProfile.floorEdgeHex);
-    const floorGeo = new THREE.CircleGeometry(9.5, 72);
+    const floorGeo = new THREE.CircleGeometry(7.2, 48);
     floorGeo.rotateX(-Math.PI / 2);
     const floorMat = new THREE.MeshStandardMaterial({
       map: floorTex,
-      roughness: 0.88,
-      metalness: 0.05,
+      roughness: 0.9,
+      metalness: 0.04,
     });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.position.y = -0.042;
     floorMesh.receiveShadow = true;
     rootGroup.add(floorMesh);
 
-    // Curved green studio cyclorama wall surrounding the rear & flanks
-    const cycGeo = new THREE.CylinderGeometry(5.2, 5.2, 5.8, 64, 1, true);
+    const cycGeo = new THREE.CylinderGeometry(4.6, 4.6, 5.2, 40, 1, true);
     const cycMat = new THREE.MeshStandardMaterial({
       color: stageProfile.wallHex,
-      roughness: 0.92,
+      roughness: 0.94,
       metalness: 0.02,
       side: THREE.BackSide,
     });
     const cycMesh = new THREE.Mesh(cycGeo, cycMat);
-    cycMesh.position.y = 2.65;
+    cycMesh.position.y = 2.45;
     rootGroup.add(cycMesh);
 
-    // Architectural fluted sage/emerald studio columns around the perimeter for rich depth
-    const colGeo = new THREE.CylinderGeometry(0.11, 0.125, 5.2, 16);
+    const colGeo = new THREE.CylinderGeometry(0.11, 0.125, 5.0, 10);
     const colMat = new THREE.MeshStandardMaterial({
       color: stageProfile.columnHex,
-      roughness: 0.72,
-      metalness: 0.14,
+      roughness: 0.76,
+      metalness: 0.12,
     });
-    const colCount = 12;
+    const colCount = 10;
     const colInstanced = new THREE.InstancedMesh(colGeo, colMat, colCount);
     const dummy = new THREE.Object3D();
     for (let i = 0; i < colCount; i++) {
       const ang = (i / colCount) * Math.PI * 2 + 0.25;
-      dummy.position.set(Math.sin(ang) * 4.75, 2.4, Math.cos(ang) * 4.75);
+      dummy.position.set(Math.sin(ang) * 4.2, 2.35, Math.cos(ang) * 4.2);
       dummy.rotation.set(0, ang, 0);
       dummy.scale.set(1, 1, 1);
       dummy.updateMatrix();
@@ -1435,30 +1502,30 @@ export default function Pants3DViewer({
     // 2. LAYERED ARCHITECTURAL SHOWROOM PODIUM + SOFT CONTACT SHADOW
     const plinthMat = new THREE.MeshStandardMaterial({
       color: stageProfile.plinthHex,
-      metalness: 0.35,
-      roughness: 0.48,
+      metalness: 0.32,
+      roughness: 0.52,
     });
     const plinthRimMat = new THREE.MeshStandardMaterial({
       color: stageProfile.plinthAccentHex,
-      metalness: 0.52,
-      roughness: 0.28,
+      metalness: 0.48,
+      roughness: 0.3,
       emissive: stageProfile.plinthAccentHex,
-      emissiveIntensity: 0.18,
+      emissiveIntensity: 0.12,
     });
 
-    const baseStepGeo = new THREE.CylinderGeometry(0.92, 0.98, 0.022, 64);
+    const baseStepGeo = new THREE.CylinderGeometry(0.92, 0.98, 0.022, 48);
     const baseStepMesh = new THREE.Mesh(baseStepGeo, plinthMat);
     baseStepMesh.position.y = -0.031;
     baseStepMesh.receiveShadow = true;
     rootGroup.add(baseStepMesh);
 
-    const plinthGeo = new THREE.CylinderGeometry(0.76, 0.8, 0.026, 64);
+    const plinthGeo = new THREE.CylinderGeometry(0.76, 0.8, 0.026, 48);
     const plinthMesh = new THREE.Mesh(plinthGeo, plinthMat);
     plinthMesh.position.y = -0.013;
     plinthMesh.receiveShadow = true;
     rootGroup.add(plinthMesh);
 
-    const ringGeo = new THREE.TorusGeometry(0.76, 0.0055, 12, 72);
+    const ringGeo = new THREE.TorusGeometry(0.76, 0.0055, 10, 56);
     ringGeo.rotateX(Math.PI / 2);
     const ringMesh = new THREE.Mesh(ringGeo, plinthRimMat);
     ringMesh.position.y = 0.001;
@@ -1471,14 +1538,14 @@ export default function Pants3DViewer({
       map: shadowTex,
       transparent: true,
       depthWrite: false,
-      opacity: 0.58,
+      opacity: 0.68,
     });
     const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
     shadowPlane.position.y = 0.003;
     rootGroup.add(shadowPlane);
 
-    // Subtle botanical dust particles floating in studio air
-    const moteCount = 54;
+    // Subtle botanical motes floating quietly in studio air
+    const moteCount = 36;
     const motePos = new Float32Array(moteCount * 3);
     for (let i = 0; i < moteCount; i++) {
       const a = i * 2.39996;
@@ -1491,9 +1558,9 @@ export default function Pants3DViewer({
     moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
     const moteMat = new THREE.PointsMaterial({
       color: stageProfile.rimHex,
-      size: 0.022,
+      size: 0.018,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.3,
       sizeAttenuation: true,
       depthWrite: false,
     });
@@ -1692,6 +1759,7 @@ export default function Pants3DViewer({
           sheen: calib.sheen,
           sheenRoughness: 0.82,
           sheenColor: new THREE.Color(0xd8e8d4),
+          vertexColors: true,
           side: THREE.FrontSide,
         });
 
@@ -1723,8 +1791,10 @@ export default function Pants3DViewer({
             `#ifdef USE_MAP
                vec4 frontSample = texture2D( map, vMapUv );
                vec4 backSample = texture2D( uBackMap, vUvBack );
-               float sideMix = smoothstep( -0.28, 0.28, normalize( vObjNormal ).z );
-               vec3 blendedPhoto = mix( backSample.rgb, frontSample.rgb, sideMix );
+               float nZ = normalize( vObjNormal ).z;
+               float sideMix = smoothstep( -0.22, 0.22, nZ );
+               float seamAO = 1.0 - 0.08 * ( 1.0 - smoothstep( 0.0, 0.14, abs( nZ ) ) );
+               vec3 blendedPhoto = mix( backSample.rgb, frontSample.rgb, sideMix ) * seamAO;
                diffuseColor *= vec4( blendedPhoto, 1.0 );
              #endif`
           );
@@ -1733,6 +1803,8 @@ export default function Pants3DViewer({
 
         const liningMat = new THREE.MeshStandardMaterial({
           color: calib.liningColor,
+          normalMap: weaveNormTex,
+          normalScale: new THREE.Vector2(0.18, 0.18),
           roughness: 0.94,
           metalness: 0.02,
           side: THREE.FrontSide,

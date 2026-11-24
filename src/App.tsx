@@ -992,10 +992,10 @@ function Garment3DModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left: Real Three.js WebGL 3D Viewport */}
-        <div className="lg:col-span-7 relative bg-[#1B3A1A] border-b lg:border-b-0 lg:border-r border-[#345B31] min-h-[360px] sm:min-h-[520px] overflow-hidden">
+        <div className="lg:col-span-7 relative bg-[#0C1D0C] border-b lg:border-b-0 lg:border-r border-[#345B31] min-h-[360px] sm:min-h-[520px] overflow-hidden">
           <Suspense
             fallback={
-              <div className="w-full h-full min-h-[360px] sm:min-h-[520px] flex flex-col items-center justify-center gap-3 bg-[#1B3A1A]">
+              <div className="w-full h-full min-h-[360px] sm:min-h-[520px] flex flex-col items-center justify-center gap-3 bg-[#0C1D0C]">
                 <div className="w-10 h-10 rounded-full border-2 border-[#4D8046] border-t-[#9BD08A] animate-spin" />
                 <span className="text-xs font-mono uppercase tracking-wider text-[#D3C9AC]">
                   Cargando motor 3D…
