@@ -246,10 +246,27 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
     target: EventTarget | null;
   } | null>(null);
   const lastDragMovedRef = useRef<boolean>(false);
+  const lastTouchEndTsRef = useRef<number>(0);
   const justLockedFreeMoveRef = useRef<boolean>(false);
   const wheelAccumRef = useRef<{ acc: number; lastTs: number }>({ acc: 0, lastTs: 0 });
   const freeMoveOriginRef = useRef<{ x: number; y: number; startVal: number } | null>(null);
   const valueRef = useRef<number>(value);
+
+  const onChangeRef = useRef(onChange);
+  const onInteractRef = useRef(onInteract);
+  const isEditingTextRef = useRef(isEditingText);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    onInteractRef.current = onInteract;
+  }, [onInteract]);
+
+  useEffect(() => {
+    isEditingTextRef.current = isEditingText;
+  }, [isEditingText]);
 
   useEffect(() => {
     valueRef.current = value;
@@ -267,11 +284,11 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         setRollDir(next > prev ? 'up' : 'down');
         setTickSeq((s) => s + 1);
         playRouletteTick(next, prev);
-        onInteract?.();
-        onChange(next);
+        onInteractRef.current?.();
+        onChangeRef.current(next);
       }
     },
-    [clamp, onChange, onInteract]
+    [clamp]
   );
 
   const stepSize = useCallback(
@@ -314,11 +331,10 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
     if (!el) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (isEditingText && e.target === inputRef.current) return;
+      if (isEditingTextRef.current && e.target === inputRef.current) return;
       const touch = e.changedTouches[0];
       if (!touch) return;
 
-      e.preventDefault();
       getRouletteAudio();
       lastDragMovedRef.current = false;
       setIsFreeMove(false);
@@ -348,17 +364,18 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       }
       if (!touch) return;
 
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault();
       // Right -> smaller (-), Left -> larger (+)
       const dx = origin.x - touch.clientX;
       const dy = origin.y - touch.clientY;
-      if (Math.hypot(dx, dy) > 8 && !origin.moved) {
+      if (Math.hypot(dx, dy) > 6 && !origin.moved) {
         origin.moved = true;
         inputRef.current?.blur();
       }
-      const primaryDelta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
-      const steps = Math.trunc(primaryDelta / 30);
-      commitSize(origin.startVal + steps);
+      if (origin.moved) {
+        const steps = Math.trunc(dx / 26);
+        commitSize(origin.startVal + steps);
+      }
     };
 
     const handleWindowTouchEnd = (e: TouchEvent) => {
@@ -374,24 +391,28 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       }
       if (!ended) return;
 
+      lastTouchEndTsRef.current = performance.now();
       lastDragMovedRef.current = origin.moved;
       const tapTarget = origin.target as Node | null;
       touchOriginRef.current = null;
       setIsDragging(false);
 
-      if (!origin.moved && tapTarget) {
+      if (!origin.moved && e.type === 'touchend' && tapTarget) {
         if (prevBtnRef.current?.contains(tapTarget)) {
           stepSize(-1);
         } else if (nextBtnRef.current?.contains(tapTarget)) {
           stepSize(1);
         } else if (centerBadgeRef.current?.contains(tapTarget)) {
+          if (inputRef.current) {
+            inputRef.current.style.pointerEvents = 'auto';
+          }
           setIsEditingText(true);
           inputRef.current?.focus();
         }
       }
     };
 
-    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleWindowTouchMove, { passive: false });
     window.addEventListener('touchend', handleWindowTouchEnd);
     window.addEventListener('touchcancel', handleWindowTouchEnd);
@@ -401,7 +422,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
       window.removeEventListener('touchend', handleWindowTouchEnd);
       window.removeEventListener('touchcancel', handleWindowTouchEnd);
     };
-  }, [isEditingText, commitSize, stepSize]);
+  }, [commitSize, stepSize]);
 
   // Desktop grab-and-drag: drag right -> smaller sizes, drag left -> larger sizes
   useEffect(() => {
@@ -496,7 +517,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         }}
         disabled={value <= min}
         aria-label="Disminuir talle"
-        className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+        className="w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-sm sm:text-xs font-bold transition-colors cursor-pointer touch-manipulation"
       >
         ‹
       </button>
@@ -530,7 +551,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           e.preventDefault();
           e.stopPropagation();
           getRouletteAudio();
-          onInteract?.();
+          onInteractRef.current?.();
           setIsDragging(false);
           setIsEditingText(false);
           inputRef.current?.blur();
@@ -543,7 +564,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         }}
         style={{ touchAction: 'none' }}
         title="Arrastrá a la derecha para talles más chicos o a la izquierda para talles más grandes (26–56)"
-        className={`relative overflow-hidden flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all touch-none ${
+        className={`relative overflow-hidden flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:py-1 rounded-xl bg-gradient-to-r from-[#0A1509] via-[#173015] to-[#0A1509] border shadow-[inset_0_2px_8px_rgba(0,0,0,0.85)] transition-all touch-none ${
           isFreeMove || isDragging
             ? 'border-[#9BD08A] ring-2 ring-[#9BD08A]/70 shadow-[0_0_14px_rgba(155,208,138,0.45)]'
             : 'border-[#5E9455] hover:border-[#9BD08A]'
@@ -576,6 +597,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            if (performance.now() - lastTouchEndTsRef.current < 450) return;
             getRouletteAudio();
             if (justLockedFreeMoveRef.current) {
               justLockedFreeMoveRef.current = false;
@@ -590,7 +612,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         >
           <span
             key={`prev-${tickSeq}`}
-            className={`inline-block ${
+            className={`pointer-events-none inline-block ${
               tickSeq > 0 ? (rollDir === 'up' ? 'animate-wheel-side-up' : 'animate-wheel-side-down') : ''
             }`}
           >
@@ -603,25 +625,29 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           data-cursor-interactive="true"
           onClick={(e) => {
             e.stopPropagation();
+            if (performance.now() - lastTouchEndTsRef.current < 450) return;
             getRouletteAudio();
             if (justLockedFreeMoveRef.current) {
               justLockedFreeMoveRef.current = false;
               return;
             }
             if (!isFreeMove && !lastDragMovedRef.current) {
+              if (inputRef.current) {
+                inputRef.current.style.pointerEvents = 'auto';
+              }
               setIsEditingText(true);
               inputRef.current?.focus();
             }
           }}
           style={{ touchAction: 'none' }}
-          className={`relative w-9 h-5 flex items-center justify-center rounded-md overflow-hidden shadow-[0_0_10px_rgba(211,201,172,0.35)] transition-colors touch-none cursor-pointer ${
+          className={`relative w-9 h-6 sm:h-5 flex items-center justify-center rounded-md overflow-hidden shadow-[0_0_10px_rgba(211,201,172,0.35)] transition-colors touch-none cursor-pointer ${
             isFreeMove || isDragging ? 'bg-[#9BD08A] text-[#0E140D]' : 'bg-[#D3C9AC] text-[#0E140D]'
           }`}
         >
           {!isEditingText && (
             <span
               key={`cur-${tickSeq}`}
-              className={`font-mono font-bold text-xs leading-none inline-block ${
+              className={`pointer-events-none font-mono font-bold text-xs leading-none inline-block ${
                 tickSeq > 0 ? (rollDir === 'up' ? 'animate-wheel-up' : 'animate-wheel-down') : ''
               }`}
             >
@@ -632,6 +658,8 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           <input
             ref={inputRef}
             type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             min={min}
             max={max}
             value={draftValue}
@@ -645,6 +673,9 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
               }
             }}
             onBlur={() => {
+              if (inputRef.current) {
+                inputRef.current.style.pointerEvents = '';
+              }
               setIsEditingText(false);
               const parsed = parseInt(draftValue, 10);
               const finalVal = Number.isNaN(parsed) ? value : clamp(parsed);
@@ -664,6 +695,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
           type="button"
           onClick={(e) => {
             e.stopPropagation();
+            if (performance.now() - lastTouchEndTsRef.current < 450) return;
             getRouletteAudio();
             if (justLockedFreeMoveRef.current) {
               justLockedFreeMoveRef.current = false;
@@ -678,7 +710,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         >
           <span
             key={`next-${tickSeq}`}
-            className={`inline-block ${
+            className={`pointer-events-none inline-block ${
               tickSeq > 0 ? (rollDir === 'up' ? 'animate-wheel-side-up' : 'animate-wheel-side-down') : ''
             }`}
           >
@@ -696,7 +728,7 @@ function SizeWheel({ value, min = 26, max = 56, onChange, onInteract }: SizeWhee
         }}
         disabled={value >= max}
         aria-label="Aumentar talle"
-        className="w-7 h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+        className="w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-[#152B14] border border-[#4D8046] hover:border-[#9BD08A] disabled:opacity-35 text-[#DDECD7] hover:text-white flex items-center justify-center text-sm sm:text-xs font-bold transition-colors cursor-pointer touch-manipulation"
       >
         ›
       </button>
@@ -745,7 +777,6 @@ export default function App() {
   const ytPlayerRef = useRef<any>(null);
   const isYtReadyRef = useRef<boolean>(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
-  const [musicVolume, setMusicVolume] = useState<number>(0.85);
   const hasUserTriggeredMusic = useRef<boolean>(false);
 
   // Fullscreen State & Feedback Toast
@@ -836,7 +867,7 @@ export default function App() {
       if (!ytPlayerRef.current || !isYtReadyRef.current) return;
       try {
         ytPlayerRef.current.seekTo(503, true);
-        ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
+        ytPlayerRef.current.setVolume(85);
         ytPlayerRef.current.playVideo();
       } catch {}
     };
@@ -867,7 +898,7 @@ export default function App() {
               if (!isMounted) return;
               isYtReadyRef.current = true;
               try {
-                event.target.setVolume(Math.round(musicVolume * 100));
+                event.target.setVolume(85);
                 event.target.seekTo(503, true);
                 event.target.playVideo();
               } catch {}
@@ -935,7 +966,7 @@ export default function App() {
         }
       } catch {}
     };
-  }, [musicVolume]);
+  }, []);
 
   const toggleMusic = () => {
     triggerLogoReaction();
@@ -947,22 +978,9 @@ export default function App() {
         ytPlayerRef.current.pauseVideo();
         setIsMusicPlaying(false);
       } else {
-        ytPlayerRef.current.setVolume(Math.round(musicVolume * 100));
+        ytPlayerRef.current.setVolume(85);
         ytPlayerRef.current.playVideo();
         setIsMusicPlaying(true);
-      }
-    } catch {}
-  };
-
-  const handleVolumeChange = (vol: number) => {
-    setMusicVolume(vol);
-    if (!ytPlayerRef.current || !isYtReadyRef.current) return;
-    try {
-      ytPlayerRef.current.setVolume(Math.round(vol * 100));
-      if (vol === 0) {
-        ytPlayerRef.current.mute();
-      } else {
-        ytPlayerRef.current.unMute();
       }
     } catch {}
   };
@@ -1005,7 +1023,7 @@ export default function App() {
       a.onfinish = () => s.remove();
     };
 
-    const burst = (x: number, y: number, count = 8, customColor?: string) => {
+    const burst = (x: number, y: number, count = 8) => {
       for (let i = 0; i < count; i++) {
         const ang = (i / count) * Math.PI * 2 + Math.random() * 0.5;
         const dist = 30 + Math.random() * 45;
@@ -1014,7 +1032,6 @@ export default function App() {
           dx: Math.cos(ang) * dist,
           dy: Math.sin(ang) * dist,
           d: 650 + Math.random() * 300,
-          c: customColor,
         });
       }
     };
@@ -1718,7 +1735,7 @@ export default function App() {
 
         {/* Filter Bar (Quality optical products, matching catalog box color and styling) */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-[#183216] border-2 border-[#548A4C] rounded-2xl p-4 sm:p-5 mb-10 shadow-[0_12px_35px_rgba(0,0,0,0.7)]">
-          {/* Watch Names Pills (No 000GREEN Signature) */}
+          {/* Product Filter Buttons */}
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -1760,25 +1777,6 @@ export default function App() {
               </svg>
               <span>Favoritos ({favorites.length})</span>
             </button>
-
-            {EXACT_PRODUCTS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  triggerLogoReaction();
-                  setActiveFilter((prev) => (prev === p.id ? 'todo' : p.id));
-                  scrollToProductMatch(p.name, true);
-                }}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                  activeFilter === p.id
-                    ? 'bg-[#D3C9AC] text-[#0E140D] font-bold shadow-md'
-                    : 'bg-[#274D24] text-white border border-[#5E9455] hover:border-[#9BD08A] hover:bg-[#32612E]'
-                }`}
-              >
-                {p.name}
-              </button>
-            ))}
           </div>
 
           {/* Sort Controls (Price slider removed as requested) */}
@@ -1918,7 +1916,7 @@ export default function App() {
                 } rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-[0_12px_35px_rgba(0,0,0,0.6)] scroll-mt-28 transition-all duration-300`}
               >
                 <div>
-                  {/* Top Header of the Watch Box: Only Favorite button (Edición Limitada removed as requested) */}
+                  {/* Favorite button */}
                   <div className="flex justify-end items-center mb-2.5">
                     <button
                       type="button"
@@ -2120,7 +2118,6 @@ export default function App() {
               <div className="font-bold uppercase tracking-wider text-[#D3C9AC] border-b border-[#4D8046] pb-1.5">Soporte</div>
               <ul className="space-y-2 text-[#E3F2DF] font-medium">
                 <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Envíos y Entregas</span></li>
-                <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Guía de Talles y Fit</span></li>
                 <li><span onClick={triggerLogoReaction} className="hover:text-white cursor-pointer block py-0.5">Cuidado de la prenda</span></li>
               </ul>
             </div>
@@ -2239,7 +2236,7 @@ export default function App() {
                     }}
                     className="bg-[#D3C9AC] text-[#0E140D] font-bold px-6 py-3 rounded-full text-xs uppercase tracking-wider hover:bg-white transition-colors cursor-pointer shadow-md"
                   >
-                    Seguir comprando
+                    Volver al sitio
                   </button>
                 </div>
               ) : (

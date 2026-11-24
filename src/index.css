@@ -3,17 +3,7 @@
 :root {
   color-scheme: dark;
   --bg: #000000;
-  --surface: #151D13;
-  --tile: #CBD0B8;
   --fg: #E3DCC3;
-  --cream: #D3C9AC;
-  --muted: #98A18A;
-  --line: #2A3626;
-  --moss: #7E9A64;
-  --accent: #E3DCC3;
-  --accent-fg: #0E140D;
-  --bad: #E88C84;
-  --good: #9BD08A;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-mark: 'Cinzel', serif;
   --font-body: 'Manrope', -apple-system, sans-serif;
@@ -66,15 +56,6 @@ input[type="number"].no-spinner {
 
 .animate-marquee:hover {
   animation-play-state: paused;
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 0.8; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.02); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 4s ease-in-out infinite;
 }
 
 @keyframes sound-bar-1 {
@@ -198,20 +179,6 @@ input[type="number"].no-spinner {
   }
 }
 
-/* Click Sonic Ripple Animation for Custom Cyber Cursor */
-@keyframes cursor-ripple {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.95;
-    border-color: #76FF03;
-  }
-  100% {
-    transform: scale(2.6);
-    opacity: 0;
-    border-color: #9BD08A;
-  }
-}
-
 /* 000GREEN Official Moss Cursor (Instant Data URI, 0ms latency, 100% cache-proof) */
 @media (hover: hover) and (pointer: fine) {
   html, body {
@@ -310,8 +277,3 @@ input[type="number"].no-spinner {
 .animate-wheel-flash {
   animation: wheel-flash-pulse 0.32s ease-out both;
 }
-
-
-
-
-
