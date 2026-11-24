@@ -3,13 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef, useCallback, type PointerEvent as ReactPointerEvent } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import baggyMossCargoImg from './assets/images/baggy_moss_cargo_v2_1795108115684_cutout.png';
 import baggyObsidianDenimImg from './assets/images/baggy_obsidian_denim_v3_1795108133375_cutout.png';
 import baggyStealthParachuteImg from './assets/images/baggy_stealth_parachute_v2_1795108116852_cutout.png';
 import baggyBioStitchImg from './assets/images/baggy_biostitch_carpenter_v2_1795108116703_cutout.png';
 import baggyBonePleatedImg from './assets/images/baggy_bone_pleated_v2_1795108116230_cutout.png';
 import baggyVintageIndigoImg from './assets/images/baggy_vintage_indigo_v2_1795108116399_cutout.png';
+
+import mossCargoBackImg from './assets/images/moss_cargo_back_1795483043414.jpg';
+import obsidianDenimBackImg from './assets/images/obsidian_denim_back_1795483059783.jpg';
+import stealthParachuteBackImg from './assets/images/stealth_parachute_back_1795483044594.jpg';
+import biostitchCarpenterBackImg from './assets/images/biostitch_carpenter_back_1795483044467.jpg';
+import bonePleatedBackImg from './assets/images/bone_pleated_back_1795483045028.jpg';
+import vintageIndigoBackImg from './assets/images/vintage_indigo_back_1795483045860.jpg';
+
+import type { CameraPresetKey, Pants3DSpec } from './components/Pants3DViewer';
+
+const Pants3DViewer = lazy(() => import('./components/Pants3DViewer'));
 
 // 000GREEN Official Baggy Pants Collection
 export interface ProductItem {
@@ -19,6 +30,7 @@ export interface ProductItem {
   price: number;
   desc: string;
   image: string;
+  backImage: string;
   sizes: string[];
   colors: [string, string][]; // [ColorName, HexCode]
   keywords: string[];
@@ -33,6 +45,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Moss Cargo / Olive Wide',
     price: 320000,
     image: baggyMossCargoImg,
+    backImage: mossCargoBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Pantalón baggy cargo de sarga pesada en verde musgo oliva, bolsillos fuelle de gran volumen, pinzas articuladas en rodilla y ajuste en botamanga.',
     colors: [
@@ -51,6 +64,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Obsidian Wash / Raw Baggy',
     price: 345000,
     image: baggyObsidianDenimImg,
+    backImage: obsidianDenimBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Jean baggy corte ultra wide-leg en denim japonés selvedge de 14oz lavado en negro obsidiana, caída estructurada y doble costura reforzada.',
     colors: [
@@ -68,6 +82,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Stealth Parachute / Slate Ripstop',
     price: 295000,
     image: baggyStealthParachuteImg,
+    backImage: stealthParachuteBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Baggy parachute confeccionado en ripstop técnico liviano color gris pizarra mate, cintura elástica con cordón y topes regulables en tobillos.',
     colors: [
@@ -85,6 +100,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Bio Stitch / Carpenter Black',
     price: 335000,
     image: baggyBioStitchImg,
+    backImage: biostitchCarpenterBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Pantalón baggy carpenter en lona duck negra de alto gramaje con costuras triples en contraste verde salvia 000GREEN y panel doble en rodillas.',
     colors: [
@@ -102,6 +118,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Bone Canvas / Double Pleat',
     price: 315000,
     image: baggyBonePleatedImg,
+    backImage: bonePleatedBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Baggy arquitectónico de doble pinza frontal en gabardina cruda tono hueso, caída amplia fluida y cintura sastrera de calce relajado.',
     colors: [
@@ -119,6 +136,7 @@ export const EXACT_PRODUCTS: ProductItem[] = [
     name: '000 Vintage Indigo / Acid Baggy',
     price: 330000,
     image: baggyVintageIndigoImg,
+    backImage: vintageIndigoBackImg,
     sizes: ['36', '38', '40', '42', '44', '46'],
     desc: 'Jean super baggy estilo skate 90s en denim índigo con lavado ácido vintage, botamanga extra ancha y remaches metálicos de alta resistencia.',
     colors: [
@@ -845,9 +863,11 @@ function IntroOverlay({ isClosing, logoBumping, onLogoTap, onEnter, onSkip }: In
 
 interface Garment3DModalProps {
   product: ProductItem;
+  allProducts: ProductItem[];
   size: string;
   isFavorite: boolean;
   fmt: (n: number) => string;
+  onSelectProduct: (productId: string) => void;
   onSizeChange: (nextSize: number) => void;
   onToggleFavorite: () => void;
   onBuy: () => void;
@@ -857,9 +877,11 @@ interface Garment3DModalProps {
 
 function Garment3DModal({
   product,
+  allProducts,
   size,
   isFavorite,
   fmt,
+  onSelectProduct,
   onSizeChange,
   onToggleFavorite,
   onBuy,
@@ -870,257 +892,184 @@ function Garment3DModal({
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const [rotationDeg, setRotationDeg] = useState<number>(0);
-  const [tiltX, setTiltX] = useState<number>(0);
-  const [zoom, setZoom] = useState<number>(1.05);
+  const [displayDeg, setDisplayDeg] = useState<number>(0);
+  const [zoomRatio, setZoomRatio] = useState<number>(1.0);
   const [autoSpin, setAutoSpin] = useState<boolean>(!prefersReducedMotion);
-  const [isDragging3D, setIsDragging3D] = useState<boolean>(false);
+  const [presetRequest, setPresetRequest] = useState<{ key: CameraPresetKey; seq: number } | null>(null);
+  const [zoomStepRequest, setZoomStepRequest] = useState<{ delta: number; seq: number } | null>(null);
 
-  const stageRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef<{
-    pointerId: number;
-    lastX: number;
-    lastY: number;
-    lastTs: number;
-  } | null>(null);
-  const velocityRef = useRef<number>(0);
-  const targetAngleRef = useRef<number | null>(null);
-  const autoSpinRef = useRef<boolean>(autoSpin);
-  const isDraggingRef = useRef<boolean>(isDragging3D);
+  const spec3D = useMemo<Pants3DSpec>(
+    () => ({
+      id: product.id,
+      name: product.name,
+      kind: product.kind,
+      frontImage: product.image,
+      backImage: product.backImage,
+      primaryColor: product.colors[0][1],
+      accentColor: product.colors[1][1],
+    }),
+    [product]
+  );
 
-  useEffect(() => {
-    autoSpinRef.current = autoSpin;
-  }, [autoSpin]);
-
-  useEffect(() => {
-    isDraggingRef.current = isDragging3D;
-  }, [isDragging3D]);
+  const currentIndex = allProducts.findIndex((item) => item.id === product.id);
+  const prevProduct = allProducts[(currentIndex - 1 + allProducts.length) % allProducts.length];
+  const nextProduct = allProducts[(currentIndex + 1) % allProducts.length];
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
-      } else if (e.key === 'ArrowLeft') {
-        setAutoSpin(false);
-        targetAngleRef.current = null;
-        setRotationDeg((prev) => prev - 18);
-      } else if (e.key === 'ArrowRight') {
-        setAutoSpin(false);
-        targetAngleRef.current = null;
-        setRotationDeg((prev) => prev + 18);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  useEffect(() => {
-    let rafId = 0;
-    let lastTime = performance.now();
-
-    const tick = (now: number) => {
-      const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) / 1000));
-      lastTime = now;
-
-      if (!isDraggingRef.current) {
-        if (targetAngleRef.current !== null) {
-          const target = targetAngleRef.current;
-          setRotationDeg((prev) => {
-            const normPrev = ((prev % 360) + 360) % 360;
-            let diff = target - normPrev;
-            if (diff > 180) diff -= 360;
-            if (diff < -180) diff += 360;
-            if (Math.abs(diff) < 0.6) {
-              targetAngleRef.current = null;
-              return target;
-            }
-            return prev + diff * Math.min(1, dt * 11);
-          });
-        } else if (Math.abs(velocityRef.current) > 0.04) {
-          const step = velocityRef.current;
-          velocityRef.current *= 0.93;
-          setRotationDeg((prev) => prev + step);
-        } else if (autoSpinRef.current) {
-          setRotationDeg((prev) => prev + dt * 34);
-        }
-      }
-
-      rafId = requestAnimationFrame(tick);
-    };
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
-  const handleStagePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 && e.pointerType === 'mouse') return;
-    targetAngleRef.current = null;
-    velocityRef.current = 0;
-    setIsDragging3D(true);
-    dragRef.current = {
-      pointerId: e.pointerId,
-      lastX: e.clientX,
-      lastY: e.clientY,
-      lastTs: performance.now(),
-    };
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
-  };
-
-  const handleStagePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== e.pointerId) return;
-
-    const now = performance.now();
-    const dx = e.clientX - drag.lastX;
-    const dy = e.clientY - drag.lastY;
-    const elapsed = Math.max(8, now - drag.lastTs);
-
-    drag.lastX = e.clientX;
-    drag.lastY = e.clientY;
-    drag.lastTs = now;
-
-    const degDelta = dx * 0.72;
-    velocityRef.current = (degDelta / elapsed) * 16;
-
-    setRotationDeg((prev) => prev + degDelta);
-    setTiltX((prev) => Math.max(-12, Math.min(12, prev - dy * 0.14)));
-  };
-
-  const handleStagePointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== e.pointerId) return;
-    dragRef.current = null;
-    setIsDragging3D(false);
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
-  };
-
-  const jumpToAngle = (deg: number) => {
+  const jumpPreset = (key: CameraPresetKey) => {
     onInteract();
     setAutoSpin(false);
-    velocityRef.current = 0;
-    targetAngleRef.current = deg;
+    setPresetRequest((prev) => ({ key, seq: (prev?.seq ?? 0) + 1 }));
+  };
+
+  const stepZoom = (delta: number) => {
+    onInteract();
+    setZoomStepRequest((prev) => ({ delta, seq: (prev?.seq ?? 0) + 1 }));
   };
 
   const resetView = () => {
     onInteract();
-    velocityRef.current = 0;
-    targetAngleRef.current = 0;
-    setTiltX(0);
-    setZoom(1.05);
     setAutoSpin(false);
+    setPresetRequest((prev) => ({ key: 'front', seq: (prev?.seq ?? 0) + 1 }));
   };
 
-  const displayDeg = Math.round(((rotationDeg % 360) + 360) % 360);
-  const rad = (rotationDeg * Math.PI) / 180;
-  const sinVal = Math.sin(rad);
-  const cosVal = Math.cos(rad);
-  const visualYaw = sinVal * 38;
-  const offsetX = sinVal * 12;
-  const depthScale = zoom * (1 + cosVal * 0.045);
-  const lightX = Math.round(50 + sinVal * 26);
-  const lightY = Math.round(42 - tiltX * 1.4);
-  const backShade = cosVal < 0 ? Math.abs(cosVal) * 0.22 : 0;
-  const extrudeX = (-sinVal * 8).toFixed(1);
+  const handleTelemetry = useCallback((deg: number, z: number) => {
+    setDisplayDeg(deg);
+    setZoomRatio(z);
+  }, []);
 
-  const anglePresets = [
-    { label: 'Frontal', deg: 0 },
-    { label: '45°', deg: 45 },
-    { label: 'Perfil', deg: 90 },
-    { label: '180°', deg: 180 },
+  const anglePresets: Array<{ label: string; key: CameraPresetKey; degTarget: number }> = [
+    { label: 'Frontal', key: 'front', degTarget: 0 },
+    { label: '45°', key: 'angle45', degTarget: 45 },
+    { label: 'Perfil', key: 'side', degTarget: 90 },
+    { label: '180°', key: 'back', degTarget: 180 },
+    { label: 'Cenital', key: 'top', degTarget: -1 },
   ];
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Vista 3D de ${product.name}`}
-      className="fixed inset-0 z-[65] bg-black/82 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+      aria-label={`Vista 3D literal de ${product.name}`}
+      className="fixed inset-0 z-[65] bg-black/88 flex items-center justify-center p-2.5 sm:p-5 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl bg-[#111D10] border-2 border-[#548A4C] rounded-3xl shadow-[0_28px_90px_rgba(0,0,0,0.92)] overflow-hidden grid grid-cols-1 md:grid-cols-12 animate-modal-3d my-auto"
+        className="w-full max-w-5xl bg-[#111D10] border-2 border-[#548A4C] rounded-3xl shadow-[0_28px_90px_rgba(0,0,0,0.95)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 animate-modal-3d my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left: Interactive 360° Turntable Stage */}
-        <div
-          ref={stageRef}
-          onPointerDown={handleStagePointerDown}
-          onPointerMove={handleStagePointerMove}
-          onPointerUp={handleStagePointerUp}
-          onPointerCancel={handleStagePointerUp}
-          style={{ touchAction: 'none' }}
-          className="md:col-span-7 min-h-[340px] sm:min-h-[470px] bg-gradient-to-b from-[#060E06] via-[#0F230E] to-[#040904] relative overflow-hidden flex items-center justify-center select-none border-b md:border-b-0 md:border-r border-[#345B31] cursor-grab active:cursor-grabbing"
-        >
-          {/* Dynamic Directional Studio Spotlight */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `radial-gradient(circle at ${lightX}% ${lightY}%, rgba(211, 201, 172, 0.34) 0%, rgba(155, 208, 138, 0.16) 32%, rgba(8, 18, 7, 0) 68%)`,
-            }}
-          />
-
-          {/* Top Stage HUD: Gesture Hint & Tabular Angle Readout */}
-          <div className="pointer-events-none absolute top-3.5 inset-x-4 z-20 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-[#D3C9AC] bg-black/55 border border-[#4D8046]/70 px-3 py-1 rounded-full">
-              Arrastrá para girar 360°
-            </span>
-            <span className="font-mono tabular-nums text-xs font-bold text-[#9BD08A] bg-black/65 border border-[#4D8046]/80 px-3 py-1 rounded-full">
-              {String(displayDeg).padStart(3, '0')}° · {zoom.toFixed(1)}x
-            </span>
-          </div>
-
-          {/* 3D Calibrated Turntable Floor Disc */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-[9%] left-1/2 -translate-x-1/2 w-[230px] sm:w-[270px] h-[230px] sm:h-[270px]"
-            style={{
-              transform: `perspective(680px) rotateX(74deg) rotateZ(${rotationDeg}deg)`,
-            }}
+        {/* Left: Real Three.js WebGL 3D Viewport */}
+        <div className="lg:col-span-7 relative bg-[#071007] border-b lg:border-b-0 lg:border-r border-[#345B31] min-h-[360px] sm:min-h-[520px] overflow-hidden">
+          <Suspense
+            fallback={
+              <div className="w-full h-full min-h-[360px] sm:min-h-[520px] flex flex-col items-center justify-center gap-3 bg-[#071007]">
+                <div className="w-10 h-10 rounded-full border-2 border-[#4D8046] border-t-[#9BD08A] animate-spin" />
+                <span className="text-xs font-mono uppercase tracking-wider text-[#D3C9AC]">
+                  Cargando motor 3D…
+                </span>
+              </div>
+            }
           >
-            <div className="w-full h-full rounded-full border-2 border-[#548A4C]/55 relative shadow-[0_0_30px_rgba(155,208,138,0.16)]">
-              <div className="absolute inset-4 rounded-full border border-dashed border-[#D3C9AC]/35" />
-              {/* Orbiting 0° Reference Marker */}
-              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-[#9BD08A] shadow-[0_0_12px_rgba(155,208,138,0.95)]" />
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#D3C9AC]/60" />
-              <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#D3C9AC]/45" />
-              <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 rounded-full bg-[#D3C9AC]/45" />
-            </div>
-          </div>
-
-          {/* Ground Contact Shadow */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute bottom-[12%] left-1/2 -translate-x-1/2 w-[48%] h-4 rounded-full bg-black/85 blur-[8px]"
-            style={{
-              transform: `translateX(${(offsetX * 0.5).toFixed(1)}px) scale(${(1.02 - Math.abs(sinVal) * 0.12).toFixed(3)})`,
-            }}
-          />
-
-          {/* 3D Floating Garment Cutout */}
-          <div
-            className="pointer-events-none relative z-10 w-[76%] h-[78%] flex items-center justify-center will-change-transform"
-            style={{
-              transform: `perspective(1050px) translateX(${offsetX.toFixed(2)}px) rotateX(${tiltX.toFixed(2)}deg) rotateY(${visualYaw.toFixed(2)}deg) scale(${depthScale.toFixed(3)})`,
-              filter: `brightness(${(1 - backShade * 0.45).toFixed(3)}) contrast(${(1 + Math.abs(sinVal) * 0.06).toFixed(3)}) drop-shadow(${extrudeX}px 18px 20px rgba(0,0,0,0.8))`,
-            }}
-          >
-            <img
-              src={product.image}
-              alt={product.name}
-              draggable={false}
-              referrerPolicy="no-referrer"
-              className="pointer-events-none w-full h-full object-contain object-center select-none"
+            <Pants3DViewer
+              spec={spec3D}
+              autoSpin={autoSpin}
+              presetRequest={presetRequest}
+              zoomStepRequest={zoomStepRequest}
+              onUserOrbitStart={() => setAutoSpin(false)}
+              onTelemetryChange={handleTelemetry}
             />
+          </Suspense>
+
+          {/* Top Compact Stage HUD (No backdrop-blur over WebGL, no pulsating dots) */}
+          <div className="pointer-events-none absolute top-3.5 inset-x-4 z-10 flex items-center justify-between gap-2">
+            <span className="text-[11px] font-medium text-[#E3DCC3] bg-[#0B150A]/90 border border-[#4D8046] px-3 py-1 rounded-full">
+              Rotá 360° y hacé zoom en 3D
+            </span>
+            <span className="font-mono tabular-nums text-xs font-bold text-[#9BD08A] bg-[#0B150A]/90 border border-[#4D8046] px-3 py-1 rounded-full">
+              {String(displayDeg).padStart(3, '0')}° · {zoomRatio.toFixed(1)}x
+            </span>
+          </div>
+
+          {/* Bottom Compact Camera Dock */}
+          <div className="absolute bottom-3 inset-x-3 z-10 flex justify-center">
+            <div className="bg-[#0B150A]/95 border border-[#4D8046] rounded-2xl px-2.5 py-2 flex flex-wrap items-center justify-center gap-1.5 shadow-xl">
+              {anglePresets.map((preset) => {
+                const isActive =
+                  preset.degTarget >= 0 &&
+                  (Math.abs(displayDeg - preset.degTarget) <= 12 ||
+                    (preset.degTarget === 0 && displayDeg >= 348));
+                return (
+                  <button
+                    key={preset.key}
+                    type="button"
+                    onClick={() => jumpPreset(preset.key)}
+                    className={`min-h-[34px] px-2.5 rounded-lg border text-[11px] font-mono font-bold transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-[#2C5828] border-[#9BD08A] text-white'
+                        : 'bg-[#152814] border-[#43723E] text-[#D3C9AC] hover:border-[#9BD08A] hover:text-white'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                );
+              })}
+
+              <span className="hidden sm:inline-block w-px h-5 bg-[#345B31] mx-0.5" />
+
+              <button
+                type="button"
+                onClick={() => {
+                  onInteract();
+                  setAutoSpin((prev) => !prev);
+                }}
+                className={`min-h-[34px] px-2.5 rounded-lg border text-[11px] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  autoSpin
+                    ? 'bg-[#285124] border-[#9BD08A] text-white'
+                    : 'bg-[#152814] border-[#43723E] text-[#D3C9AC] hover:border-[#9BD08A]'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${autoSpin ? 'bg-[#9BD08A]' : 'bg-[#6F8E69]'}`} />
+                <span>Giro 360°</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => stepZoom(-0.35)}
+                aria-label="Acercar en 3D"
+                className="min-w-[34px] min-h-[34px] rounded-lg border border-[#43723E] bg-[#152814] hover:border-[#9BD08A] text-white font-bold text-xs cursor-pointer"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                onClick={() => stepZoom(0.35)}
+                aria-label="Alejar en 3D"
+                className="min-w-[34px] min-h-[34px] rounded-lg border border-[#43723E] bg-[#152814] hover:border-[#9BD08A] text-white font-bold text-xs cursor-pointer"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                onClick={resetView}
+                className="min-h-[34px] px-2.5 rounded-lg border border-[#43723E] bg-[#152814] hover:border-[#9BD08A] text-[11px] font-semibold text-[#D3C9AC] hover:text-white cursor-pointer"
+              >
+                Restablecer
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Right: Garment Spec, 3D Controls, Size Wheel & Buy */}
-        <div className="md:col-span-5 p-5 sm:p-6 flex flex-col justify-between gap-4 bg-[#152414]">
+        {/* Right: Jean Selector (All 6 Models), Specs, Size Wheel & Buy */}
+        <div className="lg:col-span-5 p-5 sm:p-6 flex flex-col justify-between gap-4 bg-[#152414]">
           <div className="space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#345B31]">
@@ -1168,99 +1117,89 @@ function Garment3DModal({
               </div>
             </div>
 
-            <p className="text-xs text-[#D5E7CF] leading-relaxed">
-              {product.desc}
-            </p>
-
-            {/* Quick Angle Presets */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-medium text-[#A8C7A2]">
-                <span>Ángulo rápido</span>
-                <span className="font-mono tabular-nums text-[#D3C9AC]">{displayDeg}°</span>
+            {/* Model Switcher Across All 6 Pants in 3D */}
+            <div className="bg-[#1B3319] border border-[#3E6C3A] rounded-2xl p-3 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-medium text-[#A8C7A2]">
+                  Cambiar modelo en 3D
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onInteract();
+                      onSelectProduct(prevProduct.id);
+                    }}
+                    aria-label="Modelo anterior"
+                    className="w-8 h-8 rounded-lg border border-[#4D8046] bg-[#152814] hover:border-[#9BD08A] text-[#E3DCC3] hover:text-white text-xs font-bold cursor-pointer"
+                  >
+                    ‹
+                  </button>
+                  <span className="font-mono tabular-nums text-[11px] text-[#D3C9AC] px-1">
+                    {currentIndex + 1}/{allProducts.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onInteract();
+                      onSelectProduct(nextProduct.id);
+                    }}
+                    aria-label="Modelo siguiente"
+                    className="w-8 h-8 rounded-lg border border-[#4D8046] bg-[#152814] hover:border-[#9BD08A] text-[#E3DCC3] hover:text-white text-xs font-bold cursor-pointer"
+                  >
+                    ›
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-1.5">
-                {anglePresets.map((preset) => {
-                  const isActive = Math.abs(displayDeg - preset.deg) <= 10 || (preset.deg === 0 && displayDeg >= 350);
+
+              <div className="grid grid-cols-6 gap-1.5">
+                {allProducts.map((item) => {
+                  const active = item.id === product.id;
                   return (
                     <button
-                      key={preset.label}
+                      key={item.id}
                       type="button"
-                      onClick={() => jumpToAngle(preset.deg)}
-                      className={`min-h-[38px] rounded-lg border text-[11px] font-mono font-bold transition-colors cursor-pointer ${
-                        isActive
-                          ? 'bg-[#2C5828] border-[#9BD08A] text-white'
-                          : 'bg-[#1A3118] border-[#43723E] text-[#D3C9AC] hover:border-[#9BD08A] hover:text-white'
+                      onClick={() => {
+                        onInteract();
+                        onSelectProduct(item.id);
+                      }}
+                      title={item.name}
+                      className={`h-12 rounded-lg border overflow-hidden p-1 bg-[#0B170B] transition-all cursor-pointer ${
+                        active
+                          ? 'border-[#9BD08A] ring-1 ring-[#9BD08A]'
+                          : 'border-[#3E6C3A] opacity-75 hover:opacity-100 hover:border-[#9BD08A]'
                       }`}
                     >
-                      {preset.label}
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-contain"
+                      />
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Auto-Spin & Reset */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  onInteract();
-                  targetAngleRef.current = null;
-                  setAutoSpin((prev) => !prev);
-                }}
-                className={`flex-1 min-h-[40px] rounded-lg border px-3 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
-                  autoSpin
-                    ? 'bg-[#285124] border-[#9BD08A] text-white'
-                    : 'bg-[#192F17] border-[#43723E] text-[#D3C9AC] hover:border-[#9BD08A]'
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${autoSpin ? 'bg-[#9BD08A]' : 'bg-[#6F8E69]'}`} />
-                <span>Auto-giro 360°</span>
-              </button>
+            <p className="text-xs text-[#D5E7CF] leading-relaxed">
+              {product.desc}
+            </p>
 
-              <button
-                type="button"
-                onClick={resetView}
-                className="min-h-[40px] px-3.5 rounded-lg border border-[#43723E] bg-[#192F17] hover:border-[#9BD08A] text-xs font-semibold text-[#D3C9AC] hover:text-white transition-colors cursor-pointer"
-              >
-                Restablecer
-              </button>
-            </div>
-
-            {/* Zoom Control */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-medium text-[#A8C7A2]">
-                <span>Zoom de tela</span>
-                <span className="font-mono tabular-nums text-[#D3C9AC]">{zoom.toFixed(2)}x</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setZoom((z) => Math.max(0.95, Number((z - 0.15).toFixed(2))))}
-                  aria-label="Alejar zoom"
-                  className="w-9 h-9 rounded-lg bg-[#1A3118] border border-[#43723E] hover:border-[#9BD08A] text-white font-bold cursor-pointer flex items-center justify-center"
+            {/* Color Swatches */}
+            <div className="flex flex-wrap items-center gap-2">
+              {product.colors.map(([colorName, hex]) => (
+                <span
+                  key={colorName}
+                  className="inline-flex items-center gap-1.5 text-[11px] text-[#E3F2DF] bg-[#1B3319] border border-[#3E6C3A] px-2.5 py-1 rounded-lg"
                 >
-                  -
-                </button>
-                <input
-                  type="range"
-                  min={0.95}
-                  max={1.8}
-                  step={0.05}
-                  value={zoom}
-                  onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  aria-label="Nivel de zoom"
-                  className="flex-1 accent-[#9BD08A] cursor-pointer"
-                />
-                <button
-                  type="button"
-                  onClick={() => setZoom((z) => Math.min(1.8, Number((z + 0.15).toFixed(2))))}
-                  aria-label="Acercar zoom"
-                  className="w-9 h-9 rounded-lg bg-[#1A3118] border border-[#43723E] hover:border-[#9BD08A] text-white font-bold cursor-pointer flex items-center justify-center"
-                >
-                  +
-                </button>
-              </div>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full border border-white/30 shrink-0"
+                    style={{ backgroundColor: hex }}
+                  />
+                  <span>{colorName}</span>
+                </span>
+              ))}
             </div>
 
             {/* Size Selector Synced with Catalog */}
@@ -3177,9 +3116,11 @@ export default function App() {
         return (
           <Garment3DModal
             product={inspectedProduct}
+            allProducts={EXACT_PRODUCTS}
             size={chosenSize}
             isFavorite={favorites.includes(inspectedProduct.id)}
             fmt={fmt}
+            onSelectProduct={(nextId) => setInspectedProductId(nextId)}
             onInteract={triggerLogoReaction}
             onSizeChange={(nextNum) =>
               setSelectedSizes((prev) => ({ ...prev, [inspectedProduct.id]: String(nextNum) }))
