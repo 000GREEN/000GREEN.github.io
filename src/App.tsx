@@ -863,11 +863,9 @@ function IntroOverlay({ isClosing, logoBumping, onLogoTap, onEnter, onSkip }: In
 
 interface Garment3DModalProps {
   product: ProductItem;
-  allProducts: ProductItem[];
   size: string;
   isFavorite: boolean;
   fmt: (n: number) => string;
-  onSelectProduct: (productId: string) => void;
   onSizeChange: (nextSize: number) => void;
   onToggleFavorite: () => void;
   onBuy: () => void;
@@ -875,13 +873,38 @@ interface Garment3DModalProps {
   onClose: () => void;
 }
 
+const GARMENT_3D_NOTES: Record<string, { fit: string; detail: string }> = {
+  b1: {
+    fit: 'Corte Cargo Wide Leg',
+    detail: 'Bolsillos laterales con fuelle 3D, botones a presión y ajuste en tobillo.',
+  },
+  b2: {
+    fit: 'Corte Straight Baggy 14 oz',
+    detail: 'Parche trasero de cuero mate y botamanga rígida con pespunte selvedge.',
+  },
+  b3: {
+    fit: 'Corte Balloon Parachute',
+    detail: 'Volumen ancho en rodilla con pinzas 3D, cintura elástica y cordón inferior.',
+  },
+  b4: {
+    fit: 'Corte Double-Knee Workwear',
+    detail: 'Paneles frontales reforzados, vivo salvia lateral y presilla porta-martillo.',
+  },
+  b5: {
+    fit: 'Corte Tailored Baggy Fluido',
+    detail: 'Pinzas frontales dobles, caída suelta en sarga 280g y cintura limpia.',
+  },
+  b6: {
+    fit: 'Corte 90s Puddle-Hem Flare',
+    detail: 'Denim lavado ácido con apertura amplia en el ruedo y remaches cobrizos.',
+  },
+};
+
 function Garment3DModal({
   product,
-  allProducts,
   size,
   isFavorite,
   fmt,
-  onSelectProduct,
   onSizeChange,
   onToggleFavorite,
   onBuy,
@@ -911,9 +934,10 @@ function Garment3DModal({
     [product]
   );
 
-  const currentIndex = allProducts.findIndex((item) => item.id === product.id);
-  const prevProduct = allProducts[(currentIndex - 1 + allProducts.length) % allProducts.length];
-  const nextProduct = allProducts[(currentIndex + 1) % allProducts.length];
+  const modelNote = GARMENT_3D_NOTES[product.id] ?? {
+    fit: product.kind,
+    detail: 'Modelo 3D individual con rotación 360° y vista frontal/trasera real.',
+  };
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -939,7 +963,7 @@ function Garment3DModal({
   const resetView = () => {
     onInteract();
     setAutoSpin(false);
-    setPresetRequest((prev) => ({ key: 'front', seq: (prev?.seq ?? 0) + 1 }));
+    setPresetRequest((prev) => ({ key: 'hero', seq: (prev?.seq ?? 0) + 1 }));
   };
 
   const handleTelemetry = useCallback((deg: number, z: number) => {
@@ -1068,14 +1092,14 @@ function Garment3DModal({
           </div>
         </div>
 
-        {/* Right: Jean Selector (All 6 Models), Specs, Size Wheel & Buy */}
+        {/* Right: Standalone Garment Studio Info, Specs, Size Wheel & Buy */}
         <div className="lg:col-span-5 p-5 sm:p-6 flex flex-col justify-between gap-4 bg-[#152414]">
           <div className="space-y-4">
             {/* Header */}
             <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#345B31]">
               <div>
                 <div className="text-[11px] font-mono uppercase tracking-wider text-[#9BD08A]">
-                  {product.kind}
+                  Vista 3D Individual · {product.kind}
                 </div>
                 <h2 className="font-display font-bold text-xl sm:text-2xl text-[#E3DCC3] leading-tight mt-0.5">
                   {product.name}
@@ -1117,69 +1141,14 @@ function Garment3DModal({
               </div>
             </div>
 
-            {/* Model Switcher Across All 6 Pants in 3D */}
-            <div className="bg-[#1B3319] border border-[#3E6C3A] rounded-2xl p-3 space-y-2.5">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-medium text-[#A8C7A2]">
-                  Cambiar modelo en 3D
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onInteract();
-                      onSelectProduct(prevProduct.id);
-                    }}
-                    aria-label="Modelo anterior"
-                    className="w-8 h-8 rounded-lg border border-[#4D8046] bg-[#152814] hover:border-[#9BD08A] text-[#E3DCC3] hover:text-white text-xs font-bold cursor-pointer"
-                  >
-                    ‹
-                  </button>
-                  <span className="font-mono tabular-nums text-[11px] text-[#D3C9AC] px-1">
-                    {currentIndex + 1}/{allProducts.length}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onInteract();
-                      onSelectProduct(nextProduct.id);
-                    }}
-                    aria-label="Modelo siguiente"
-                    className="w-8 h-8 rounded-lg border border-[#4D8046] bg-[#152814] hover:border-[#9BD08A] text-[#E3DCC3] hover:text-white text-xs font-bold cursor-pointer"
-                  >
-                    ›
-                  </button>
-                </div>
+            {/* Dedicated 3D Silhouette & Craft Breakdown for this Pant Only */}
+            <div className="bg-[#1B3319] border border-[#3E6C3A] rounded-2xl p-3.5 space-y-1.5">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#9BD08A]">
+                {modelNote.fit}
               </div>
-
-              <div className="grid grid-cols-6 gap-1.5">
-                {allProducts.map((item) => {
-                  const active = item.id === product.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        onInteract();
-                        onSelectProduct(item.id);
-                      }}
-                      title={item.name}
-                      className={`h-12 rounded-lg border overflow-hidden p-1 bg-[#0B170B] transition-all cursor-pointer ${
-                        active
-                          ? 'border-[#9BD08A] ring-1 ring-[#9BD08A]'
-                          : 'border-[#3E6C3A] opacity-75 hover:opacity-100 hover:border-[#9BD08A]'
-                      }`}
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-contain"
-                      />
-                    </button>
-                  );
-                })}
-              </div>
+              <p className="text-xs text-[#E3F2DF] leading-relaxed">
+                {modelNote.detail}
+              </p>
             </div>
 
             <p className="text-xs text-[#D5E7CF] leading-relaxed">
@@ -2583,7 +2552,7 @@ export default function App() {
                         d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"
                       />
                     </svg>
-                    <span>Vista 3D / 360°</span>
+                    <span>Vista 3D exclusiva</span>
                   </button>
 
                   {/* Recuadro de Información: Nombre, Precio, Descripción y Talles */}
@@ -3115,12 +3084,11 @@ export default function App() {
         const chosenSize = selectedSizes[inspectedProduct.id] || '40';
         return (
           <Garment3DModal
+            key={inspectedProduct.id}
             product={inspectedProduct}
-            allProducts={EXACT_PRODUCTS}
             size={chosenSize}
             isFavorite={favorites.includes(inspectedProduct.id)}
             fmt={fmt}
-            onSelectProduct={(nextId) => setInspectedProductId(nextId)}
             onInteract={triggerLogoReaction}
             onSizeChange={(nextNum) =>
               setSelectedSizes((prev) => ({ ...prev, [inspectedProduct.id]: String(nextNum) }))
