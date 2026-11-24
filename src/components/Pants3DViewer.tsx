@@ -114,8 +114,10 @@ interface ModelCalibration {
   backWaistSkipRatio: number;
   roughness: number;
   sheen: number;
+  sheenColor: number;
   weaveKind: 'denim' | 'ripstop' | 'canvas';
   liningColor: number;
+  pocketBagColor: number;
   cargoBulge: boolean;
   pleatRidges: boolean;
   kneeDarts: boolean;
@@ -131,8 +133,10 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     backWaistSkipRatio: 0.008,
     roughness: 0.9,
     sheen: 0.16,
+    sheenColor: 0x9aa888,
     weaveKind: 'canvas',
-    liningColor: 0x22291c,
+    liningColor: 0x262f1f,
+    pocketBagColor: 0xaba68f,
     cargoBulge: true,
     pleatRidges: false,
     kneeDarts: false,
@@ -146,8 +150,10 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     backWaistSkipRatio: 0.01,
     roughness: 0.84,
     sheen: 0.18,
+    sheenColor: 0x8a939c,
     weaveKind: 'denim',
-    liningColor: 0x121315,
+    liningColor: 0x1a1d21,
+    pocketBagColor: 0xbcb5a2,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -159,10 +165,12 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
   b3: {
     frontWaistSkipRatio: 0.01,
     backWaistSkipRatio: 0.008,
-    roughness: 0.62,
-    sheen: 0.36,
+    roughness: 0.64,
+    sheen: 0.32,
+    sheenColor: 0x859994,
     weaveKind: 'ripstop',
-    liningColor: 0x252d2f,
+    liningColor: 0x242c2e,
+    pocketBagColor: 0x454f50,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: true,
@@ -176,8 +184,10 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     backWaistSkipRatio: 0.008,
     roughness: 0.88,
     sheen: 0.15,
+    sheenColor: 0x8c9783,
     weaveKind: 'canvas',
-    liningColor: 0x141614,
+    liningColor: 0x1b1e1a,
+    pocketBagColor: 0xb8b09a,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -190,9 +200,11 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     frontWaistSkipRatio: 0.012,
     backWaistSkipRatio: 0.008,
     roughness: 0.86,
-    sheen: 0.24,
+    sheen: 0.22,
+    sheenColor: 0xede4d0,
     weaveKind: 'canvas',
-    liningColor: 0xa29780,
+    liningColor: 0x9c917b,
+    pocketBagColor: 0xd6ccb6,
     cargoBulge: false,
     pleatRidges: true,
     kneeDarts: false,
@@ -206,8 +218,10 @@ const MODEL_CALIBRATIONS: Record<string, ModelCalibration> = {
     backWaistSkipRatio: 0.01,
     roughness: 0.82,
     sheen: 0.2,
+    sheenColor: 0x88a0bd,
     weaveKind: 'denim',
-    liningColor: 0x1d293a,
+    liningColor: 0x223042,
+    pocketBagColor: 0xc2bba8,
     cargoBulge: false,
     pleatRidges: false,
     kneeDarts: false,
@@ -229,6 +243,7 @@ interface Pants3DViewerProps {
 
 interface MaskData {
   canvas: HTMLCanvasElement;
+  normalCanvas: HTMLCanvasElement;
   pixels: Uint8ClampedArray;
   width: number;
   height: number;
@@ -529,8 +544,12 @@ function extractAndDilateCutout(
 
   ctx.putImageData(imgData, 0, 0);
 
+  // Build 1:1 photo-matched wrinkle, pocket, seam & stitching normal map
+  const normalCanvas = buildGarmentDetailNormalCanvas(cleanPixels, data, W, H);
+
   return {
     canvas,
+    normalCanvas,
     pixels: cleanPixels,
     width: W,
     height: H,
@@ -542,6 +561,92 @@ function extractAndDilateCutout(
     leftLegBounds,
     rightLegBounds,
   };
+}
+
+function buildGarmentDetailNormalCanvas(
+  cleanPixels: Uint8ClampedArray,
+  dilatedData: Uint8ClampedArray,
+  W: number,
+  H: number
+): HTMLCanvasElement {
+  const total = W * H;
+  const luma = new Float32Array(total);
+  for (let p = 0; p < total; p++) {
+    const p4 = p * 4;
+    luma[p] =
+      (dilatedData[p4] * 0.299 + dilatedData[p4 + 1] * 0.587 + dilatedData[p4 + 2] * 0.114) / 255;
+  }
+
+  // Separable 5-tap blur for smooth fabric fold heightfield without noisy grain
+  const temp = new Float32Array(total);
+  const smooth = new Float32Array(total);
+  for (let y = 0; y < H; y++) {
+    const rowOff = y * W;
+    for (let x = 0; x < W; x++) {
+      let sum = 0;
+      for (let k = -3; k <= 3; k++) {
+        const sx = Math.max(0, Math.min(W - 1, x + k));
+        sum += luma[rowOff + sx];
+      }
+      temp[rowOff + x] = sum / 7;
+    }
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      let sum = 0;
+      for (let k = -3; k <= 3; k++) {
+        const sy = Math.max(0, Math.min(H - 1, y + k));
+        sum += temp[sy * W + x];
+      }
+      smooth[y * W + x] = sum / 7;
+    }
+  }
+
+  const normalCanvas = document.createElement('canvas');
+  normalCanvas.width = W;
+  normalCanvas.height = H;
+  const nCtx = normalCanvas.getContext('2d')!;
+  const nData = nCtx.createImageData(W, H);
+  const nd = nData.data;
+
+  const strength = 2.6;
+  for (let y = 0; y < H; y++) {
+    const ym = Math.max(0, y - 2);
+    const yp = Math.min(H - 1, y + 2);
+    for (let x = 0; x < W; x++) {
+      const xm = Math.max(0, x - 2);
+      const xp = Math.min(W - 1, x + 2);
+      const p = y * W + x;
+      const p4 = p * 4;
+
+      // Attenuate normals smoothly within 3px of outer mask border so silhouette edge stays clean
+      const edgeA =
+        Math.min(
+          cleanPixels[p4 + 3],
+          cleanPixels[(y * W + Math.max(0, x - 3)) * 4 + 3],
+          cleanPixels[(y * W + Math.min(W - 1, x + 3)) * 4 + 3],
+          cleanPixels[(Math.max(0, y - 3) * W + x) * 4 + 3],
+          cleanPixels[(Math.min(H - 1, y + 3) * W + x) * 4 + 3]
+        ) / 255;
+
+      const hL = 0.55 * luma[y * W + xm] + 0.45 * smooth[y * W + xm];
+      const hR = 0.55 * luma[y * W + xp] + 0.45 * smooth[y * W + xp];
+      const hU = 0.55 * luma[ym * W + x] + 0.45 * smooth[ym * W + x];
+      const hD = 0.55 * luma[yp * W + x] + 0.45 * smooth[yp * W + x];
+
+      const dx = (hR - hL) * 0.5 * strength * edgeA;
+      const dy = (hD - hU) * 0.5 * strength * edgeA;
+      const nz = 1.0;
+      const invLen = 1 / Math.sqrt(dx * dx + dy * dy + nz * nz);
+
+      nd[p4] = Math.round(((-dx * invLen) * 0.5 + 0.5) * 255);
+      nd[p4 + 1] = Math.round(((dy * invLen) * 0.5 + 0.5) * 255);
+      nd[p4 + 2] = Math.round(((nz * invLen) * 0.5 + 0.5) * 255);
+      nd[p4 + 3] = 255;
+    }
+  }
+  nCtx.putImageData(nData, 0, 0);
+  return normalCanvas;
 }
 
 async function getOrBuildGarmentAssets(spec: Pants3DSpec): Promise<BakedGarmentCacheEntry> {
@@ -751,6 +856,7 @@ interface UnifiedTrouserMetrics {
   waistRx: number;
   waistRz: number;
   waistY: number;
+  tagPos: [number, number, number];
 }
 
 // Builds ONE seamless, water-tight, 1:1 photo-silhouette-matched 3D trouser mesh:
@@ -812,25 +918,25 @@ function createPhotoMatchedTrouserMesh(
     return { mn, mx, rx, cx, py };
   };
 
-  // True photo waist & hip proportions
+  // True photo waist & hip proportions with realistic standing baggy depth (not flat!)
   const waistF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, 0.96);
   const hipF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, 0.12);
   const waistRx = waistF.rx;
-  const waistRz = waistRx * 0.56;
+  const waistRz = waistRx * 0.65;
 
-  // Exact bifurcation geometry matching the photo's hip width
+  // Exact bifurcation geometry matching the photo's hip width & 3D volume
   const splitLegRx = Math.max(0.12, hipF.rx * 0.515);
-  const splitLegRz = splitLegRx * 0.78;
-  const splitCrotchHalfZ = 0.036;
+  const splitLegRz = splitLegRx * 0.84;
+  const splitCrotchHalfZ = 0.04;
   const splitInnerAngle = Math.acos(Math.min(0.97, splitCrotchHalfZ / splitLegRz));
   const splitLegCx = splitLegRx * Math.sin(splitInnerAngle);
 
-  const outerHalfCols = 28;
-  const pelvisCols = outerHalfCols * 2; // 56
-  const innerArcCols = 10;
-  const legCols = outerHalfCols + innerArcCols; // 38
-  const pelvisRows = 20;
-  const legRows = 30;
+  const outerHalfCols = 36;
+  const pelvisCols = outerHalfCols * 2; // 72
+  const innerArcCols = 12;
+  const legCols = outerHalfCols + innerArcCols; // 48
+  const pelvisRows = 26;
+  const legRows = 38;
 
   const posList: number[] = [];
   const uvFrontList: number[] = [];
@@ -898,6 +1004,9 @@ function createPhotoMatchedTrouserMesh(
     };
   };
 
+  // Belt-loop angles around waistband (2 front, 2 side, 2 back)
+  const loopAngles = [0.54, 1.6, 2.58, 3.7, 4.68, 5.74];
+
   // 1. PELVIS & WAIST TRUNK (vPelvis: 0 crotch -> 1 waist)
   const pelvisGrid: number[][] = [];
   for (let r = 0; r <= pelvisRows; r++) {
@@ -906,7 +1015,7 @@ function createPhotoMatchedTrouserMesh(
 
     const sliceF = sampleSpanAndCx(frontMask, frontMask.wholeBounds, frontMask.topY, frontMask.crotchY, v);
     const ovalRx = sliceF.rx;
-    const ovalRz = ovalRx * 0.58;
+    const ovalRz = ovalRx * 0.68;
     const splitBlend = 1 - smoothstep(0.0, 0.52, v);
 
     const row: number[] = [];
@@ -916,7 +1025,7 @@ function createPhotoMatchedTrouserMesh(
       const sinP = Math.sin(phi);
       const cosP = Math.cos(phi);
 
-      const seatDepth = cosP < 0 ? 1.15 - 0.08 * v : 1.0;
+      const seatDepth = cosP < 0 ? 1.18 - 0.05 * v : 1.04;
       let ox = sliceF.cx * (1 - splitBlend) + sinP * ovalRx;
       let oz = cosP * ovalRz * seatDepth;
 
@@ -931,36 +1040,71 @@ function createPhotoMatchedTrouserMesh(
 
       const { uF, vF, uB, vB, fPx, fY } = computePelvisUVs(ox, cosP, v);
 
-      // Subtle photo-driven surface relief & tailored waistband/fly/model sculpting
-      const photoRelief = cosP > 0 ? sampleLumaRelief(frontMask, fPx, fY) * 0.016 : 0;
+      // Subtle photo-driven surface relief & tailored waistband/fly/pockets/belt-loops
+      const photoRelief = cosP > 0 ? sampleLumaRelief(frontMask, fPx, fY) * 0.022 : 0;
       let relief = photoRelief * Math.sin(v * Math.PI);
+      let pelvisAO = 1.0;
 
       // Tailored waistband ridge + seam groove
-      if (v > 0.925) {
-        relief += 0.0045 * smoothstep(0.925, 0.955, v);
-      } else if (v > 0.9) {
-        relief -= 0.002 * Math.sin(((v - 0.9) / 0.025) * Math.PI);
+      if (v > 0.922) {
+        relief += 0.006 * smoothstep(0.922, 0.955, v);
+      } else if (v > 0.895) {
+        relief -= 0.0028 * Math.sin(((v - 0.895) / 0.027) * Math.PI);
+        pelvisAO = Math.min(pelvisAO, 0.94);
       }
 
-      // Subtle front fly panel relief
+      // 6 sculpted vertical belt loops around waistband (skip for elasticWaist)
+      if (!calib.elasticWaist && v > 0.895 && v < 0.992) {
+        for (let li = 0; li < loopAngles.length; li++) {
+          const dPhi = Math.abs(Math.atan2(Math.sin(phi - loopAngles[li]), Math.cos(phi - loopAngles[li])));
+          if (dPhi < 0.14) {
+            const loopBump = Math.exp(-Math.pow(dPhi * 24, 2));
+            relief += 0.0072 * loopBump;
+            if (dPhi > 0.045 && dPhi < 0.12) pelvisAO = Math.min(pelvisAO, 0.92);
+          }
+        }
+      }
+
+      // Front fly J-placket ridge & central seam
       if (cosP > 0.84 && v > 0.34 && v < 0.92) {
-        relief += 0.0038 * smoothstep(0.84, 0.97, cosP) * Math.sin(((v - 0.34) / 0.58) * Math.PI);
+        const flyProfile = smoothstep(0.84, 0.97, cosP) * Math.sin(((v - 0.34) / 0.58) * Math.PI);
+        relief += 0.0052 * flyProfile;
+      }
+
+      // Front side slant pocket welt relief
+      if (cosP > 0.32 && Math.abs(sinP) > 0.56 && Math.abs(sinP) < 0.88 && v > 0.54 && v < 0.9) {
+        const weltRidge = Math.exp(-Math.pow((Math.abs(sinP) - 0.72) * 14, 2));
+        relief += 0.0042 * weltRidge * Math.sin(((v - 0.54) / 0.36) * Math.PI);
+      }
+
+      // Back yoke curved crease & patch pockets puff
+      if (cosP < -0.25 && v > 0.7 && v < 0.82) {
+        const yokeLine = Math.exp(-Math.pow((v - (0.75 + Math.abs(sinP) * 0.03)) * 55, 2));
+        relief -= 0.003 * yokeLine;
+        if (yokeLine > 0.4) pelvisAO = Math.min(pelvisAO, 0.93);
+      }
+      if (cosP < -0.45 && Math.abs(sinP) > 0.16 && Math.abs(sinP) < 0.65 && v > 0.22 && v < 0.58) {
+        const pockWidth = Math.sin(((Math.abs(sinP) - 0.16) / 0.49) * Math.PI);
+        const pockHeight = Math.sin(((v - 0.22) / 0.36) * Math.PI);
+        relief += 0.0068 * pockWidth * pockHeight * smoothstep(-0.45, -0.75, cosP);
       }
 
       // Elastic waistband gathering ripples (b3)
       if (calib.elasticWaist && v > 0.915) {
-        relief += 0.0032 * Math.sin(phi * 26) * smoothstep(0.915, 0.96, v);
+        const gather = Math.sin(phi * 26) * smoothstep(0.915, 0.96, v);
+        relief += 0.004 * gather;
+        if (gather < -0.3) pelvisAO = Math.min(pelvisAO, 0.93);
       }
 
       // Back right waistband leather patch micro-relief (b2)
       if (calib.cuffStep && cosP < -0.55 && sinP < -0.15 && sinP > -0.62 && v > 0.85 && v < 0.97) {
-        relief += 0.0048 * smoothstep(-0.55, -0.78, cosP);
+        relief += 0.0055 * smoothstep(-0.55, -0.78, cosP);
       }
 
       if (calib.pleatRidges && cosP > 0.25) {
         const p1 = Math.exp(-Math.pow((sinP - 0.33) * 9.5, 2)) + Math.exp(-Math.pow((sinP + 0.33) * 9.5, 2));
         const p2 = Math.exp(-Math.pow((sinP - 0.56) * 10.5, 2)) + Math.exp(-Math.pow((sinP + 0.56) * 10.5, 2));
-        relief += (p1 * 0.016 + p2 * 0.011) * smoothstep(0.25, 0.85, cosP) * smoothstep(0.05, 0.42, v);
+        relief += (p1 * 0.018 + p2 * 0.012) * smoothstep(0.25, 0.85, cosP) * smoothstep(0.05, 0.42, v);
       }
       ox += sinP * relief;
       oz += cosP * relief;
@@ -969,15 +1113,16 @@ function createPhotoMatchedTrouserMesh(
       const frontDip = calib.frontWaistSkipRatio > 0.05 ? -0.022 : -0.008;
       const waistTilt =
         v > 0.72
-          ? ((v - 0.72) / 0.28) * (cosP < 0 ? 0.02 * Math.abs(cosP) : frontDip * cosP)
+          ? ((v - 0.72) / 0.28) * (cosP < 0 ? 0.022 * Math.abs(cosP) : frontDip * cosP)
           : 0;
       const crotchDip = v < 0.22 ? -0.028 * Math.pow(Math.abs(cosP), 2.5) * (1 - v / 0.22) : 0;
 
-      // Subtle crevice AO at crotch saddle & waistband stitch groove
-      const crotchAO = v < 0.24 ? 1 - 0.13 * (1 - v / 0.24) * (1 - Math.abs(sinP) * 0.45) : 1.0;
-      const waistSeamAO = v > 0.9 && v < 0.94 ? 0.95 : 1.0;
+      // Subtle crevice AO at crotch saddle
+      if (v < 0.24) {
+        pelvisAO = Math.min(pelvisAO, 1 - 0.14 * (1 - v / 0.24) * (1 - Math.abs(sinP) * 0.45));
+      }
 
-      row.push(pushVert(ox, baseY + waistTilt + crotchDip, oz, uF, vF, uB, vB, Math.min(crotchAO, waistSeamAO)));
+      row.push(pushVert(ox, baseY + waistTilt + crotchDip, oz, uF, vF, uB, vB, pelvisAO));
     }
     pelvisGrid.push(row);
   }
@@ -1003,20 +1148,23 @@ function createPhotoMatchedTrouserMesh(
       // Turned-up selvedge cuff with subtle top fold indentation around vLeg ≈ 0.088
       const cuffBody = smoothstep(0.008, 0.026, vLeg) * (1 - smoothstep(0.082, 0.095, vLeg));
       const foldTuck = Math.exp(-Math.pow((vLeg - 0.086) * 90, 2));
-      cutMod = 0.01 * cuffBody - 0.005 * foldTuck;
+      cutMod = 0.011 * cuffBody - 0.0055 * foldTuck;
     }
 
     const rx = THREE.MathUtils.lerp(sl.rx + cutMod, splitLegRx, splitBlend);
-    const rz = rx * 0.76;
+    const rz = rx * (0.87 - 0.05 * splitBlend);
     const cx = THREE.MathUtils.lerp(sl.cx, isLeft ? -splitLegCx : splitLegCx, splitBlend);
-    const cz = Math.sin(vLeg * Math.PI) * 0.012;
+    const cz = Math.sin(vLeg * Math.PI) * 0.018 - Math.sin(vLeg * Math.PI * 2) * 0.008;
     return { rx, rz, cx, cz, fMin: sl.mn, fMax: sl.mx, fPy: sl.py };
   };
+
+  const legGrids: { left: number[][]; right: number[][] } = { left: [], right: [] };
 
   const buildLeg = (isLeft: boolean) => {
     const side: 1 | -1 = isLeft ? -1 : 1;
     const halfInnerCols = Math.floor(innerArcCols / 2);
     const bBoundsArr = isLeft ? backMask.rightLegBounds : backMask.leftLegBounds;
+    const legSeed = isLeft ? 1.85 : -0.45;
 
     const legGrid: number[][] = [];
     for (let r = 0; r <= legRows; r++) {
@@ -1092,45 +1240,65 @@ function createPhotoMatchedTrouserMesh(
         const uB = THREE.MathUtils.clamp(bPx / bW, 0.002, 0.998);
         const vB = 1.0 - THREE.MathUtils.clamp(bY / bH, 0.002, 0.998);
 
-        // Subtle photo-guided fold relief + model-specific sculptural silhouettes
+        // Multi-scale photo relief + organic cloth gravity drape + model sculptural features
         const lx = px - prof.cx;
         const lz = pz - prof.cz;
         const texTheta = Math.atan2(lx, lz);
         const outDirX = Math.sin(texTheta);
         const outDirZ = Math.cos(texTheta);
 
-        let disp = (outDirZ > 0 ? sampleLumaRelief(frontMask, fPx, prof.fPy) : 0) * 0.014 * Math.sin(vLeg * Math.PI);
+        let disp = (outDirZ > 0 ? sampleLumaRelief(frontMask, fPx, prof.fPy) : 0) * 0.019 * Math.sin(vLeg * Math.PI);
         let legAO = 1.0;
+
+        // Organic hanging cloth flutes + knee break / back-of-knee crease (subtle so photo silhouette stays crisp)
+        const drapeMask = Math.sin(vLeg * Math.PI) * (1 - Math.abs(outDirX) * 0.42);
+        const clothFlute =
+          Math.sin(texTheta * 3 + vLeg * 4.5 + legSeed) * 0.0085 +
+          Math.cos(texTheta * 5 - vLeg * 6.5 + legSeed) * 0.0045;
+        disp += clothFlute * drapeMask;
+        if (clothFlute < -0.004) legAO -= 0.045 * drapeMask;
+
+        // Subtle anatomical knee slack in front & hollow behind knee
+        if (vLeg > 0.35 && vLeg < 0.6) {
+          const kneeBell = Math.sin(((vLeg - 0.35) / 0.25) * Math.PI);
+          if (outDirZ > 0.3) {
+            disp += 0.0075 * kneeBell * smoothstep(0.3, 0.85, outDirZ);
+          } else if (outDirZ < -0.35) {
+            const backHollow = Math.sin(((vLeg - 0.35) / 0.25) * Math.PI * 2);
+            disp -= 0.0055 * Math.abs(backHollow) * smoothstep(-0.35, -0.85, outDirZ);
+            legAO -= 0.055 * kneeBell * smoothstep(-0.35, -0.85, outDirZ);
+          }
+        }
 
         if (calib.cargoBulge && vLeg > 0.56 && vLeg < 0.88) {
           // Sculpted 3D cargo bellow relief + flap overhang tuck crease
           const outerSide = isLeft ? smoothstep(-0.35, -0.92, outDirX) : smoothstep(0.35, 0.92, outDirX);
           const pocketBox = smoothstep(0.56, 0.62, vLeg) * (1 - smoothstep(0.82, 0.88, vLeg));
           const flapTuck = Math.exp(-Math.pow((vLeg - 0.79) * 58, 2));
-          disp += (0.026 * pocketBox - 0.0065 * flapTuck) * outerSide * (1 - topSplitBlend);
-          if (flapTuck > 0.35) legAO -= 0.06 * outerSide * flapTuck;
+          disp += (0.028 * pocketBox - 0.007 * flapTuck) * outerSide * (1 - topSplitBlend);
+          if (flapTuck > 0.35) legAO -= 0.07 * outerSide * flapTuck;
         } else if (calib.cargoBulge && vLeg > 0.03 && vLeg < 0.09) {
           const outerSide = isLeft ? smoothstep(-0.45, -0.92, outDirX) : smoothstep(0.45, 0.92, outDirX);
-          disp += 0.005 * outerSide * Math.sin(((vLeg - 0.03) / 0.06) * Math.PI);
+          disp += 0.0055 * outerSide * Math.sin(((vLeg - 0.03) / 0.06) * Math.PI);
         } else if (calib.kneeDarts && vLeg > 0.38 && vLeg < 0.68) {
           const kneeZone = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI);
-          const dartPleat = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI * 2) * 0.0045;
-          disp += (0.016 * kneeZone + dartPleat) * smoothstep(0.15, 0.85, outDirZ);
+          const dartPleat = Math.sin(((vLeg - 0.38) / 0.3) * Math.PI * 2) * 0.005;
+          disp += (0.017 * kneeZone + dartPleat) * smoothstep(0.15, 0.85, outDirZ);
         } else if (calib.elasticWaist && vLeg < 0.075) {
-          const cuffGather = Math.sin(texTheta * 20) * 0.0035 * (1 - vLeg / 0.075);
+          const cuffGather = Math.sin(texTheta * 20) * 0.004 * (1 - vLeg / 0.075);
           disp += cuffGather;
         } else if (calib.doubleKnee && vLeg > 0.28 && vLeg < 0.9) {
           const panelStep = smoothstep(0.28, 0.32, vLeg) * (1 - smoothstep(0.86, 0.9, vLeg));
-          disp += 0.0048 * panelStep * smoothstep(0.32, 0.72, outDirZ);
+          disp += 0.0055 * panelStep * smoothstep(0.32, 0.72, outDirZ);
         } else if (calib.puddleHem && vLeg < 0.26) {
           const stackZone = 1 - vLeg / 0.26;
           const phaseOffset = isLeft ? 1.3 : -0.6;
           const stackWave = Math.sin(vLeg * 38 + texTheta * 2 + phaseOffset);
-          disp += 0.014 * stackZone * stackWave;
-          if (stackWave < -0.25) legAO -= 0.06 * stackZone * (-stackWave);
+          disp += 0.016 * stackZone * stackWave;
+          if (stackWave < -0.25) legAO -= 0.07 * stackZone * (-stackWave);
         } else if (calib.pleatRidges && vLeg > 0.38) {
           const frontCrease = Math.exp(-Math.pow(outDirX * 5.2, 2)) * smoothstep(0.35, 0.9, outDirZ);
-          disp += 0.012 * frontCrease * (1 - topSplitBlend * 0.3);
+          disp += 0.013 * frontCrease * (1 - topSplitBlend * 0.3);
         }
 
         px += outDirX * disp * (1 - topSplitBlend * 0.7);
@@ -1138,13 +1306,19 @@ function createPhotoMatchedTrouserMesh(
 
         // Subtle inner-thigh saddle & crotch contact darkening
         const isInnerVert = c < halfInnerCols || c > halfInnerCols + outerHalfCols;
-        if (isInnerVert && vLeg > 0.7) {
-          legAO = Math.min(legAO, 1 - 0.16 * smoothstep(0.7, 1.0, vLeg));
+        if (isInnerVert && vLeg > 0.68) {
+          legAO = Math.min(legAO, 1 - 0.18 * smoothstep(0.68, 1.0, vLeg));
         }
 
         row.push(pushVert(px, py, pz, uF, vF, uB, vB, legAO));
       }
       legGrid.push(row);
+    }
+
+    if (isLeft) {
+      legGrids.left = legGrid;
+    } else {
+      legGrids.right = legGrid;
     }
 
     for (let r = 0; r < legRows; r++) {
@@ -1174,87 +1348,263 @@ function createPhotoMatchedTrouserMesh(
   outerGeo.computeVertexNormals();
   weldCoincidentNormals(outerGeo, posList.length / 3);
 
-  // Inner rolled waistband & hem lining with clean UVs for subtle fabric weave
+  // 3. COMPLETE SOLID OPAQUE GARMENT INTERIOR + ROLLED WAISTBAND & HEM RIMS + POCKET BAGS
+  // Never transparent from top view, side angles, or underneath!
+  const posAttr = outerGeo.attributes.position as THREE.BufferAttribute;
+  const normAttr = outerGeo.attributes.normal as THREE.BufferAttribute;
+
   const linPos: number[] = [];
   const linUv: number[] = [];
+  const linColor: number[] = [];
   const linIdx: number[] = [];
-  const topRow = pelvisGrid[pelvisRows];
-  const posAttr = outerGeo.attributes.position as THREE.BufferAttribute;
 
-  const waistSteps = [
-    { scale: 1.0, yOff: 0.0 },
-    { scale: 0.985, yOff: 0.004 },
-    { scale: 0.95, yOff: 0.005 },
-    { scale: 0.91, yOff: -0.022 },
-    { scale: 0.87, yOff: -0.17 },
-  ];
-  const waistLinGrid: number[][] = [];
-  for (let s = 0; s < waistSteps.length; s++) {
-    const st = waistSteps[s];
+  const baseLinC = new THREE.Color(calib.liningColor);
+  const pocketC = new THREE.Color(calib.pocketBagColor);
+  const waistTapeC = baseLinC.clone().lerp(pocketC, 0.35);
+
+  const pushInnerVert = (
+    x: number,
+    y: number,
+    z: number,
+    u: number,
+    v: number,
+    cObj: THREE.Color,
+    ao: number
+  ) => {
+    const idx = linPos.length / 3;
+    linPos.push(x, y, z);
+    linUv.push(u, v);
+    linColor.push(cObj.r * ao, cObj.g * ao, cObj.b * ao);
+    return idx;
+  };
+
+  const clothThickness = 0.0044;
+  const offsetInwardVert = (outerIdx: number, thickness: number, lockY: boolean) => {
+    const ox = posAttr.getX(outerIdx);
+    const oy = posAttr.getY(outerIdx);
+    const oz = posAttr.getZ(outerIdx);
+    const nx = normAttr.getX(outerIdx);
+    const ny = normAttr.getY(outerIdx);
+    const nz = normAttr.getZ(outerIdx);
+    return {
+      x: ox - nx * thickness,
+      y: lockY ? oy : oy - ny * thickness * 0.4,
+      z: oz - nz * thickness,
+    };
+  };
+
+  // 3a. Full Inner Pelvis Wall (r: 0 split -> pelvisRows waist)
+  const innerPelvisGrid: number[][] = [];
+  for (let r = 0; r <= pelvisRows; r++) {
+    const v = r / pelvisRows;
+    const isWaistBand = v > 0.91;
+    const colTint = isWaistBand ? waistTapeC : baseLinC;
+    const cavAO = isWaistBand ? 0.88 + 0.1 * ((v - 0.91) / 0.09) : 0.34 + 0.44 * v;
+
     const row: number[] = [];
     for (let c = 0; c <= pelvisCols; c++) {
-      const vIdx = topRow[c];
-      const idx = linPos.length / 3;
-      linPos.push(
-        posAttr.getX(vIdx) * st.scale,
-        posAttr.getY(vIdx) + st.yOff,
-        posAttr.getZ(vIdx) * st.scale
-      );
-      linUv.push(c / pelvisCols, s / (waistSteps.length - 1));
-      row.push(idx);
+      const p = offsetInwardVert(pelvisGrid[r][c], v > 0.92 ? 0.0055 : clothThickness, r === pelvisRows);
+      row.push(pushInnerVert(p.x, p.y, p.z, c / pelvisCols, v * 0.45, colTint, cavAO));
     }
-    waistLinGrid.push(row);
+    innerPelvisGrid.push(row);
   }
-  for (let s = 0; s < waistSteps.length - 1; s++) {
+  for (let r = 0; r < pelvisRows; r++) {
     for (let c = 0; c < pelvisCols; c++) {
-      const a = waistLinGrid[s][c];
-      const b = waistLinGrid[s][c + 1];
-      const d = waistLinGrid[s + 1][c];
-      const e = waistLinGrid[s + 1][c + 1];
-      linIdx.push(a, b, d, b, e, d);
+      const a = innerPelvisGrid[r][c];
+      const b = innerPelvisGrid[r][c + 1];
+      const d = innerPelvisGrid[r + 1][c];
+      const e = innerPelvisGrid[r + 1][c + 1];
+      // Reversed from outer pelvis (a, b, d) -> inward normals!
+      linIdx.push(a, d, b, b, d, e);
     }
   }
 
-  [false, true].forEach((isLeft) => {
-    const prof0 = evalLegSlice(isLeft, 0);
-    const hemSteps = [
-      { scale: 0.82, y: yHem + 0.065 },
-      { scale: 0.93, y: yHem + 0.006 },
-      { scale: 0.995, y: yHem },
-    ];
-    const hGrid: number[][] = [];
-    for (let s = 0; s < hemSteps.length; s++) {
-      const st = hemSteps[s];
+  // 3b. Rounded Folded Top Waistband Rim connecting outer waist -> inner waist
+  const outerTopRing: number[] = [];
+  const midRimRing: number[] = [];
+  const topOuterRow = pelvisGrid[pelvisRows];
+  const topInnerRow = innerPelvisGrid[pelvisRows];
+  for (let c = 0; c <= pelvisCols; c++) {
+    const oi = topOuterRow[c];
+    const ii = topInnerRow[c];
+    const ox = posAttr.getX(oi);
+    const oy = posAttr.getY(oi);
+    const oz = posAttr.getZ(oi);
+    const ix = linPos[ii * 3];
+    const iy = linPos[ii * 3 + 1];
+    const iz = linPos[ii * 3 + 2];
+
+    outerTopRing.push(pushInnerVert(ox, oy, oz, c / pelvisCols, 0.96, waistTapeC, 0.96));
+    midRimRing.push(
+      pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 + 0.0045, (oz + iz) * 0.5, c / pelvisCols, 0.98, waistTapeC, 1.0)
+    );
+  }
+  for (let c = 0; c < pelvisCols; c++) {
+    // outerTopRing -> midRimRing -> topInnerRow (upward normals!)
+    linIdx.push(
+      outerTopRing[c],
+      outerTopRing[c + 1],
+      midRimRing[c],
+      outerTopRing[c + 1],
+      midRimRing[c + 1],
+      midRimRing[c]
+    );
+    linIdx.push(
+      midRimRing[c],
+      midRimRing[c + 1],
+      topInnerRow[c],
+      midRimRing[c + 1],
+      topInnerRow[c + 1],
+      topInnerRow[c]
+    );
+  }
+
+  // 3c. Full Inner Left & Right Leg Tubes (r: 0 hem -> legRows split) + Bottom Hem Rolled Rim
+  const buildInnerLeg = (isLeft: boolean) => {
+    const outerGrid = isLeft ? legGrids.left : legGrids.right;
+    const innerLegGrid: number[][] = [];
+    for (let r = 0; r <= legRows; r++) {
+      const vLeg = r / legRows;
+      // Cavity AO: realistic shadow inside thigh/knee, soft floor bounce near hem
+      const cavAO =
+        vLeg < 0.2 ? THREE.MathUtils.lerp(0.32, 0.16, vLeg / 0.2) : THREE.MathUtils.lerp(0.16, 0.34, (vLeg - 0.2) / 0.8);
       const row: number[] = [];
-      for (let c = 0; c <= 28; c++) {
-        const ang = (c / 28) * Math.PI * 2;
-        const idx = linPos.length / 3;
-        linPos.push(
-          prof0.cx + Math.sin(ang) * prof0.rx * st.scale,
-          st.y,
-          prof0.cz + Math.cos(ang) * prof0.rz * st.scale
+      for (let c = 0; c <= legCols; c++) {
+        const p = offsetInwardVert(outerGrid[r][c], clothThickness, r === 0);
+        row.push(pushInnerVert(p.x, p.y, p.z, c / legCols, vLeg, baseLinC, cavAO));
+      }
+      innerLegGrid.push(row);
+    }
+
+    for (let r = 0; r < legRows; r++) {
+      for (let c = 0; c < legCols; c++) {
+        const a = innerLegGrid[r][c];
+        const b = innerLegGrid[r][c + 1];
+        const d = innerLegGrid[r + 1][c];
+        const e = innerLegGrid[r + 1][c + 1];
+        if (isLeft) {
+          linIdx.push(a, b, d, b, e, d);
+        } else {
+          linIdx.push(a, d, b, b, d, e);
+        }
+      }
+    }
+
+    // Rolled bottom hem edge connecting outerHem -> midHem -> innerHem
+    const outerHemRing: number[] = [];
+    const midHemRing: number[] = [];
+    const outBotRow = outerGrid[0];
+    const inBotRow = innerLegGrid[0];
+    for (let c = 0; c <= legCols; c++) {
+      const oi = outBotRow[c];
+      const ii = inBotRow[c];
+      const ox = posAttr.getX(oi);
+      const oy = posAttr.getY(oi);
+      const oz = posAttr.getZ(oi);
+      const ix = linPos[ii * 3];
+      const iy = linPos[ii * 3 + 1];
+      const iz = linPos[ii * 3 + 2];
+
+      outerHemRing.push(pushInnerVert(ox, oy, oz, c / legCols, 0.0, baseLinC, 0.42));
+      midHemRing.push(
+        pushInnerVert((ox + ix) * 0.5, (oy + iy) * 0.5 - 0.0025, (oz + iz) * 0.5, c / legCols, 0.02, baseLinC, 0.36)
+      );
+    }
+    for (let c = 0; c < legCols; c++) {
+      if (isLeft) {
+        linIdx.push(
+          outerHemRing[c],
+          outerHemRing[c + 1],
+          midHemRing[c],
+          outerHemRing[c + 1],
+          midHemRing[c + 1],
+          midHemRing[c]
         );
-        linUv.push(c / 28, s / (hemSteps.length - 1));
-        row.push(idx);
+        linIdx.push(
+          midHemRing[c],
+          midHemRing[c + 1],
+          inBotRow[c],
+          midHemRing[c + 1],
+          inBotRow[c + 1],
+          inBotRow[c]
+        );
+      } else {
+        linIdx.push(
+          outerHemRing[c],
+          midHemRing[c],
+          outerHemRing[c + 1],
+          outerHemRing[c + 1],
+          midHemRing[c],
+          midHemRing[c + 1]
+        );
+        linIdx.push(
+          midHemRing[c],
+          inBotRow[c],
+          midHemRing[c + 1],
+          midHemRing[c + 1],
+          inBotRow[c],
+          inBotRow[c + 1]
+        );
       }
-      hGrid.push(row);
     }
-    for (let s = 0; s < hemSteps.length - 1; s++) {
-      for (let c = 0; c < 28; c++) {
-        const a = hGrid[s][c];
-        const b = hGrid[s][c + 1];
-        const d = hGrid[s + 1][c];
-        const e = hGrid[s + 1][c + 1];
-        linIdx.push(a, b, d, b, e, d);
+  };
+
+  buildInnerLeg(false);
+  buildInnerLeg(true);
+
+  // 3d. Subtle Cotton Inner Pocket Bags visible from Top View on Left & Right Front Hips
+  const buildInnerPocketBag = (isLeft: boolean) => {
+    const startCol = isLeft ? pelvisCols - 15 : 4;
+    const endCol = isLeft ? pelvisCols - 4 : 15;
+    const minRow = Math.round(pelvisRows * 0.46);
+    const maxRow = Math.round(pelvisRows * 0.9);
+    const pGrid: number[][] = [];
+    for (let r = minRow; r <= maxRow; r++) {
+      const tV = (r - minRow) / (maxRow - minRow);
+      const row: number[] = [];
+      for (let c = startCol; c <= endCol; c++) {
+        const tU = (c - startCol) / (endCol - startCol);
+        const oi = pelvisGrid[r][c];
+        const nx = normAttr.getX(oi);
+        const nz = normAttr.getZ(oi);
+        // Gentle pouch sag inward (0.011m at center of pocket, 0.005m at stitched seams)
+        const bagPouch = 0.0055 + 0.008 * Math.sin(tU * Math.PI) * Math.sin(tV * Math.PI);
+        const px = posAttr.getX(oi) - nx * bagPouch;
+        const py = posAttr.getY(oi);
+        const pz = posAttr.getZ(oi) - nz * bagPouch;
+        const bagAO = 0.46 + 0.36 * tV;
+        row.push(pushInnerVert(px, py, pz, tU * 0.5, tV * 0.5, pocketC, bagAO));
+      }
+      pGrid.push(row);
+    }
+    const rCnt = pGrid.length - 1;
+    const cCnt = pGrid[0].length - 1;
+    for (let r = 0; r < rCnt; r++) {
+      for (let c = 0; c < cCnt; c++) {
+        const a = pGrid[r][c];
+        const b = pGrid[r][c + 1];
+        const d = pGrid[r + 1][c];
+        const e = pGrid[r + 1][c + 1];
+        linIdx.push(a, d, b, b, d, e);
       }
     }
-  });
+  };
+  buildInnerPocketBag(false);
+  buildInnerPocketBag(true);
 
   const liningGeo = new THREE.BufferGeometry();
   liningGeo.setAttribute('position', new THREE.Float32BufferAttribute(linPos, 3));
   liningGeo.setAttribute('uv', new THREE.Float32BufferAttribute(linUv, 2));
+  liningGeo.setAttribute('color', new THREE.Float32BufferAttribute(linColor, 3));
   liningGeo.setIndex(linIdx);
   liningGeo.computeVertexNormals();
+
+  const backInnerIdx = innerPelvisGrid[pelvisRows - 1][Math.floor(pelvisCols / 2)];
+  const tagPos: [number, number, number] = [
+    linPos[backInnerIdx * 3],
+    linPos[backInnerIdx * 3 + 1] - 0.01,
+    linPos[backInnerIdx * 3 + 2] + 0.004,
+  ];
 
   void specId;
 
@@ -1265,6 +1615,7 @@ function createPhotoMatchedTrouserMesh(
       waistRx,
       waistRz,
       waistY: yWaist,
+      tagPos,
     },
   };
 }
@@ -1425,8 +1776,8 @@ export default function Pants3DViewer({
     const hemiLight = new THREE.HemisphereLight(0xd9ebd0, stageProfile.bgHex, 0.56);
     scene.add(hemiLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.32);
-    keyLight.position.set(2.4, 4.2, 3.2);
+    const keyLight = new THREE.DirectionalLight(0xfffaf0, 1.38);
+    keyLight.position.set(2.8, 3.6, 2.5);
     keyLight.castShadow = !isSoftwareGl;
     keyLight.shadow.mapSize.width = 1024;
     keyLight.shadow.mapSize.height = 1024;
@@ -1437,16 +1788,16 @@ export default function Pants3DViewer({
     keyLight.shadow.camera.right = d;
     keyLight.shadow.camera.top = d;
     keyLight.shadow.camera.bottom = -d;
-    keyLight.shadow.bias = -0.0005;
-    keyLight.shadow.normalBias = 0.02;
+    keyLight.shadow.bias = -0.00025;
+    keyLight.shadow.normalBias = 0.012;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xb2d4b4, 0.48);
+    const fillLight = new THREE.DirectionalLight(0xb2d4b4, 0.44);
     fillLight.position.set(-2.9, 2.2, 2.0);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 0.92);
-    rimLight.position.set(-1.3, 2.8, -3.2);
+    const rimLight = new THREE.DirectionalLight(stageProfile.rimHex, 0.96);
+    rimLight.position.set(-1.6, 2.6, -2.9);
     scene.add(rimLight);
 
     const disposables: Array<{ dispose: () => void }> = [envTex];
@@ -1743,28 +2094,42 @@ export default function Pants3DViewer({
         const weaveNormTex = new THREE.CanvasTexture(normalCanvas);
         weaveNormTex.wrapS = THREE.RepeatWrapping;
         weaveNormTex.wrapT = THREE.RepeatWrapping;
-        weaveNormTex.repeat.set(16, 20);
+        weaveNormTex.repeat.set(18, 22);
         weaveNormTex.anisotropy = maxAniso;
         weaveNormTex.needsUpdate = true;
 
-        disposables.push(frontTex, backTex, weaveNormTex);
+        const frontNormTex = new THREE.CanvasTexture(frontMask.normalCanvas);
+        frontNormTex.wrapS = THREE.ClampToEdgeWrapping;
+        frontNormTex.wrapT = THREE.ClampToEdgeWrapping;
+        frontNormTex.anisotropy = maxAniso;
+        frontNormTex.needsUpdate = true;
 
-        // Full native-photo Dual-Projection PBR Material (exact Front + Back photo match!)
+        const backNormTex = new THREE.CanvasTexture(backMask.normalCanvas);
+        backNormTex.wrapS = THREE.ClampToEdgeWrapping;
+        backNormTex.wrapT = THREE.ClampToEdgeWrapping;
+        backNormTex.anisotropy = maxAniso;
+        backNormTex.needsUpdate = true;
+
+        disposables.push(frontTex, backTex, weaveNormTex, frontNormTex, backNormTex);
+
+        // Full native-photo Dual-Projection + Photo-Normal PBR Material
         const garmentMat = new THREE.MeshPhysicalMaterial({
           map: frontTex,
           normalMap: weaveNormTex,
-          normalScale: new THREE.Vector2(0.28, 0.28),
+          normalScale: new THREE.Vector2(0.24, 0.24),
           roughness: calib.roughness,
           metalness: 0.02,
           sheen: calib.sheen,
           sheenRoughness: 0.82,
-          sheenColor: new THREE.Color(0xd8e8d4),
+          sheenColor: new THREE.Color(calib.sheenColor),
           vertexColors: true,
           side: THREE.FrontSide,
         });
 
         garmentMat.onBeforeCompile = (shader) => {
           shader.uniforms.uBackMap = { value: backTex };
+          shader.uniforms.uFrontNormMap = { value: frontNormTex };
+          shader.uniforms.uBackNormMap = { value: backNormTex };
 
           shader.vertexShader =
             'attribute vec2 aUvBack;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
@@ -1783,7 +2148,7 @@ export default function Pants3DViewer({
           );
 
           shader.fragmentShader =
-            'uniform sampler2D uBackMap;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
+            'uniform sampler2D uBackMap;\nuniform sampler2D uFrontNormMap;\nuniform sampler2D uBackNormMap;\nvarying vec2 vUvBack;\nvarying vec3 vObjNormal;\n' +
             shader.fragmentShader;
 
           shader.fragmentShader = shader.fragmentShader.replace(
@@ -1798,15 +2163,32 @@ export default function Pants3DViewer({
                diffuseColor *= vec4( blendedPhoto, 1.0 );
              #endif`
           );
+
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <normal_fragment_maps>',
+            `#ifdef USE_NORMALMAP_TANGENTSPACE
+               vec3 weaveN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
+               weaveN.xy *= normalScale;
+               vec3 fDetN = texture2D( uFrontNormMap, vMapUv ).xyz * 2.0 - 1.0;
+               vec3 bDetN = texture2D( uBackNormMap, vUvBack ).xyz * 2.0 - 1.0;
+               bDetN.x = -bDetN.x;
+               float nZNorm = normalize( vObjNormal ).z;
+               float normMix = smoothstep( -0.22, 0.22, nZNorm );
+               vec3 detailN = mix( bDetN, fDetN, normMix );
+               vec3 mapN = normalize( vec3( weaveN.xy + detailN.xy * 0.88, max( 0.25, weaveN.z ) ) );
+               normal = normalize( tbn * mapN );
+             #endif`
+          );
         };
-        garmentMat.customProgramCacheKey = () => `pants-dual-proj-${spec.id}`;
+        garmentMat.customProgramCacheKey = () => `pants-dual-proj-v2-${spec.id}`;
 
         const liningMat = new THREE.MeshStandardMaterial({
-          color: calib.liningColor,
+          color: 0xffffff,
           normalMap: weaveNormTex,
-          normalScale: new THREE.Vector2(0.18, 0.18),
+          normalScale: new THREE.Vector2(0.22, 0.22),
           roughness: 0.94,
           metalness: 0.02,
+          vertexColors: true,
           side: THREE.FrontSide,
         });
 
@@ -1823,6 +2205,7 @@ export default function Pants3DViewer({
         garmentGroup.add(garmentMesh);
 
         const liningMesh = new THREE.Mesh(liningGeo, liningMat);
+        liningMesh.receiveShadow = true;
         garmentGroup.add(liningMesh);
         disposables.push(garmentMat, liningMat, outerGeo, liningGeo);
 
@@ -1835,7 +2218,7 @@ export default function Pants3DViewer({
         });
         const tagGeo = new THREE.BoxGeometry(0.1, 0.038, 0.005);
         const tagMesh = new THREE.Mesh(tagGeo, tagMat);
-        tagMesh.position.set(0, metrics.waistY - 0.055, -metrics.waistRz * 0.91);
+        tagMesh.position.set(...metrics.tagPos);
         garmentGroup.add(tagMesh);
         disposables.push(tagTex, tagMat, tagGeo);
 
