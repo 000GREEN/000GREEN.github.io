@@ -1198,7 +1198,7 @@ export default function App() {
 
   const getGmailOrderUrl = () => {
     const subject = `Pedido 000GREEN - ${fmt(total)}`;
-    return `https://mail.google.com/mail/?view=cm&fs=1&to=000green@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=000greeen@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(getOrderSummaryText())}`;
   };
 
   const handleGmailLaunch = () => {
@@ -2142,10 +2142,10 @@ export default function App() {
                 <div>
                   <span className="text-[#A4C992] text-[10px] block font-mono uppercase tracking-wider">Correo Electrónico</span>
                   <a
-                    href="mailto:000green@gmail.com"
+                    href="mailto:000greeen@gmail.com"
                     className="text-white hover:text-[#9BD08A] font-bold underline transition-colors block"
                   >
-                    000green@gmail.com
+                    000greeen@gmail.com
                   </a>
                 </div>
               </div>
@@ -2218,7 +2218,7 @@ export default function App() {
                       Gracias por su compra
                     </h3>
                     <p className="text-xs text-[#98A18A] leading-relaxed max-w-xs mx-auto">
-                      Tu correo hacia <strong className="text-[#E3DCC3]">000green@gmail.com</strong>
+                      Tu correo hacia <strong className="text-[#E3DCC3]">000greeen@gmail.com</strong>
                       {thankYouTotal > 0 ? (
                         <>
                           {' '}por <span className="font-mono text-[#D3C9AC] font-bold">{fmt(thankYouTotal)}</span>
